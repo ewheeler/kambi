@@ -35,17 +35,26 @@ end
 module Kambi::Models
     class Post < Base
       has_many :comments, :order => 'created_at ASC'
-      has_and_belongs_to_many :clips, :join_table => 'kambi_clips_posts', :class_name => 'Kambi::Models::Clip'
-      has_and_belongs_to_many :tags, :join_table => 'kambi_posts_tags', :class_name => 'Kambi::Models::Tag'
+      has_many :clipposts
+      has_many :posttags
+      has_many :clips, :through => :clipposts
+      has_many :tags, :through => :posttags
       validates_presence_of :title, :nickname
       validates_uniqueness_of :nickname
     end
   
     class Clip < Base
-      has_and_belongs_to_many :posts, :join_table => 'kambi_clips_posts', :class_name => 'Kambi::Models::Post'
-      has_and_belongs_to_many :tags, :join_table => 'kambi_clips_tags', :class_name => 'Kambi::Models::Tag'
+      has_many :clipposts
+      has_many :cliptags
+      has_many :posts, :through => :clipposts
+      has_many :tags, :through => :cliptags
       validates_presence_of :url, :nickname
       validates_uniqueness_of :nickname
+    end
+    
+    class Clippost < Base
+      has_many :clips
+      has_many :posts
     end
   
     class Comment < Base
@@ -59,13 +68,23 @@ module Kambi::Models
     
     class Tag < Base
       validates_presence_of :name
-      has_and_belongs_to_many :posts, :join_table => 'kambi_posts_tags', :class_name => 'Kambi::Models::Post'
-      has_and_belongs_to_many :clips, :join_table => 'kambi_clips_tags', :class_name => 'Kambi::Models::Clip'
+      belongs_to :posts
+      belongs_to :clips
+    end
+    
+    class Posttag < Base
+      has_many :tags
+      has_many :posts
+    end
+    
+    class Cliptag < Base
+      has_many :tags
+      has_many :clips
     end
     
     class User < Base; end
 
-    class CreateTheBasics < V 1.0
+    class CreateTheBasics < V 1.2
       def self.up
         create_table :kambi_users, :force => true do |table|
           table.string :username, :password
@@ -85,7 +104,7 @@ module Kambi::Models
           table.timestamps
         end
         
-        create_table :kambi_clips_posts, :force => true do |table|
+        create_table :kambi_clipposts, :force => true do |table|
           table.integer :clip_id
           table.integer :post_id
         end
@@ -101,12 +120,12 @@ module Kambi::Models
           table.string :name
         end
         
-        create_table :kambi_posts_tags, :force => true do |table|
+        create_table :kambi_posttags, :force => true do |table|
           table.integer :tag_id
           table.integer :post_id
         end
         
-        create_table :kambi_clips_tags, :force => true do |table|
+        create_table :kambi_cliptags, :force => true do |table|
           table.integer :tag_id
           table.integer :clip_id
         end
@@ -178,7 +197,7 @@ module Kambi::Controllers
         def read(post_id) 
             @post = Post.find post_id
             @comments = @post.comments
-            @clips = @post.clips
+            @clips = @post.clipposts.collect{|c| c.clips}.flatten
             render :view
         end
 
@@ -187,10 +206,11 @@ module Kambi::Controllers
             unless @state.user_id.blank?
                 @post = Post.find post_id
                 all_tags = Models::Tag.find :all
-                these_tags = @post.tags
-                these_tags.each{|d| unless input.include?(d.name); @post.tags.delete(d); end; }
+                these_tags_ids = @post.posttags.collect{|p| p.tag_id}.flatten
+                these_tags = these_tags_ids.collect{|i| Kambi::Models::Tag.find i}
+                these_tags.each{|d| unless input.include?(d.name); @post.posttags.delete(d); end; }
                 not_these_tags = all_tags - these_tags
-                not_these_tags.each{|a| if input.include?(a.name); @post.tags<<(a); end; }
+                not_these_tags.each{|a| if input.include?(a.name); pt = Posttag.new; @post.posttags.build(pt.create :post_id => @post.id, :tag_id => a.id).save; end; }
                 @post.update_attributes :title => input.post_title, :body => input.post_body, :nickname => input.post_nickname
                 redirect R(@post)
             else
@@ -237,7 +257,8 @@ module Kambi::Controllers
             end
             @post = Post.find post_id
             @all_posts_tags = Models::Tag.find :all
-            @these_posts_tags = @post.tags
+            these_posts_tags_ids = @post.posttags.collect{|p| p.tag_id}.flatten
+            @these_posts_tags = these_posts_tags_ids.collect{|i| Kambi::Models::Tag.find i}
             render :edit_post
         end
         
@@ -261,7 +282,7 @@ module Kambi::Controllers
             #these_clips_posts = clip.posts
             #not_these_clips_posts = all_posts - these_clips_posts
             #these_clips_posts.each{|d| unless input.include?(d.title); clip.posts.delete(d); end; }
-            all_posts.each{|a| if input.include?(a.title); clip.posts<<(a); end; }
+            all_posts.each{|a| if input.include?(a.title); clip.clipposts.create(a.id); end; }
             redirect R(Posts)
         end
         
@@ -290,9 +311,9 @@ module Kambi::Controllers
             end
             @clip = Models::Clip.find clip_id
             @all_posts = Models::Post.find :all
-            @these_clips_posts = @clip.posts
+            @these_clips_posts = @clip.clipposts.collect{|t| t.posts}.flatten
             @all_clips_tags = Models::Tag.find :all
-            @these_clips_tags = @clip.tags
+            @these_clips_tags = @clip.cliptags.collect{|c| c.tags}.flatten
             render :edit_clip
         end
         
@@ -301,16 +322,16 @@ module Kambi::Controllers
             unless @state.user_id.blank?
                 clip = Clip.find clip_id
                 all_tags = Models::Tag.find :all
-                these_tags = clip.tags
+                these_tags = clip.cliptags.collect{|c| c.tags}.flatten
                 not_these_tags = all_tags - these_tags
-                these_tags.each{|d| unless input.include?(d.name); clip.tags.delete(d); end; }
-                not_these_tags.each{|a| if input.include?(a.name); clip.tags<<(a); end; }
+                these_tags.each{|d| unless input.include?(d.name); clip.cliptags.delete(d); end; }
+                not_these_tags.each{|a| if input.include?(a.name); clip.cliptags.build(a); end; }
                 clip.update_attributes :url => input.clip_url, :body => input.clip_body, :nickname => input.clip_nickname
                 all_posts = Models::Post.find :all
-                these_clips_posts = clip.posts
+                these_clips_posts = clip.clipposts.collect{|t| t.posts}.flatten
                 not_these_clips_posts = all_posts - these_clips_posts
-                these_clips_posts.each{|d| unless input.include?(d.title); clip.posts.delete(d); end; }
-                not_these_clips_posts.each{|a| if input.include?(a.title); clip.posts<<(a); end; }
+                these_clips_posts.each{|d| unless input.include?(d.title); clip.clipposts.delete(d); end; }
+                not_these_clips_posts.each{|a| if input.include?(a.title); clip.clipposts.build(a); end; }
                 #@post = Post.find clip.post_id
                 redirect R(Posts)
             else
@@ -471,7 +492,8 @@ module Kambi::Views
             for post in @posts
               div.post do
                 _post(post)
-                for clip in post.clips
+                pclips = post.clipposts.collect{|p| p.clips}.flatten
+                for clip in pclips
                   div.clip do
                     _clip(clip)
                   end
@@ -529,7 +551,8 @@ module Kambi::Views
         def view
             div.post do
               _post(@post)
-              for clip in @post.clips
+              pclips = @post.clipposts.collect{|p| p.clips}.flatten
+              for clip in pclips
                 div.clip do
                   _clip(clip)
                 end
@@ -607,10 +630,12 @@ module Kambi::Views
           h1 do
             a(post.title, :href => R(Posts, post.id))
           end
-          unless post.tags.empty?
+          ptagids = post.posttags.collect{|p| p.tag_id}.flatten
+          ptags = ptagids.collect{|i| Kambi::Models::Tag.find i }
+          unless ptags.empty?
             div.posts_tags do
               p "tagged with :"
-              for tag in post.tags
+              for tag in ptags
                 a(tag.name, :href => R(Tags, tag.id))
               end
             end
@@ -623,11 +648,13 @@ module Kambi::Views
         end
         
         def _clip(clip)
-            a(clip.nickname, :href => clip.url)
-          unless clip.tags.nil?
+          a(clip.nickname, :href => clip.url)
+          ctagids = clip.cliptags.collect{|c| c.tag_id}.flatten
+          ctags = ctagids.collect{|i| Kambi::Models::Tag.find i }
+          unless ctags.nil?
                       div.clips_tags do
                         p "tagged with :"
-                        for tag in clip.tags
+                        for tag in ctags
                           p do
                             a(tag.name, :href => R(Tags, tag.tag_id))
                           end
