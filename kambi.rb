@@ -35,15 +35,15 @@ end
 module Kambi::Models
     class Post < Base
       has_many :comments, :order => 'created_at ASC'
-      has_and_belongs_to_many :clips, :join_table => 'kambi_clips_posts', :class_name => 'kambi::Models::Clip'
-      has_and_belongs_to_many :tags, :join_table => 'kambi_posts_tags', :class_name => 'kambi::Models::Tag'
+      has_and_belongs_to_many :clips, :join_table => 'kambi_clips_posts', :class_name => 'Kambi::Models::Clip'
+      has_and_belongs_to_many :tags, :join_table => 'kambi_posts_tags', :class_name => 'Kambi::Models::Tag'
       validates_presence_of :title, :nickname
       validates_uniqueness_of :nickname
     end
   
     class Clip < Base
-      has_and_belongs_to_many :posts, :join_table => 'kambi_clips_posts', :class_name => 'kambi::Models::Post'
-      has_and_belongs_to_many :tags, :join_table => 'kambi_posts_tags', :class_name => 'kambi::Models::Tag'
+      has_and_belongs_to_many :posts, :join_table => 'kambi_clips_posts', :class_name => 'Kambi::Models::Post'
+      has_and_belongs_to_many :tags, :join_table => 'kambi_posts_tags', :class_name => 'Kambi::Models::Tag'
       validates_presence_of :url, :nickname
       validates_uniqueness_of :nickname
     end
@@ -59,8 +59,8 @@ module Kambi::Models
     
     class Tag < Base
       validates_presence_of :name
-      has_and_belongs_to_many :posts, :join_table => 'kambi_posts_tags', :class_name => 'kambi::Models::Post'
-      has_and_belongs_to_many :clips, :join_table => 'kambi_clips_tags', :class_name => 'kambi::Models::Clip'
+      has_and_belongs_to_many :posts, :join_table => 'kambi_posts_tags', :class_name => 'Kambi::Models::Post'
+      has_and_belongs_to_many :clips, :join_table => 'kambi_clips_tags', :class_name => 'Kambi::Models::Clip'
     end
     
     class User < Base; end
@@ -259,10 +259,17 @@ module Kambi::Controllers
                        :body => input.clip_body)
             all_posts = Models::Post.find :all
             #these_clips_posts = clip.posts
-            not_these_clips_posts = all_posts - these_clips_posts
+            #not_these_clips_posts = all_posts - these_clips_posts
             #these_clips_posts.each{|d| unless input.include?(d.title); clip.posts.delete(d); end; }
-            not_these_clips_posts.each{|a| if input.include?(a.title); clip.posts<<(a); end; }
+            all_posts.each{|a| if input.include?(a.title); clip.posts<<(a); end; }
             redirect R(Posts)
+        end
+        
+        # GET /clips
+        # GET /clips.xml
+        def list
+            @clips = Clip.find :all
+            render :view_clips
         end
         
         # GET /clips/new
@@ -572,6 +579,14 @@ module Kambi::Views
             input :name => 'tag_name', :type => 'text'; br
             
             input :type => 'submit'
+          end
+        end
+        
+        def view_clips
+          for clip in @clips
+            p do
+              a(clip.nickname, :href => R(Clips, clip.id, 'edit'))
+            end
           end
         end
     
