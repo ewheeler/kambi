@@ -43,7 +43,7 @@ module Kambi::Models
   
     class Clip < Base
       has_and_belongs_to_many :posts, :join_table => 'kambi_clips_posts', :class_name => 'Kambi::Models::Post'
-      has_and_belongs_to_many :tags, :join_table => 'kambi_posts_tags', :class_name => 'Kambi::Models::Tag'
+      has_and_belongs_to_many :tags, :join_table => 'kambi_clips_tags', :class_name => 'Kambi::Models::Tag'
       validates_presence_of :url, :nickname
       validates_uniqueness_of :nickname
     end
@@ -624,16 +624,16 @@ module Kambi::Views
         
         def _clip(clip)
             a(clip.nickname, :href => clip.url)
-          # unless clip.tags.nil?
-          #             div.clips_tags do
-          #               p "tagged with :"
-          #               for tag in clip.tags
-          #                 p do
-          #                   a(tag.name, :href => R(Tags, tag.tag_id))
-          #                 end
-          #               end
-          #             end
-          #           end
+          unless clip.tags.nil?
+                      div.clips_tags do
+                        p "tagged with :"
+                        for tag in clip.tags
+                          p do
+                            a(tag.name, :href => R(Tags, tag.tag_id))
+                          end
+                        end
+                      end
+                    end
           p clip.body
           p do
             a("Edit Clip", :href => R(Clips, clip.clip_id, 'edit'))
