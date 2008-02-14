@@ -105,8 +105,8 @@ module Kambi::Models
     class Tag < Base
       validates_presence_of :name
       has_many :taggings
-      has_many :clips, :through => :taggings, :source => :clip, :conditions => "taggings.taggable_type = 'Clip'"
-      has_many :posts, :through => :taggings, :source => :post, :conditions => "taggings.taggable_type = 'Post'"
+      has_many :clips, :through => :taggings, :source => :clip, :conditions => "kambi_taggings.taggable_type = 'Clip'"
+      has_many :posts, :through => :taggings, :source => :post, :conditions => "kambi_taggings.taggable_type = 'Post'"
       
       def taggables
         self.posts + self.clips
@@ -659,13 +659,18 @@ module Kambi::Views
         
         def view_tags
           if @tag
-            unless @posts.empty?
+            if @taggables
+              @posts = []
+              @clips = []
+              @taggables.each{|t| if t.is_a?(Kambi::Models::Post); @posts << t; elsif t.is_a?(Kambi::Models::Clip); @clips << t; end}
+            end
+            if @posts
               p "Posts tagged with " + @tag.name + ":"
               for post in @posts
                 a(post.title, :href => R(Posts, post.id)) 
               end
             end
-            unless @clips.empty?
+            if @clips
               for clip in @clips
                 p "Clips tagged with " + @tag.name + ":"
                 a(clip.nickname, :href => R(Clips, clip.id))   
