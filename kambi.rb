@@ -35,8 +35,8 @@ end
 module Kambi::Models
     class Post < Base
       has_many :comments, :order => 'created_at ASC'
-      has_many :clipposts
-      has_many :posttags
+      has_many :clipposts, :foreign_key => "post_id"
+      has_many :posttags, :foreign_key => "post_id"
       has_many :clips, :through => :clipposts
       has_many :tags, :through => :posttags
       validates_presence_of :title, :nickname
@@ -44,8 +44,8 @@ module Kambi::Models
     end
   
     class Clip < Base
-      has_many :clipposts
-      has_many :cliptags
+      has_many :clipposts, :foreign_key => "clip_id"
+      has_many :cliptags, :foreign_key => "clip_id"
       has_many :posts, :through => :clipposts
       has_many :tags, :through => :cliptags
       validates_presence_of :url, :nickname
@@ -53,8 +53,8 @@ module Kambi::Models
     end
     
     class Clippost < Base
-      has_many :clips
-      has_many :posts
+      has_many :clips, :foreign_key => "id"
+      has_many :posts, :foreign_key => "id"
     end
   
     class Comment < Base
@@ -68,18 +68,18 @@ module Kambi::Models
     
     class Tag < Base
       validates_presence_of :name
-      belongs_to :posts
-      belongs_to :clips
+      belongs_to :posts, :foreign_key => "post_id"
+      belongs_to :clips, :foreign_key => "clip_id"
     end
     
     class Posttag < Base
-      has_many :tags
-      has_many :posts
+      has_many :tags, :foreign_key => "id"
+      has_many :posts, :foreign_key => "id"
     end
     
     class Cliptag < Base
-      has_many :tags
-      has_many :clips
+      has_many :tags, :foreign_key => "id"
+      has_many :clips, :foreign_key => "id"
     end
     
     class User < Base; end
@@ -197,7 +197,10 @@ module Kambi::Controllers
         def read(post_id) 
             @post = Post.find post_id
             @comments = @post.comments
-            @clips = @post.clipposts.collect{|c| c.clips}.flatten
+            #@clips = @post.clipposts.collect{|c| c.clips}.flatten
+            clips_posts = Clippost.find(:all, :conditions => ['post_id =?', @post.id])
+            @clips = clips_posts.collect{|c| c.clips}.flatten
+            #@clips = clips_ids.collect{|i| Kambi::Models::Clip.find i.id}
             render :view
         end
 
@@ -210,7 +213,7 @@ module Kambi::Controllers
                 these_tags = these_tags_ids.collect{|i| Kambi::Models::Tag.find i}
                 these_tags.each{|d| unless input.include?(d.name); @post.posttags.delete(d); end; }
                 not_these_tags = all_tags - these_tags
-                not_these_tags.each{|a| if input.include?(a.name); pt = Posttag.new; @post.posttags.build(pt.create :post_id => @post.id, :tag_id => a.id).save; end; }
+                not_these_tags.each{|a| if input.include?(a.name); @post.posttags.push(Posttag.create :post_id => @post.id, :tag_id => a.id); end; }
                 @post.update_attributes :title => input.post_title, :body => input.post_body, :nickname => input.post_nickname
                 redirect R(@post)
             else
@@ -275,14 +278,14 @@ module Kambi::Controllers
     class Clips < REST 'clips'
         # POST /clips
         def create
-            clip = Models::Clip.create(:nickname => input.clip_nickname,
+            clip = Clip.create(:nickname => input.clip_nickname,
                         :url => input.clip_url,
                        :body => input.clip_body)
             all_posts = Models::Post.find :all
             #these_clips_posts = clip.posts
             #not_these_clips_posts = all_posts - these_clips_posts
             #these_clips_posts.each{|d| unless input.include?(d.title); clip.posts.delete(d); end; }
-            all_posts.each{|a| if input.include?(a.title); clip.clipposts.create(a.id); end; }
+            all_posts.each{|p| if input.include?(p.title); clip.clipposts<<(Clippost.create :post_id => p.id, :clip_id => clip.id); end; }
             redirect R(Posts)
         end
         
@@ -311,9 +314,17 @@ module Kambi::Controllers
             end
             @clip = Models::Clip.find clip_id
             @all_posts = Models::Post.find :all
-            @these_clips_posts = @clip.clipposts.collect{|t| t.posts}.flatten
+            #@these_clips_posts = @clip.clipposts.collect{|t| t.posts}.flatten
+            
+            #these_clips_posts_ids = @clip.clipposts.collect{|t| t.post_id}.flatten
+            #@these_clips_posts = these_clips_posts_ids.collect{|i| Kambi::Models::Post.find i}.uniq
+            
+            @these_clips_posts = @clip.posts
             @all_clips_tags = Models::Tag.find :all
             @these_clips_tags = @clip.cliptags.collect{|c| c.tags}.flatten
+            #these_clips_tags_ids = @clip.cliptags.collect{|c| c.tag_id}.flatten
+            #@these_clips_tags = these_clips_tags_ids.collect{|i| Kambi::Models::Tag.find i }
+            #@these_clips_tags = @clip.tags(true)
             render :edit_clip
         end
         
@@ -322,17 +333,24 @@ module Kambi::Controllers
             unless @state.user_id.blank?
                 clip = Clip.find clip_id
                 all_tags = Models::Tag.find :all
-                these_tags = clip.cliptags.collect{|c| c.tags}.flatten
-                not_these_tags = all_tags - these_tags
-                these_tags.each{|d| unless input.include?(d.name); clip.cliptags.delete(d); end; }
-                not_these_tags.each{|a| if input.include?(a.name); clip.cliptags.build(a); end; }
+                #these_tags = clip.cliptags.collect{|c| c.tag_id}.flatten
+                #these_clips_tags = these_tags.collect{|t| Kambi::Models::Tag.find t }
+                #not_these_clips_tags = all_tags - these_clips_tags
+                #these_clips_tags.each{|d| unless input.include?(d.name); clip.cliptags.delete(Cliptag.find(:all, :conditions => ['tag_id = ?', d.id])); end; }
+                #not_these_clips_tags.each{|a| if input.include?(a.name); clip.cliptags<<(Cliptag.create :clip_id => clip.id, :tag_id => a.id); end; }
+                clip.cliptags.delete(Cliptag.find :all)
+                all_tags.each{|t| if input.include?(t.name); clip.cliptags<<(Cliptag.create :clip_id => clip.id, :tag_id => t.id); end; }
                 clip.update_attributes :url => input.clip_url, :body => input.clip_body, :nickname => input.clip_nickname
+                
                 all_posts = Models::Post.find :all
-                these_clips_posts = clip.clipposts.collect{|t| t.posts}.flatten
-                not_these_clips_posts = all_posts - these_clips_posts
-                these_clips_posts.each{|d| unless input.include?(d.title); clip.clipposts.delete(d); end; }
-                not_these_clips_posts.each{|a| if input.include?(a.title); clip.clipposts.build(a); end; }
-                #@post = Post.find clip.post_id
+                
+                these_clips_posts_ids = clip.clipposts.collect{|t| t.post_id}.flatten
+                these_clips_posts = these_clips_posts_ids.collect{|i| Kambi::Models::Post.find i}
+                #not_these_clips_posts = all_posts - these_clips_posts
+                these_clips_posts.each{|d| unless input.include?(d.title); clip.clipposts.delete(Clippost.find(:all, :conditions => ['post_id =?', d.id])); end; }
+                #not_these_clips_posts.each{|a| if input.include?(a.title); clip.clipposts<<(Clippost.create :post_id => a.id, :clip_id => clip.id); end; }
+                #clip.clipposts.delete(Clippost.find :all)
+                all_posts.each{|p| if input.include?(p.title); clip.clipposts<<(Clippost.create :post_id => p.id, :clip_id => clip.id); end; }
                 redirect R(Posts)
             else
               _error("Unauthorized", 401)
@@ -359,8 +377,10 @@ module Kambi::Controllers
         def read(tag_id) 
             @tag = Tag.find tag_id
             @tags = Models::Tag.find :all
-            @posts = @tag.posts
-            @clips = @tag.clips
+            @posts = @tag.posttags.collect{|t| t.posts}.flatten
+            #@posts = Post.find(:all, :include => [:posttags, :tags], :conditions => "posttag.tag_id = '1' ")
+            #@clips = Clip.find(:all, :include => [:cliptags, :tags], :conditions => "cliptag.tag_id = '1' ")
+            @clips = @tag.cliptags.collect{|t| t.clips}.flatten
             render :view_tags
         end
         
@@ -493,6 +513,8 @@ module Kambi::Views
               div.post do
                 _post(post)
                 pclips = post.clipposts.collect{|p| p.clips}.flatten
+                #pclips = pclips_ids.collect{|i| Kambi::Models::Clip.find i}
+                #pclips = post.clips
                 for clip in pclips
                   div.clip do
                     _clip(clip)
@@ -551,8 +573,9 @@ module Kambi::Views
         def view
             div.post do
               _post(@post)
-              pclips = @post.clipposts.collect{|p| p.clips}.flatten
-              for clip in pclips
+              #pclips_ids = @post.clipposts.collect{|p| p.clip_id}.flatten
+              #pclips = pclips_ids.collect{|i| Kambi::Models::Clip.find i}
+              for clip in @clips
                 div.clip do
                   _clip(clip)
                 end
@@ -656,14 +679,14 @@ module Kambi::Views
                         p "tagged with :"
                         for tag in ctags
                           p do
-                            a(tag.name, :href => R(Tags, tag.tag_id))
+                            a(tag.name, :href => R(Tags, tag.id))
                           end
                         end
                       end
                     end
           p clip.body
           p do
-            a("Edit Clip", :href => R(Clips, clip.clip_id, 'edit'))
+            a("Edit Clip", :href => R(Clips, clip.id, 'edit'))
           end
         end
       
@@ -729,7 +752,7 @@ module Kambi::Views
             
             if @all_clips_tags
               for tag in @all_clips_tags
-                if !@these_clips_tags.nil? && @these_clips_tags.include?(tag)
+                if @these_clips_tags.include?(tag)
                   input :type => 'checkbox', :name => tag.name, :value => tag, :checked => 'true'
                   label tag.name, :for => tag.name; br
                 else
@@ -741,16 +764,17 @@ module Kambi::Views
            
             if @all_posts
               for post in @all_posts
-                if !@these_clips_posts.nil? && @these_clips_posts.include?(post)
-                  input :type => 'checkbox', :name => post.title, :value => post, :checked => 'true'
-                  label post.title, :for => post.title; br
-                else
-                  input :type => 'checkbox', :name => post.title, :value => post
-                  label post.title, :for => post.title; br
+                unless @these_clips_posts.nil?
+                  if @these_clips_posts.include?(post)
+                    input :type => 'checkbox', :name => post.title, :value => post, :checked => 'true'
+                    label post.title, :for => post.title; br
+                  end
                 end
+                input :type => 'checkbox', :name => post.title, :value => post
+                label post.title, :for => post.title; br
               end
             end
-            
+            input :type => 'hidden', :name => 'clip_id', :value => clip.id
             input :type => 'submit'
           end
         end 
