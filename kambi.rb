@@ -472,7 +472,8 @@ module Kambi::Controllers
                 }
                 a:link,a:visited {
                   color:black;
-                  text-decoration:underline;
+                  border-bottom: 1px dotted #990000;
+                  text-decoration:none;
                 }
                 a:hover {
                   background:yellow;
@@ -629,7 +630,7 @@ module Kambi::Views
           div.tags do
             p "All tags:"
             for tag in @tags
-              a(tag.name, :href => R(Tags, tag.id))
+              a(tag.name, :href => R(Tags, tag.id)) 
             end
           end
           form :action => R(Tags), :method => 'post' do
@@ -772,7 +773,7 @@ module Kambi::Views
            
             if @all_posts
               for post in @all_posts
-                if @these_clips_posts.include?(post)
+                if !@these_clips_posts.nil? and @these_clips_posts.include?(post)
                   input :type => 'checkbox', :name => post.title, :value => post, :checked => 'true'
                   label post.title, :for => post.title; br
                 else
