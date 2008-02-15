@@ -1,12 +1,13 @@
 #!/usr/bin/env ruby
 
+# This is a RESTful adaptation of the Camping-based Blokk application:
+# http://murfy.de/read/blokk
 #
-# This is a RESTful version of the Camping-based Blokk application.
-#
-# The original version can be found here: 
+# The original Camping-based Blog can be found here: 
 # http://code.whytheluckystiff.net/camping/browser/trunk/examples/blog.rb
 #
-
+# Borrows from RESTstop's version: http://reststop.rubyforge.org/classes/Camping.html
+#
 require 'rubygems'
 
 gem 'camping', '~> 1.5'
@@ -35,25 +36,25 @@ module Kambi::Models
     class Post < Base
       has_many :comments, :order => 'created_at ASC'
       has_many :references, :foreign_key => "post_id"
-      has_many :clips, :through => :references, :source => :clip
+      has_many :clips, :through => :references#, :source => :clip
       validates_presence_of :title, :nickname
       validates_uniqueness_of :nickname
       has_many :taggings, :as => :taggable
-      has_many :tags, :through => :taggings#, :foreign_key => "taggable_id"
+      has_many :tags, :through => :taggings
     end
   
     class Clip < Base
       has_many :references, :foreign_key => "clip_id"
-      has_many :posts, :through => :references, :source => :post
+      has_many :posts, :through => :references#, :source => :post
       validates_presence_of :url, :nickname
       validates_uniqueness_of :nickname
       has_many :taggings, :as => :taggable
-      has_many :tags, :through => :taggings#, :foreign_key => "taggable_id"
+      has_many :tags, :through => :taggings
     end
     
     class Reference < Base
-      belongs_to :clip, :class_name => "Clip"#, :foreign_key => "id"
-      belongs_to :post, :class_name => "Post"#, :foreign_key => "id"
+      belongs_to :clip, :class_name => "Clip"
+      belongs_to :post, :class_name => "Post"
     end
   
     class Comment < Base
@@ -76,7 +77,7 @@ module Kambi::Models
       has_many :posts, :through => :taggings, :source => :post, :conditions => "kambi_taggings.taggable_type = 'Post'"
       
       def taggables
-        self.taggings.collect{|t| t.post}.flatten + self.taggings.collect{|t| t.clip}.flatten
+        self.taggings.collect{|t| t.taggable}
       end  
     end
     
@@ -202,10 +203,8 @@ module Kambi::Controllers
             unless @state.user_id.blank?
                 @post = Post.find post_id
                 all_tags = Models::Tag.find :all
-                these_tags = @post.tags
-                these_tags.each{|d| unless input.include?(d.name); @post.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@post.id}"] )); end; }
-                not_these_tags = all_tags - these_tags
-                not_these_tags.each{|a| if input.include?(a.name); @post.taggings.push(Tagging.create( :taggable_id => @post.id, :taggable_type => "Post", :tag_id => a.id)); end; }
+                @post.tags.each{|d| @post.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@post.id}"] )) }
+                all_tags.each{|a| if input.include?(a.name); @post.taggings<<(Tagging.create( :taggable_id => @post.id, :taggable_type => "Post", :tag_id => a.id)); end; }
                 @post.update_attributes :title => input.post_title, :body => input.post_body, :nickname => input.post_nickname
                 redirect R(@post)
             else
@@ -431,13 +430,13 @@ module Kambi::Controllers
                 }
                 div.post {
                     padding: 1em;
-                    border-bottom: 4px solid #444;
-                      padding-right:2%;
-                      padding-bottom:2%;
-                      font-family:georgia,"lucida bright","times new roman",serif;
-                      width: 40em;
-                      text-align:justify;
-                      word-spacing:0.25em;
+                    border-bottom: 8px solid #444;
+                    padding-right:2%;
+                    padding-bottom:2%;
+                    font-family:georgia,"lucida bright","times new roman",serif;
+                    width: 40%;
+                    text-align:justify;
+                    word-spacing:0.25em;
                 }
                 div.clip{
                     padding: 1em;
@@ -445,7 +444,7 @@ module Kambi::Controllers
                     width:20em;
                     margin-top:2%;
                     text-align:justify;
-                    padding-left:50%;
+                    margin-left:80%;
                 }
                 div.tags {
                     font-size: 80%;
@@ -457,23 +456,24 @@ module Kambi::Controllers
                     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
                 }
                 a:link,a:visited {
-                  color:black;
-                  border-bottom: 1px dotted #990000;
-                  text-decoration:none;
+                    color:black;
+                    border-bottom: 1px dotted #990000;
+                    text-decoration:none;
                 }
                 a:hover {
-                  color:white;
-                  background:#990000;
-                  text-decoration:none;
+                    color:white;
+                    background:#990000;
+                    text-decoration:none;
                 }
                 div.comments{
-                  padding: 1em;
-                  border: 1px solid black;
+                    padding: 1em;
+                    border: 1px solid black;
+                    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
                 }
                 div.comment{
-                  padding: 1em;
-                  margin-right: 4em;
-                  border-left: 1px dotted #444;
+                    padding: 1em;
+                    margin-right: 4em;
+                    border-left: 1px dotted #444;
                 }
             }
         end
@@ -642,7 +642,7 @@ module Kambi::Views
             input :name => 'username', :type => 'text'; br
     
             label 'Password', :for => 'password'; br
-            input :name => 'password', :type => 'text'; br
+            input :name => 'password', :type => 'password'; br
     
             input :type => 'submit', :name => 'login', :value => 'Login'
           end
