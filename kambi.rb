@@ -108,8 +108,9 @@ module Kambi::Models
       has_many :clips, :through => :taggings, :source => :clip, :conditions => "kambi_taggings.taggable_type = 'Clip'"
       has_many :posts, :through => :taggings, :source => :post, :conditions => "kambi_taggings.taggable_type = 'Post'"
       
+      
       def taggables
-        self.posts + self.clips
+        self.taggings.collect{|t| t.post}.flatten + self.taggings.collect{|t| t.clip}.flatten
       end
       
     end
@@ -253,7 +254,7 @@ module Kambi::Controllers
                 these_tags = @post.tags
                 these_tags.each{|d| unless input.include?(d.name); @post.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@post.id}"] )); end; }
                 not_these_tags = all_tags - these_tags
-                not_these_tags.each{|a| if input.include?(a.name); @post.taggings.push(Tagging.create :taggable_id => @post.id, :taggable_type => "Post", :tag_id => a.id); end; }
+                not_these_tags.each{|a| if input.include?(a.name); @post.taggings.push(Tagging.create( :taggable_id => @post.id, :taggable_type => "Post", :tag_id => a.id)); end; }
                 @post.update_attributes :title => input.post_title, :body => input.post_body, :nickname => input.post_nickname
                 redirect R(@post)
             else
@@ -354,21 +355,10 @@ module Kambi::Controllers
                 @user = User.find @state.user_id
             end
             @clip = Models::Clip.find clip_id
-            @all_posts = Models::Post.find :all
-            #@these_clips_posts = @clip.clipposts.collect{|t| t.posts}.flatten
-            
-            #these_clips_posts_ids = @clip.clipposts.collect{|t| t.post_id}.flatten
-            #@these_clips_posts = these_clips_posts_ids.collect{|i| Kambi::Models::Post.find i}.uniq
-            
+            @all_posts = Models::Post.find :all        
             @these_clips_posts = @clip.posts
-            @all_clips_tags = Models::Tag.find :all
-            #@these_clips_tags = @clip.cliptags.collect{|c| c.tags}.flatten
-            
+            @all_clips_tags = Models::Tag.find :all            
             @these_clips_tags = @clip.tags
-            
-            #these_clips_tags_ids = @clip.cliptags.collect{|c| c.tag_id}.flatten
-            #@these_clips_tags = these_clips_tags_ids.collect{|i| Kambi::Models::Tag.find i }
-            #@these_clips_tags = @clip.tags(true)
             render :edit_clip
         end
         
@@ -377,24 +367,12 @@ module Kambi::Controllers
             unless @state.user_id.blank?
                 clip = Clip.find clip_id
                 all_tags = Models::Tag.find :all
-                #these_tags = clip.cliptags.collect{|c| c.tag_id}.flatten
-                #these_clips_tags = these_tags.collect{|t| Kambi::Models::Tag.find t }
-                #not_these_clips_tags = all_tags - these_clips_tags
-                #these_clips_tags.each{|d| unless input.include?(d.name); clip.cliptags.delete(Cliptag.find(:all, :conditions => ['tag_id = ?', d.id])); end; }
-                #not_these_clips_tags.each{|a| if input.include?(a.name); clip.cliptags<<(Cliptag.create :clip_id => clip.id, :tag_id => a.id); end; }
-                #clip.cliptags.delete(Cliptag.find :all)
-                #all_tags.each{|t| if input.include?(t.name); clip.cliptags<<(Cliptag.create :clip_id => clip.id, :tag_id => t.id); end; }
                 clip.update_attributes :url => input.clip_url, :body => input.clip_body, :nickname => input.clip_nickname
-                
                 these_tags = clip.tags
                 these_tags.each{|d| unless input.include?(d.name); clip.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{clip.id}"] )); end; }
                 not_these_tags = all_tags - these_tags
-                not_these_tags.each{|a| if input.include?(a.name); clip.taggings.push(Tagging.create :taggable_id => clip.id, :taggable_type => "Clip", :tag_id => a.id); end; }
-                
-                
-                
-                
-                
+                not_these_tags.each{|a| if input.include?(a.name); clip.taggings.push(Tagging.create(:taggable_id => clip.id, :taggable_type => "Clip", :tag_id => a.id)); end; }
+
                 all_posts = Models::Post.find :all
                 
                 these_clips_posts_ids = clip.clipposts.collect{|t| t.post_id}.flatten
@@ -422,6 +400,7 @@ module Kambi::Controllers
         # GET /tags.xml
         def list
             @tags = Tag.find :all
+            @taggables = @tags.collect{|t| t.taggables}.flatten
             render :view_tags
         end
         
@@ -429,13 +408,29 @@ module Kambi::Controllers
         # GET /tags/1.xml
         def read(tag_id) 
             @tag = Tag.find tag_id
-            @tags = Models::Tag.find :all
+            puts @tag.name
+            @tags = Tag.find :all
             #@posts = @tag.posttags.collect{|t| t.posts}.flatten
             #@posts = Post.find(:all, :include => [:posttags, :tags], :conditions => "posttag.tag_id = '1' ")
             #@clips = Clip.find(:all, :include => [:cliptags, :tags], :conditions => "cliptag.tag_id = '1' ")
             #@clips = @tag.cliptags.collect{|t| t.clips}.flatten
-            
-            @taggables = @tag.taggables
+            @taggables = @tag.taggables.flatten.compact.uniq
+            # @posts = @tag.taggings.collect{|t| t.post}.flatten.compact
+            # @clips = @tag.taggings.collect{|t| t.clip}.flatten.compact
+            #@posts = @tag.posts
+            #puts @posts.length if @posts.length>0
+            #@clips = @tag.clips
+            #puts @clips.length if @clips.length>0
+            #puts @taggables.length if @taggables.length>0
+            @posts = Array.new
+            @clips = Array.new
+            @taggables.each{|t|  if t.instance_of?(Kambi::Models::Post); 
+                                    puts t.nickname;
+                                    @posts<<t; 
+                                  elsif t.instance_of?(Kambi::Models::Clip);
+                                    puts t.nickname; 
+                                    @clips<<t;  
+                                  end; }
             #@clips = @tag.taggables
             render :view_tags
         end
@@ -569,8 +564,6 @@ module Kambi::Views
               div.post do
                 _post(post)
                 pclips = post.clipposts.collect{|p| p.clips}.flatten
-                #pclips = pclips_ids.collect{|i| Kambi::Models::Clip.find i}
-                #pclips = post.clips
                 for clip in pclips
                   div.clip do
                     _clip(clip)
@@ -629,8 +622,6 @@ module Kambi::Views
         def view
             div.post do
               _post(@post)
-              #pclips_ids = @post.clipposts.collect{|p| p.clip_id}.flatten
-              #pclips = pclips_ids.collect{|i| Kambi::Models::Clip.find i}
               for clip in @clips
                 div.clip do
                   _clip(clip)
@@ -659,20 +650,15 @@ module Kambi::Views
         
         def view_tags
           if @tag
-            if @taggables
-              @posts = []
-              @clips = []
-              @taggables.each{|t| if t.is_a?(Kambi::Models::Post); @posts << t; elsif t.is_a?(Kambi::Models::Clip); @clips << t; end}
-            end
-            if @posts
+            unless @posts.empty?
               p "Posts tagged with " + @tag.name + ":"
               for post in @posts
                 a(post.title, :href => R(Posts, post.id)) 
               end
             end
-            if @clips
+            unless @clips.empty?
+              p "Clips tagged with " + @tag.name + ":"
               for clip in @clips
-                p "Clips tagged with " + @tag.name + ":"
                 a(clip.nickname, :href => R(Clips, clip.id))   
               end
             end
@@ -714,8 +700,6 @@ module Kambi::Views
           h1 do
             a(post.title, :href => R(Posts, post.id))
           end
-          #ptagids = post.posttags.collect{|p| p.tag_id}.flatten
-          #ptags = ptagids.collect{|i| Kambi::Models::Tag.find i }
           ptags = post.tags if !post.tags.nil?
           unless ptags.empty?
             div.posts_tags do
@@ -734,8 +718,6 @@ module Kambi::Views
         
         def _clip(clip)
           a(clip.nickname, :href => clip.url)
-          #ctagids = clip.cliptags.collect{|c| c.tag_id}.flatten
-          #ctags = ctagids.collect{|i| Kambi::Models::Tag.find i }
           ctags = clip.tags if !clip.tags.nil?
           unless ctags.empty?
                       div.clips_tags do
