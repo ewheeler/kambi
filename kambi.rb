@@ -17,7 +17,6 @@ require 'camping'
 require 'camping/db'
 require 'camping/session'
 
-
 begin
   # try to use local copy of library
   require '../lib/reststop'
@@ -63,7 +62,6 @@ module Kambi::Models
       belongs_to :post
     end
     
-
     class Tagging < Base
       belongs_to :tag
       belongs_to :taggable, :polymorphic => true
@@ -77,11 +75,9 @@ module Kambi::Models
       has_many :clips, :through => :taggings, :source => :clip, :conditions => "kambi_taggings.taggable_type = 'Clip'"
       has_many :posts, :through => :taggings, :source => :post, :conditions => "kambi_taggings.taggable_type = 'Post'"
       
-      
       def taggables
         self.taggings.collect{|t| t.post}.flatten + self.taggings.collect{|t| t.clip}.flatten
-      end
-      
+      end  
     end
     
     
@@ -197,7 +193,6 @@ module Kambi::Controllers
             @post = Post.find post_id
             @comments = @post.comments
             clips_posts = Reference.find(:all, :conditions => ['post_id =?', @post.id])
-            #@clips = clips_posts.collect{|c| c.clips}.flatten
             @clips = @post.clips
             render :view
         end
@@ -222,7 +217,6 @@ module Kambi::Controllers
         def delete(post_id)
             unless @state.user_id.blank?
                 @post = Post.find post_id
-                
                 if @post.destroy
                   redirect R(Posts)
                 else
@@ -358,13 +352,7 @@ module Kambi::Controllers
             @taggables = @tag.taggables.flatten.compact.uniq
             @posts = Array.new
             @clips = Array.new
-            @taggables.each{|t|  if t.instance_of?(Kambi::Models::Post); 
-                                    puts t.nickname;
-                                    @posts<<t; 
-                                  elsif t.instance_of?(Kambi::Models::Clip);
-                                    puts t.nickname; 
-                                    @clips<<t;  
-                                  end; }
+            @taggables.each{|t|  if t.instance_of?(Kambi::Models::Post); @posts<<t; elsif t.instance_of?(Kambi::Models::Clip);  @clips<<t;  end; }
             render :view_tags
         end
         
@@ -410,7 +398,6 @@ module Kambi::Controllers
         # POST /sessions
         def create
             @user = User.find :first, :conditions => ['username = ? AND password = ?', input.username, input.password]
-     
             if @user
                 @login = 'login success !'
                 @state.user_id = @user.id
@@ -450,7 +437,6 @@ module Kambi::Controllers
                       font-family:georgia,"lucida bright","times new roman",serif;
                       width: 40em;
                       text-align:justify;
-                      line-height:1.35em;
                       word-spacing:0.25em;
                 }
                 div.clip{
@@ -476,7 +462,8 @@ module Kambi::Controllers
                   text-decoration:none;
                 }
                 a:hover {
-                  background:yellow;
+                  color:white;
+                  background:#990000;
                   text-decoration:none;
                 }
                 div.comments{
@@ -636,7 +623,6 @@ module Kambi::Views
           form :action => R(Tags), :method => 'post' do
             label 'New tag', :for => 'tag_name'; br
             input :name => 'tag_name', :type => 'text'; br
-            
             input :type => 'submit'
           end
         end
@@ -686,13 +672,13 @@ module Kambi::Views
           a(clip.nickname, :href => clip.url)
           ctags = clip.tags if !clip.tags.nil?
           unless ctags.empty?
-                      div.tags do
-                        p "tagged with :"
-                        for tag in ctags
-                          a(tag.name, :href => R(Tags, tag.id))
-                        end
-                      end
-                    end
+            div.tags do
+              p "tagged with :"
+              for tag in ctags
+                a(tag.name, :href => R(Tags, tag.id))
+              end
+            end
+          end
           p clip.body
           p do
             a("Edit Clip", :href => R(Clips, clip.id, 'edit'))
@@ -731,12 +717,9 @@ module Kambi::Views
                 end
               end
             end
-    
             input :type => 'hidden', :name => 'post_id', :value => post.id
             input :type => 'submit'
-          end
-          
-          
+          end 
         end
         
         def _clip_form(clip, opts)
