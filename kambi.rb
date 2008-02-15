@@ -9,6 +9,8 @@
 # Borrows from RESTstop's version: http://reststop.rubyforge.org/classes/Camping.html
 #
 # Tag cloud courtesy of: http://whomwah.com/2006/07/06/another-tag-cloud-script-for-ruby-on-rails/
+
+# TODO: static pages, author(id, first, last, bio, photo_url, url, org, org_url), authorships(id, post_id, author_id), photo/file uploads?
 require 'rubygems'
 
 gem 'camping', '~> 1.5'
@@ -519,23 +521,25 @@ module Kambi::Controllers
                 div.content {
                     padding: 10px;
                 }
+                div.break{
+                    clear:both;
+                }
                 div.post {
-                    padding: 1em;
-                    border-bottom: 8px solid #990000;
-                    padding-right:2%;
-                    padding-bottom:2%;
                     font-family:georgia,"lucida bright","times new roman",serif;
-                    width: 40%;
+                    width: 50%;
                     text-align:justify;
                     word-spacing:0.25em;
+                    float:left;
+                    border-bottom: 8px solid #990000;
+                    line-height:1.3em;
                 }
                 div.clip{
                     padding: 1em;
                     border-top: 4px solid #444;
-                    width:20em;
-                    margin-top:2%;
+                    width:20%;
                     text-align:justify;
-                    margin-left:80%;
+                    float:right;
+                    clear:right;
                 }
                 div.tags {
                     font-size: 80%;
@@ -617,13 +621,17 @@ module Kambi::Views
           else
             for post in @posts
               div.post do
-                _post(post)
+                  _post(post)
+                end
                 clips = post.clips
                 for clip in clips
                   div.clip do
                     _clip(clip)
                   end
                 end
+              #end
+              div.break do
+                p ''
               end
             end
           end
