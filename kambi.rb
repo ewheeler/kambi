@@ -197,7 +197,8 @@ module Kambi::Controllers
             @post = Post.find post_id
             @comments = @post.comments
             clips_posts = Reference.find(:all, :conditions => ['post_id =?', @post.id])
-            @clips = clips_posts.collect{|c| c.clips}.flatten
+            #@clips = clips_posts.collect{|c| c.clips}.flatten
+            @clips = @post.clips
             render :view
         end
 
@@ -354,18 +355,7 @@ module Kambi::Controllers
             @tag = Tag.find tag_id
             puts @tag.name
             @tags = Tag.find :all
-            #@posts = @tag.posttags.collect{|t| t.posts}.flatten
-            #@posts = Post.find(:all, :include => [:posttags, :tags], :conditions => "posttag.tag_id = '1' ")
-            #@clips = Clip.find(:all, :include => [:cliptags, :tags], :conditions => "cliptag.tag_id = '1' ")
-            #@clips = @tag.cliptags.collect{|t| t.clips}.flatten
             @taggables = @tag.taggables.flatten.compact.uniq
-            # @posts = @tag.taggings.collect{|t| t.post}.flatten.compact
-            # @clips = @tag.taggings.collect{|t| t.clip}.flatten.compact
-            #@posts = @tag.posts
-            #puts @posts.length if @posts.length>0
-            #@clips = @tag.clips
-            #puts @clips.length if @clips.length>0
-            #puts @taggables.length if @taggables.length>0
             @posts = Array.new
             @clips = Array.new
             @taggables.each{|t|  if t.instance_of?(Kambi::Models::Post); 
@@ -375,7 +365,6 @@ module Kambi::Controllers
                                     puts t.nickname; 
                                     @clips<<t;  
                                   end; }
-            #@clips = @tag.taggables
             render :view_tags
         end
         
@@ -444,10 +433,10 @@ module Kambi::Controllers
             @headers["Content-Type"] = "text/css; charset=utf-8"
             @body = %{
                 body {
-                    font-family: Utopia, Georga, serif;
+                    font-family: Georga, Utopia, serif;
                 }
                 h1.header {
-                    background-color: #fef;
+                    background-color: #e5e5e5;
                     margin: 0; padding: 10px;
                 }
                 div.content {
@@ -455,13 +444,39 @@ module Kambi::Controllers
                 }
                 div.post {
                     padding: 1em;
-                    border: 1px solid black;
-                    width: 50%;
+                    border-bottom: 4px solid #444;
+                      padding-right:2%;
+                      padding-bottom:2%;
+                      font-family:georgia,"lucida bright","times new roman",serif;
+                      width: 40em;
+                      text-align:justify;
+                      line-height:1.35em;
+                      word-spacing:0.25em;
                 }
                 div.clip{
                     padding: 1em;
-                    border: 1px dotted black;
-                    margin-right: 4em;
+                    border-top: 4px solid #444;
+                    width:20em;
+                    margin-top:2%;
+                    text-align:justify;
+                    padding-left:50%;
+                }
+                div.tags {
+                    font-size: 80%;
+                    color: #990000;
+                    border-left: 1px dotted #444;
+                    padding-left:1em;
+                }
+                a{
+                    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+                }
+                a:link,a:visited {
+                  color:black;
+                  text-decoration:underline;
+                }
+                a:hover {
+                  background:yellow;
+                  text-decoration:none;
                 }
                 div.comments{
                   padding: 1em;
@@ -470,7 +485,7 @@ module Kambi::Controllers
                 div.comment{
                   padding: 1em;
                   margin-right: 4em;
-                  border: 1px dotted black;
+                  border-left: 1px dotted #444;
                 }
             }
         end
@@ -595,21 +610,27 @@ module Kambi::Views
         def view_tags
           if @tag
             unless @posts.empty?
-              p "Posts tagged with " + @tag.name + ":"
-              for post in @posts
-                a(post.title, :href => R(Posts, post.id)) 
+              div.tags do
+                p "Posts tagged with " + @tag.name + ":"
+                for post in @posts
+                  a(post.title, :href => R(Posts, post.id)) 
+                end
               end
             end
             unless @clips.empty?
-              p "Clips tagged with " + @tag.name + ":"
-              for clip in @clips
-                a(clip.nickname, :href => R(Clips, clip.id))   
+              div.tags do
+                p "Clips tagged with " + @tag.name + ":"
+                for clip in @clips
+                  a(clip.nickname, :href => R(Clips, clip.id))   
+                end
               end
             end
           end
-          p "All tags:"
-          for tag in @tags
-            p tag.name
+          div.tags do
+            p "All tags:"
+            for tag in @tags
+              a(tag.name, :href => R(Tags, tag.id))
+            end
           end
           form :action => R(Tags), :method => 'post' do
             label 'New tag', :for => 'tag_name'; br
@@ -646,7 +667,7 @@ module Kambi::Views
           end
           ptags = post.tags if !post.tags.nil?
           unless ptags.empty?
-            div.posts_tags do
+            div.tags do
               p "tagged with :"
               for tag in ptags
                 a(tag.name, :href => R(Tags, tag.id))
@@ -664,12 +685,10 @@ module Kambi::Views
           a(clip.nickname, :href => clip.url)
           ctags = clip.tags if !clip.tags.nil?
           unless ctags.empty?
-                      div.clips_tags do
+                      div.tags do
                         p "tagged with :"
                         for tag in ctags
-                          p do
-                            a(tag.name, :href => R(Tags, tag.id))
-                          end
+                          a(tag.name, :href => R(Tags, tag.id))
                         end
                       end
                     end
