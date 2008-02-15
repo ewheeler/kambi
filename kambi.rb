@@ -35,66 +35,35 @@ end
 module Kambi::Models
     class Post < Base
       has_many :comments, :order => 'created_at ASC'
-      has_many :clipposts, :foreign_key => "post_id"
-      #has_many :posttags, :foreign_key => "post_id"
-      has_many :clips, :through => :clipposts
-      # has_many :tags, :through => :posttags
+      has_many :references, :foreign_key => "post_id"
+      has_many :clips, :through => :references, :source => :clip
       validates_presence_of :title, :nickname
       validates_uniqueness_of :nickname
-      # has_many :posttags, :foreign_key => "post_id", :as => :taggables
       has_many :taggings, :as => :taggable
       has_many :tags, :through => :taggings#, :foreign_key => "taggable_id"
     end
   
     class Clip < Base
-      has_many :clipposts, :foreign_key => "clip_id"
-      #has_many :cliptags, :foreign_key => "clip_id"
-      has_many :posts, :through => :clipposts
-      #has_many :tags, :through => :cliptags
+      has_many :references, :foreign_key => "clip_id"
+      has_many :posts, :through => :references, :source => :post
       validates_presence_of :url, :nickname
       validates_uniqueness_of :nickname
-      #has_many :cliptags, :foreign_key => "clip_id", :as => :taggables
       has_many :taggings, :as => :taggable
       has_many :tags, :through => :taggings#, :foreign_key => "taggable_id"
     end
     
-    class Clippost < Base
-      has_many :clips, :foreign_key => "id"
-      has_many :posts, :foreign_key => "id"
+    class Reference < Base
+      belongs_to :clip, :class_name => "Clip"#, :foreign_key => "id"
+      belongs_to :post, :class_name => "Post"#, :foreign_key => "id"
     end
   
     class Comment < Base
       validates_presence_of :username
       validates_length_of :body, :within => 1..3000
-      #validates_inclusion_of :bot, :in => %w(K)
-      #validates_associated :post
       belongs_to :post
-      #attr_accessor :bot
     end
     
-    # class Tag < Base
-    #   validates_presence_of :name
-    #   has_many :posttags, :foreign_key => "post_id"
-    #   has_many :cliptags, :foreign_key => "clip_id"
-    #   has_many :posts, :through => :taggable, :source => :post#, :conditions => "posttags.taggable_type = 'Post'"
-    #   has_many :clips, :through => :taggable, :source => :clip#, :conditions => "cliptags.taggable_type = 'Clip'"
-    # 
-    # 
-    # 
-    # end
-    
-    # class Posttag < Base
-    #   belongs_to :tag
-    #   belongs_to :taggable, :polymorphic => true
-    #   belongs_to :posts, :class_name => "Post", :foreign_key => "id"
-    # end
-    # 
-    # class Cliptag < Base
-    #   belongs_to :tag
-    #   belongs_to :taggable, :polymorphic => true
-    #   belongs_to :clips, :class_name => "Clip", :foreign_key => "id"
-    # end
-    
+
     class Tagging < Base
       belongs_to :tag
       belongs_to :taggable, :polymorphic => true
@@ -118,7 +87,7 @@ module Kambi::Models
     
     class User < Base; end
 
-    class CreateTheBasics < V 1.4
+    class CreateTheBasics < V 1.5
       def self.up
         create_table :kambi_users, :force => true do |table|
           table.string :username, :password
@@ -138,7 +107,7 @@ module Kambi::Models
           table.timestamps
         end
         
-        create_table :kambi_clipposts, :force => true do |table|
+        create_table :kambi_references, :force => true do |table|
           table.integer :clip_id
           table.integer :post_id
         end
@@ -153,16 +122,6 @@ module Kambi::Models
         create_table :kambi_tags, :force => true do |table|
           table.string :name
         end
-        
-        # create_table :kambi_posttags, :force => true do |table|
-        #   table.integer :tag_id
-        #   table.integer :post_id
-        # end
-        # 
-        # create_table :kambi_cliptags, :force => true do |table|
-        #   table.integer :tag_id
-        #   table.integer :clip_id
-        # end
         
         create_table :kambi_taggings, :force => true do |table|
           table.integer :tag_id
@@ -237,10 +196,8 @@ module Kambi::Controllers
         def read(post_id) 
             @post = Post.find post_id
             @comments = @post.comments
-            #@clips = @post.clipposts.collect{|c| c.clips}.flatten
-            clips_posts = Clippost.find(:all, :conditions => ['post_id =?', @post.id])
+            clips_posts = Reference.find(:all, :conditions => ['post_id =?', @post.id])
             @clips = clips_posts.collect{|c| c.clips}.flatten
-            #@clips = clips_ids.collect{|i| Kambi::Models::Clip.find i.id}
             render :view
         end
 
@@ -249,8 +206,6 @@ module Kambi::Controllers
             unless @state.user_id.blank?
                 @post = Post.find post_id
                 all_tags = Models::Tag.find :all
-                #these_tags_ids = @post.posttags.collect{|p| p.tag_id}.flatten
-                #these_tags = these_tags_ids.collect{|i| Kambi::Models::Tag.find i}
                 these_tags = @post.tags
                 these_tags.each{|d| unless input.include?(d.name); @post.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@post.id}"] )); end; }
                 not_these_tags = all_tags - these_tags
@@ -301,8 +256,6 @@ module Kambi::Controllers
             end
             @post = Post.find post_id
             @all_posts_tags = Models::Tag.find :all
-            #these_posts_tags_ids = @post.posttags.collect{|p| p.tag_id}.flatten
-            #@these_posts_tags = these_posts_tags_ids.collect{|i| Kambi::Models::Tag.find i}
             @these_posts_tags = @post.tags
             render :edit_post
         end
@@ -324,10 +277,7 @@ module Kambi::Controllers
                         :url => input.clip_url,
                        :body => input.clip_body)
             all_posts = Models::Post.find :all
-            #these_clips_posts = clip.posts
-            #not_these_clips_posts = all_posts - these_clips_posts
-            #these_clips_posts.each{|d| unless input.include?(d.title); clip.posts.delete(d); end; }
-            all_posts.each{|p| if input.include?(p.title); clip.clipposts<<(Clippost.create :post_id => p.id, :clip_id => clip.id); end; }
+            all_posts.each{|p| if input.include?(p.title); clip.references<<(Reference.create :post_id => p.id, :clip_id => clip.id); end; }
             redirect R(Posts)
         end
         
@@ -372,16 +322,10 @@ module Kambi::Controllers
                 these_tags.each{|d| unless input.include?(d.name); clip.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{clip.id}"] )); end; }
                 not_these_tags = all_tags - these_tags
                 not_these_tags.each{|a| if input.include?(a.name); clip.taggings.push(Tagging.create(:taggable_id => clip.id, :taggable_type => "Clip", :tag_id => a.id)); end; }
-
                 all_posts = Models::Post.find :all
-                
-                these_clips_posts_ids = clip.clipposts.collect{|t| t.post_id}.flatten
-                these_clips_posts = these_clips_posts_ids.collect{|i| Kambi::Models::Post.find i}
-                #not_these_clips_posts = all_posts - these_clips_posts
-                these_clips_posts.each{|d| unless input.include?(d.title); clip.clipposts.delete(Clippost.find(:all, :conditions => ['post_id =?', d.id])); end; }
-                #not_these_clips_posts.each{|a| if input.include?(a.title); clip.clipposts<<(Clippost.create :post_id => a.id, :clip_id => clip.id); end; }
-                #clip.clipposts.delete(Clippost.find :all)
-                all_posts.each{|p| if input.include?(p.title); clip.clipposts<<(Clippost.create :post_id => p.id, :clip_id => clip.id); end; }
+                these_clips_posts = clip.posts
+                these_clips_posts.each{|d|  clip.references.delete(Reference.find(:all, :conditions => ['post_id =?', d.id])) }
+                all_posts.each{|p| if input.include?(p.title); clip.references<<(Reference.create :post_id => p.id, :clip_id => clip.id); end; }
                 redirect R(Posts)
             else
               _error("Unauthorized", 401)
@@ -563,8 +507,8 @@ module Kambi::Views
             for post in @posts
               div.post do
                 _post(post)
-                pclips = post.clipposts.collect{|p| p.clips}.flatten
-                for clip in pclips
+                clips = post.clips
+                for clip in clips
                   div.clip do
                     _clip(clip)
                   end
@@ -809,14 +753,13 @@ module Kambi::Views
            
             if @all_posts
               for post in @all_posts
-                unless @these_clips_posts.nil?
-                  if @these_clips_posts.include?(post)
-                    input :type => 'checkbox', :name => post.title, :value => post, :checked => 'true'
-                    label post.title, :for => post.title; br
-                  end
+                if @these_clips_posts.include?(post)
+                  input :type => 'checkbox', :name => post.title, :value => post, :checked => 'true'
+                  label post.title, :for => post.title; br
+                else
+                  input :type => 'checkbox', :name => post.title, :value => post
+                  label post.title, :for => post.title; br
                 end
-                input :type => 'checkbox', :name => post.title, :value => post
-                label post.title, :for => post.title; br
               end
             end
             input :type => 'hidden', :name => 'clip_id', :value => clip.id
