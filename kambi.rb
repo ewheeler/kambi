@@ -182,8 +182,6 @@ module Kambi::Helpers
    # display the results
    size_txt = "font-size:#{ size.to_s }px;" unless hide_sizes
    color_txt = "color:rgb(#{ colors });" unless hide_colours
-   puts size_txt
-   puts color_txt
    return [ size_txt, color_txt ].join
   end
 
@@ -573,17 +571,15 @@ module Kambi::Controllers
                     color: #990000;
                     border-left: 1px solid #444;
                     padding-left:1em;
-                    font-family:georgia,"lucida bright","times new roman",serif;
-                    
+                    font-family:georgia,"lucida bright","times new roman",serif;   
                 }
-                div.cloud a:link, a:visited{
-                    border-bottom:none;
+                div.cloud{
+                    padding-left:10%;
                 }
                 div.cloud a:hover{
                     background:yellow;
                     color:white
                 }
-
             }
         end
     end
@@ -637,18 +633,7 @@ module Kambi::Views
             a('New Tag', :href => R(Tags)); br
           end
           div.cloud do
-            all_tags = Kambi::Models::Tag.find(:all)
-            all_tags_items = Array.new(all_tags)
-            all_tags_taggables = all_tags_items.collect!{|t| t.taggables}
-            all_taggables = Array.new(all_tags_taggables)
-            tags_counts = all_taggables.collect!{|g| g.length}
-            maxtc = 0
-            mintc = 3
-            tags_counts.each{|c| maxtc = c if c > maxtc; mintc = c if c < mintc }
-            for c in all_tags
-              tag_index = all_tags.index(c).to_i
-              a( c.name, :href => R(Tags, c.id), :style => font_size_for_tag_cloud( tags_counts.fetch(tag_index), mintc, maxtc) )
-            end
+            _cloud
           end
         end
     
@@ -730,6 +715,9 @@ module Kambi::Views
         end
         
         def view_tags
+          div.cloud do
+            _cloud
+          end
           if @tag
             unless @posts.empty?
               div.tags do
@@ -746,12 +734,6 @@ module Kambi::Views
                   a(clip.nickname, :href => R(Clips, clip.id))   
                 end
               end
-            end
-          end
-          div.tags do
-            p "All tags:"
-            for tag in @tags
-              a(tag.name, :href => R(Tags, tag.id)) 
             end
           end
           form :action => R(Tags), :method => 'post' do
@@ -781,7 +763,21 @@ module Kambi::Views
             input :type => 'submit', :name => 'login', :value => 'Login'
           end
         end
-    
+        
+        def _cloud
+          all_tags = Kambi::Models::Tag.find(:all)
+          all_tags_items = Array.new(all_tags)
+          all_tags_taggables = all_tags_items.collect!{|t| t.taggables}
+          all_taggables = Array.new(all_tags_taggables)
+          tags_counts = all_taggables.collect!{|g| g.length}
+          maxtc = 0; mintc = 3
+          tags_counts.each{|c| maxtc = c if c > maxtc; mintc = c if c < mintc }
+          for c in all_tags
+            tag_index = all_tags.index(c).to_i
+            a( c.name, :href => R(Tags, c.id), :style => font_size_for_tag_cloud( tags_counts.fetch(tag_index), mintc, maxtc) )
+          end
+        end
+        
         def _post(post)
           h1 do
             a(post.title, :href => R(Posts, post.id))
