@@ -8,6 +8,7 @@
 #
 # Borrows from RESTstop's version: http://reststop.rubyforge.org/classes/Camping.html
 #
+# Tag cloud courtesy of: http://whomwah.com/2006/07/06/another-tag-cloud-script-for-ruby-on-rails/
 require 'rubygems'
 
 gem 'camping', '~> 1.5'
@@ -41,6 +42,10 @@ module Kambi::Models
       validates_uniqueness_of :nickname
       has_many :taggings, :as => :taggable
       has_many :tags, :through => :taggings
+      
+      def pretty_time
+        self.created_at.strftime("%A %B %d, %Y at %I %p")
+      end
     end
   
     class Clip < Base
@@ -61,6 +66,10 @@ module Kambi::Models
       validates_presence_of :username
       validates_length_of :body, :within => 1..3000
       belongs_to :post
+      
+      def pretty_time
+        self.created_at.strftime("%A %B %d, %Y at %I:%M %p")
+      end
     end
     
     class Tagging < Base
@@ -80,7 +89,6 @@ module Kambi::Models
         self.taggings.collect{|t| t.taggable}
       end  
     end
-    
     
     class User < Base; end
 
@@ -137,6 +145,48 @@ end
 
 module Kambi::Helpers
   
+  def font_size_for_tag_cloud( total, lowest, highest, options={} )
+   return nil if total.nil? or highest.nil? or lowest.nil?
+   #
+   # options
+   maxf = options.delete( :max_font_size ) || 24
+   minf = options.delete( :min_font_size ) || 11
+   maxc = options.delete( :max_color ) || [ 0, 0, 0 ]
+   minc = options.delete( :min_color ) || [ 156, 156, 156 ]
+   hide_sizes = options.delete( :hide_sizes )
+   hide_colours = options.delete( :hide_colours )
+   #
+   # function to work out rgb values
+   def rgb_color( a, b, i, x)
+    return nil if i <= 1 or x <= 1
+    if a > b
+     a-(Math.log(i)*(a-b)/Math.log(x)).floor
+    else
+     (Math.log(i)*(b-a)/Math.log(x)+a).floor
+    end
+   end
+   #
+   # work out colours
+   c = []
+   (0..2).each { |i| c << rgb_color( minc[i], maxc[i], total, highest ) || nil }
+   colors = c.compact.empty? ? minc.join(',') : c.join(',')
+   #
+   # work out the font size
+   spread = highest.to_f - lowest.to_f
+   spread = 1.to_f if spread <= 0
+   fontspread = maxf.to_f - minf.to_f
+   fontstep = spread / fontspread
+   size = ( minf + ( total.to_f / fontstep ) ).to_i
+   size = maxf if size > maxf
+   #
+   # display the results
+   size_txt = "font-size:#{ size.to_s }px;" unless hide_sizes
+   color_txt = "color:rgb(#{ colors });" unless hide_colours
+   puts size_txt
+   puts color_txt
+   return [ size_txt, color_txt ].join
+  end
+
   # menu bar
   def menu target = nil
     if target
@@ -202,6 +252,10 @@ module Kambi::Controllers
         def update(post_id)
             unless @state.user_id.blank?
                 @post = Post.find post_id
+                all_clips = Models::Clip.find :all
+                @post.clips.each{|d| @post.references.delete(Reference.find(:all, :conditions => ["clip_id = #{d.id}"]))}
+                all_clips.each{|c| if input.include?(c.nickname); @post.references<<(Reference.create :post_id => @post.id, :clip_id => c.id); end; }
+                
                 all_tags = Models::Tag.find :all
                 @post.tags.each{|d| @post.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@post.id}"] )) }
                 all_tags.each{|a| if input.include?(a.name); @post.taggings<<(Tagging.create( :taggable_id => @post.id, :taggable_type => "Post", :tag_id => a.id)); end; }
@@ -249,6 +303,8 @@ module Kambi::Controllers
                 @user = User.find @state.user_id
             end
             @post = Post.find post_id
+            @all_clips = Models::Clip.find :all
+            @these_posts_clips = @post.clips
             @all_posts_tags = Models::Tag.find :all
             @these_posts_tags = @post.tags
             render :edit_post
@@ -292,6 +348,22 @@ module Kambi::Controllers
             end
             render :add_clip
         end
+        
+        
+        # DELETE /clips/1
+        def delete(clip_id)
+            unless @state.user_id.blank?
+                @clip = Clip.find clip_id
+                if @clip.destroy
+                  redirect R(Posts)
+                else
+                  _error("Unable to delete clip #{@clip.id}", 500)
+                end
+            else
+              _error("Unauthorized", 401)
+            end
+        end
+        
         
         # GET /clips/1/edit
         def edit(clip_id) 
@@ -346,9 +418,8 @@ module Kambi::Controllers
         # GET /tags/1.xml
         def read(tag_id) 
             @tag = Tag.find tag_id
-            puts @tag.name
             @tags = Tag.find :all
-            @taggables = @tag.taggables.flatten.compact.uniq
+            @taggables = @tag.taggables
             @posts = Array.new
             @clips = Array.new
             @taggables.each{|t|  if t.instance_of?(Kambi::Models::Post); @posts<<t; elsif t.instance_of?(Kambi::Models::Clip);  @clips<<t;  end; }
@@ -391,6 +462,22 @@ module Kambi::Controllers
                        :body => input.post_body, :post_id => input.post_id)
             redirect R(Posts, input.post_id)
         end
+        
+        # DELETE /comments/1
+        def delete(comment_id)
+            unless @state.user_id.blank?
+                @comment = Comment.find comment_id
+                if @comment.destroy
+                  redirect R(Posts)
+                else
+                  _error("Unable to delete comment #{@comment.id}", 500)
+                end
+            else
+              _error("Unauthorized", 401)
+            end
+        end
+        
+        
     end
     
     class Sessions < REST 'sessions'
@@ -405,6 +492,11 @@ module Kambi::Controllers
             end
             render :login
         end   
+        
+        # GET /sessions/new
+        def new
+            render :edit_post
+        end
 
         # DELETE /sessions
         def delete
@@ -424,13 +516,14 @@ module Kambi::Controllers
                 h1.header {
                     background-color: #e5e5e5;
                     margin: 0; padding: 10px;
+                    border-top: 8px solid #990000;
                 }
                 div.content {
                     padding: 10px;
                 }
                 div.post {
                     padding: 1em;
-                    border-bottom: 8px solid #444;
+                    border-bottom: 8px solid #990000;
                     padding-right:2%;
                     padding-bottom:2%;
                     font-family:georgia,"lucida bright","times new roman",serif;
@@ -449,7 +542,7 @@ module Kambi::Controllers
                 div.tags {
                     font-size: 80%;
                     color: #990000;
-                    border-left: 1px dotted #444;
+                    border-left: 1px solid #444;
                     padding-left:1em;
                 }
                 a{
@@ -467,14 +560,30 @@ module Kambi::Controllers
                 }
                 div.comments{
                     padding: 1em;
-                    border: 1px solid black;
+                    border-left: 4px solid #444;
                     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
                 }
                 div.comment{
                     padding: 1em;
                     margin-right: 4em;
-                    border-left: 1px dotted #444;
+                    border-left: 1px solid #444;
                 }
+                div.time{
+                    font-size:70%;
+                    color: #990000;
+                    border-left: 1px solid #444;
+                    padding-left:1em;
+                    font-family:georgia,"lucida bright","times new roman",serif;
+                    
+                }
+                div.cloud a:link, a:visited{
+                    border-bottom:none;
+                }
+                div.cloud a:hover{
+                    background:yellow;
+                    color:white
+                }
+
             }
         end
     end
@@ -497,6 +606,9 @@ module Kambi::Views
             body do
               h1.header { a 'Kambi', :href => R(Posts) }
               div.content do
+                if @state.user_id.blank?
+                  a('Login', :href => R(Sessions, 'new'))
+                end
                 self << yield
               end
             end
@@ -518,15 +630,32 @@ module Kambi::Views
                 end
               end
             end
-          
           end
-          p { a 'New Post', :href => R(Posts, 'new') }
-          
+          p do 
+            a('New Post', :href => R(Posts, 'new')); br
+            a('New Clip', :href => R(Clips, 'new')); br
+            a('New Tag', :href => R(Tags)); br
+          end
+          div.cloud do
+            all_tags = Kambi::Models::Tag.find(:all)
+            all_tags_items = Array.new(all_tags)
+            all_tags_taggables = all_tags_items.collect!{|t| t.taggables}
+            all_taggables = Array.new(all_tags_taggables)
+            tags_counts = all_taggables.collect!{|g| g.length}
+            maxtc = 0
+            mintc = 3
+            tags_counts.each{|c| maxtc = c if c > maxtc; mintc = c if c < mintc }
+            for c in all_tags
+              tag_index = all_tags.index(c).to_i
+              a( c.name, :href => R(Tags, c.id), :style => font_size_for_tag_cloud( tags_counts.fetch(tag_index), mintc, maxtc) )
+            end
+          end
         end
+    
     
         def login
           p { b @login }
-          p { a 'Continue', :href => R(Posts, 'new') }
+          p { a 'Continue', :href => R(Posts) }
         end
     
         def logout
@@ -580,7 +709,12 @@ module Kambi::Views
                   div.comment do
                     h1 c.username + ' says:'
                     p c.body
-                    p c.created_at
+                    div.time do
+                      p c.pretty_time
+                    end
+                    unless @state.user_id.blank?
+                      a('Delete', :href => R(Comments, c.id, 'delete'))
+                    end
                   end
                 end
                 form :action => R(Comments), :method => 'post' do
@@ -589,7 +723,7 @@ module Kambi::Views
                   label 'Comment', :for => 'post_body'; br
                   textarea :name => 'post_body' do; end; br
                   input :type => 'hidden', :name => 'post_id', :value => @post.id
-                  input :type => 'submit'
+                  input :type => 'submit', :value => 'Submit'
               end
             end
           end
@@ -623,7 +757,7 @@ module Kambi::Views
           form :action => R(Tags), :method => 'post' do
             label 'New tag', :for => 'tag_name'; br
             input :name => 'tag_name', :type => 'text'; br
-            input :type => 'submit'
+            input :type => 'submit', :value => 'Submit'
           end
         end
         
@@ -662,10 +796,14 @@ module Kambi::Views
             end
           end
           p post.body
-          p do
-            a("Edit Post", :href => R(Posts, post.id, 'edit'))
+          div.time do
+            p post.pretty_time
           end
-          p { a 'Add Clip', :href => R(Clips, 'new')}
+          unless @state.user_id.blank?
+            p do
+              a("Edit Post", :href => R(Posts, post.id, 'edit'))
+            end
+          end
         end
         
         def _clip(clip)
@@ -680,8 +818,10 @@ module Kambi::Views
             end
           end
           p clip.body
-          p do
-            a("Edit Clip", :href => R(Clips, clip.id, 'edit'))
+          unless @state.user_id.blank?
+            p do
+              a("Edit Clip", :href => R(Clips, clip.id, 'edit'))
+            end
           end
         end
       
@@ -693,6 +833,7 @@ module Kambi::Views
             span " | "
             button(:type => 'submit') {'Logout'}
           end
+          a('Delete Post', :href => R(Posts, post.id, 'delete'))
           end
           form({:method => 'post'}.merge(opts)) do
             label 'Title', :for => 'post_title'; br
@@ -717,8 +858,19 @@ module Kambi::Views
                 end
               end
             end
+            if @all_clips
+                for clip in @all_clips
+                  if @these_posts_clips.include?(clip)
+                    input :type => 'checkbox', :name => clip.nickname, :value => clip, :checked => 'true'
+                    label clip.nickname, :for => clip.nickname; br
+                  else
+                    input :type => 'checkbox', :name => clip.nickname, :value => clip
+                    label clip.nickname, :for => clip.nickname; br
+                  end
+                end
+            end
             input :type => 'hidden', :name => 'post_id', :value => post.id
-            input :type => 'submit'
+            input :type => 'submit', :value => 'Submit'
           end 
         end
         
@@ -729,6 +881,7 @@ module Kambi::Views
             span " | "
             button(:type => 'submit') {'Logout'}
           end
+          a('Delete Clip', :href => R(Clips, clip.id, 'delete'))
           end
           form({:method => 'post'}.merge(opts)) do
             label 'Nickname', :for => 'clip_nickname'; br
@@ -766,7 +919,7 @@ module Kambi::Views
               end
             end
             input :type => 'hidden', :name => 'clip_id', :value => clip.id
-            input :type => 'submit'
+            input :type => 'submit', :value => 'Submit'
           end
         end 
     end
