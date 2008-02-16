@@ -171,7 +171,7 @@ module Kambi::Helpers
    #
    # options
    maxf = options.delete( :max_font_size ) || 24
-   minf = options.delete( :min_font_size ) || 11
+   minf = options.delete( :min_font_size ) || 10
    maxc = options.delete( :max_color ) || [ 0, 0, 0 ]
    minc = options.delete( :min_color ) || [ 156, 156, 156 ]
    hide_sizes = options.delete( :hide_sizes )
@@ -255,7 +255,6 @@ module Kambi::Controllers
               _error("Unauthorized", 401)
             end
         end
-        
         
         # GET /pages/1
         # GET /pages/1.xml
@@ -382,8 +381,7 @@ module Kambi::Controllers
             @pages = Page.find :all
             render :index
         end
-        
-        
+              
         # GET /posts/new
         def new
             unless @state.user_id.blank?
@@ -442,8 +440,7 @@ module Kambi::Controllers
                 @clip = Clip.new
             end
             render :add_clip
-        end
-        
+        end     
         
         # DELETE /clips/1
         def delete(clip_id)
@@ -458,8 +455,7 @@ module Kambi::Controllers
               _error("Unauthorized", 401)
             end
         end
-        
-        
+                
         # GET /clips/1/edit
         def edit(clip_id) 
             unless @state.user_id.blank?
@@ -695,6 +691,7 @@ module Kambi::Controllers
                 }
                 div.cloud a:hover{
                     background:yellow;
+                    border-bottom: 1px solid yellow;
                     color:white
                 }
             }
@@ -762,8 +759,7 @@ module Kambi::Views
           div.cloud do
             _cloud
           end
-        end
-    
+        end   
     
         def login
           p { b @login }
@@ -824,38 +820,37 @@ module Kambi::Views
         end
         
         def view
-            div.post do
-              _post(@post)
-            end
-              for clip in @clips
-                div.clip do
-                  _clip(clip)
-                end
+          div.post do
+            _post(@post)
+          end
+            for clip in @clips
+              div.clip do
+                _clip(clip)
               end
-              div.comments do
-                p "Comments:"
-                for c in @comments
-                  div.comment do
-                    h1 c.username + ' says:'
-                    p c.body
-                    div.time do
-                      p c.pretty_time
-                    end
-                    unless @state.user_id.blank?
-                      a('Delete', :href => R(Comments, c.id, 'delete'))
-                    end
+            end
+            div.comments do
+              p "Comments:"
+              for c in @comments
+                div.comment do
+                  h1 c.username + ' says:'
+                  p c.body
+                  div.time do
+                    p c.pretty_time
+                  end
+                  unless @state.user_id.blank?
+                    a('Delete', :href => R(Comments, c.id, 'delete'))
                   end
                 end
-                form :action => R(Comments), :method => 'post' do
-                  label 'Name', :for => 'post_username'; br
-                  input :name => 'post_username', :type => 'text'; br
-                  label 'Comment', :for => 'post_body'; br
-                  textarea :name => 'post_body' do; end; br
-                  input :type => 'hidden', :name => 'post_id', :value => @post.id
-                  input :type => 'submit', :value => 'Submit'
               end
+              form :action => R(Comments), :method => 'post' do
+                label 'Name', :for => 'post_username'; br
+                input :name => 'post_username', :type => 'text'; br
+                label 'Comment', :for => 'post_body'; br
+                textarea :name => 'post_body' do; end; br
+                input :type => 'hidden', :name => 'post_id', :value => @post.id
+                input :type => 'submit', :value => 'Submit'
             end
-          #end
+          end
         end
         
         def view_page
@@ -1039,15 +1034,15 @@ module Kambi::Views
               end
             end
             if @all_clips
-                for clip in @all_clips
-                  if @these_pages_clips.include?(clip)
-                    input :type => 'checkbox', :name => clip.nickname, :value => clip, :checked => 'true'
-                    label clip.nickname, :for => clip.nickname; br
-                  else
-                    input :type => 'checkbox', :name => clip.nickname, :value => clip
-                    label clip.nickname, :for => clip.nickname; br
-                  end
+              for clip in @all_clips
+                if @these_pages_clips.include?(clip)
+                  input :type => 'checkbox', :name => clip.nickname, :value => clip, :checked => 'true'
+                  label clip.nickname, :for => clip.nickname; br
+                else
+                  input :type => 'checkbox', :name => clip.nickname, :value => clip
+                  label clip.nickname, :for => clip.nickname; br
                 end
+              end
             end
             input :type => 'hidden', :name => 'page_id', :value => page.id
             input :type => 'submit', :value => 'Submit'
@@ -1136,7 +1131,6 @@ module Kambi::Views
                 end
               end
             end
-           
             if @all_posts
               for post in @all_posts
                 if !@these_clips_posts.nil? and @these_clips_posts.include?(post)
@@ -1153,6 +1147,7 @@ module Kambi::Views
           end
         end 
     end
+
     default_format :HTML
 
     module XML
@@ -1170,7 +1165,6 @@ module Kambi::Views
     end
 end
  
-
 # 
 # if __FILE__ == $0
 #   require 'mongrel/camping'
