@@ -254,11 +254,13 @@ module Kambi::Controllers
                 @post = Post.find post_id
                 all_clips = Models::Clip.find :all
                 @post.clips.each{|d| @post.references.delete(Reference.find(:all, :conditions => ["clip_id = #{d.id}"]))}
-                all_clips.each{|c| if input.include?(c.nickname); @post.references<<(Reference.create :post_id => @post.id, :clip_id => c.id); end; }
+                all_clips.each{|c| if input.include?(c.nickname); 
+                    @post.references<<(Reference.create :post_id => @post.id, :clip_id => c.id); end; }
                 
                 all_tags = Models::Tag.find :all
                 @post.tags.each{|d| @post.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@post.id}"] )) }
-                all_tags.each{|a| if input.include?(a.name); @post.taggings<<(Tagging.create( :taggable_id => @post.id, :taggable_type => "Post", :tag_id => a.id)); end; }
+                all_tags.each{|a| if input.include?(a.name); 
+                    @post.taggings<<(Tagging.create( :taggable_id => @post.id, :taggable_type => "Post", :tag_id => a.id)); end; }
                 @post.update_attributes :title => input.post_title, :body => input.post_body, :nickname => input.post_nickname
                 redirect R(@post)
             else
@@ -323,11 +325,10 @@ module Kambi::Controllers
     class Clips < REST 'clips'
         # POST /clips
         def create
-            clip = Clip.create(:nickname => input.clip_nickname,
-                        :url => input.clip_url,
-                       :body => input.clip_body)
+            clip = Clip.create(:nickname => input.clip_nickname, :url => input.clip_url, :body => input.clip_body)
             all_posts = Models::Post.find :all
-            all_posts.each{|p| if input.include?(p.title); clip.references<<(Reference.create :post_id => p.id, :clip_id => clip.id); end; }
+            all_posts.each{|p| if input.include?(p.title); 
+                clip.references<<(Reference.create :post_id => p.id, :clip_id => clip.id); end; }
             redirect R(Posts)
         end
         
@@ -385,13 +386,16 @@ module Kambi::Controllers
                 all_tags = Models::Tag.find :all
                 clip.update_attributes :url => input.clip_url, :body => input.clip_body, :nickname => input.clip_nickname
                 these_tags = clip.tags
-                these_tags.each{|d| unless input.include?(d.name); clip.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{clip.id}"] )); end; }
+                these_tags.each{|d| unless input.include?(d.name); 
+                    clip.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{clip.id}"] )); end; }
                 not_these_tags = all_tags - these_tags
-                not_these_tags.each{|a| if input.include?(a.name); clip.taggings.push(Tagging.create(:taggable_id => clip.id, :taggable_type => "Clip", :tag_id => a.id)); end; }
+                not_these_tags.each{|a| if input.include?(a.name); 
+                    clip.taggings.push(Tagging.create(:taggable_id => clip.id, :taggable_type => "Clip", :tag_id => a.id)); end; }
                 all_posts = Models::Post.find :all
                 these_clips_posts = clip.posts
                 these_clips_posts.each{|d|  clip.references.delete(Reference.find(:all, :conditions => ['post_id =?', d.id])) }
-                all_posts.each{|p| if input.include?(p.title); clip.references<<(Reference.create :post_id => p.id, :clip_id => clip.id); end; }
+                all_posts.each{|p| if input.include?(p.title); 
+                    clip.references<<(Reference.create :post_id => p.id, :clip_id => clip.id); end; }
                 redirect R(Posts)
             else
               _error("Unauthorized", 401)
@@ -422,7 +426,8 @@ module Kambi::Controllers
             @taggables = @tag.taggables
             @posts = Array.new
             @clips = Array.new
-            @taggables.each{|t|  if t.instance_of?(Kambi::Models::Post); @posts<<t; elsif t.instance_of?(Kambi::Models::Clip);  @clips<<t;  end; }
+            @taggables.each{|t|  if t.instance_of?(Kambi::Models::Post); @posts<<t; 
+                elsif t.instance_of?(Kambi::Models::Clip);  @clips<<t;  end; }
             render :view_tags
         end
         
@@ -475,9 +480,7 @@ module Kambi::Controllers
             else
               _error("Unauthorized", 401)
             end
-        end
-        
-        
+        end     
     end
     
     class Sessions < REST 'sessions'
@@ -540,6 +543,10 @@ module Kambi::Controllers
                     text-align:justify;
                     float:right;
                     clear:right;
+                    margin-right:20%;
+                    line-height:1.3em;
+                    word-spacing:0.25em;
+                    font-size:90%;
                 }
                 div.tags {
                     font-size: 80%;
@@ -562,8 +569,11 @@ module Kambi::Controllers
                 }
                 div.comments{
                     padding: 1em;
+                    margin-top: 1em;
                     border-left: 4px solid #444;
                     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+                    float:left;
+                    clear:both;
                 }
                 div.comment{
                     padding: 1em;
@@ -636,9 +646,11 @@ module Kambi::Views
             end
           end
           p do 
-            a('New Post', :href => R(Posts, 'new')); br
-            a('New Clip', :href => R(Clips, 'new')); br
-            a('New Tag', :href => R(Tags)); br
+            unless @state.user_id.blank?
+              a('New Post', :href => R(Posts, 'new')); br
+              a('New Clip', :href => R(Clips, 'new')); br
+              a('New Tag', :href => R(Tags)); br
+            end
           end
           div.cloud do
             _cloud
@@ -691,6 +703,7 @@ module Kambi::Views
         def view
             div.post do
               _post(@post)
+            end
               for clip in @clips
                 div.clip do
                   _clip(clip)
@@ -719,7 +732,7 @@ module Kambi::Views
                   input :type => 'submit', :value => 'Submit'
               end
             end
-          end
+          #end
         end
         
         def view_tags
