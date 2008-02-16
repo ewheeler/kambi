@@ -10,7 +10,7 @@
 #
 # Tag cloud courtesy of: http://whomwah.com/2006/07/06/another-tag-cloud-script-for-ruby-on-rails/
 
-# TODO: static pages, author(id, first, last, bio, photo_url, url, org, org_url), authorships(id, post_id, author_id), photo/file uploads?
+# TODO: author(id, first, last, bio, photo_url, url, org, org_url), authorships(id, post_id, author_id), photo/file uploads?
 require 'rubygems'
 
 gem 'camping', '~> 1.5'
@@ -36,6 +36,15 @@ module Kambi
 end
 
 module Kambi::Models
+    class Page < Base
+      has_many :references, :foreign_key => "page_id"
+      has_many :clips, :through => :references
+      validates_presence_of :title, :nickname
+      validates_uniqueness_of :nickname
+      has_many :taggings, :as => :taggable
+      has_many :tags, :through => :taggings
+    end
+      
     class Post < Base
       has_many :comments, :order => 'created_at ASC'
       has_many :references, :foreign_key => "post_id"
@@ -53,6 +62,7 @@ module Kambi::Models
     class Clip < Base
       has_many :references, :foreign_key => "clip_id"
       has_many :posts, :through => :references#, :source => :post
+      has_many :pages, :through => :references
       validates_presence_of :url, :nickname
       validates_uniqueness_of :nickname
       has_many :taggings, :as => :taggable
@@ -62,6 +72,7 @@ module Kambi::Models
     class Reference < Base
       belongs_to :clip, :class_name => "Clip"
       belongs_to :post, :class_name => "Post"
+      belongs_to :page, :class_name => "Page"
     end
   
     class Comment < Base
@@ -79,6 +90,7 @@ module Kambi::Models
       belongs_to :taggable, :polymorphic => true
       belongs_to :clip, :class_name => "Clip", :foreign_key => "taggable_id"
       belongs_to :post, :class_name => "Post", :foreign_key => "taggable_id"
+      belongs_to :page, :class_name => "Page", :foreign_key => "taggable_id"
     end
 
     class Tag < Base
@@ -86,6 +98,7 @@ module Kambi::Models
       has_many :taggings
       has_many :clips, :through => :taggings, :source => :clip, :conditions => "kambi_taggings.taggable_type = 'Clip'"
       has_many :posts, :through => :taggings, :source => :post, :conditions => "kambi_taggings.taggable_type = 'Post'"
+      has_many :pages, :through => :taggings, :source => :page, :conditions => "kambi_taggings.taggable_type = 'Page'"
       
       def taggables
         self.taggings.collect{|t| t.taggable}
@@ -94,12 +107,17 @@ module Kambi::Models
     
     class User < Base; end
 
-    class CreateTheBasics < V 1.5
+    class CreateTheBasics < V 1.6
       def self.up
         create_table :kambi_users, :force => true do |table|
           table.string :username, :password
         end
         User.create :username => 'camper', :password => 'mepemepe'
+        
+        create_table :kambi_pages, :force => true do |table|
+          table.string :title, :nickname
+          table.text :body
+        end
         
         create_table :kambi_posts, :force => true do |table|
           table.integer :user_id
@@ -117,6 +135,7 @@ module Kambi::Models
         create_table :kambi_references, :force => true do |table|
           table.integer :clip_id
           table.integer :post_id
+          table.integer :page_id
         end
         
         create_table :kambi_comments, :force => true do |table|
@@ -225,6 +244,80 @@ class Mab
 end
 
 module Kambi::Controllers
+    class Pages < REST 'pages'      
+
+        # POST /pages
+        def create
+            unless @state.user_id.blank?
+                page = Page.create :title => input.page_title, :body => input.page_body, :nickname => input.page_nickname
+                redirect R(Pages)
+            else
+              _error("Unauthorized", 401)
+            end
+        end
+        
+        
+        # GET /pages/1
+        # GET /pages/1.xml
+        def read(page_id) 
+            @page = Page.find page_id
+            clips_pages = Reference.find(:all, :conditions => ['page_id =?', @page.id])
+            @clips = @page.clips
+            render :view_page
+        end
+        
+        # PUT /pages/1
+        def update(page_id)
+            unless @state.user_id.blank?
+                @page = Page.find page_id
+                all_clips = Models::Clip.find :all
+                @page.clips.each{|d| @page.references.delete(Reference.find(:all, :conditions => ["clip_id = #{d.id}"]))}
+                all_clips.each{|c| if input.include?(c.nickname); 
+                    @page.references<<(Reference.create :page_id => @page.id, :clip_id => c.id); end; }
+                
+                all_tags = Models::Tag.find :all
+                @page.tags.each{|d| @page.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@page.id}"] )) }
+                all_tags.each{|a| if input.include?(a.name); 
+                    @page.taggings<<(Tagging.create( :taggable_id => @page.id, :taggable_type => "Page", :tag_id => a.id)); end; }
+                @page.update_attributes :title => input.page_title, :body => input.page_body, :nickname => input.page_nickname
+                redirect R(@page)
+            else
+              _error("Unauthorized", 401)
+            end
+        end
+        
+        # GET /pages
+        # GET /pages.xml
+        def list
+            @pages = Page.find :all
+            @posts = Post.find :all
+            render :index
+        end
+        
+        # GET /pages/new
+        def new
+            unless @state.user_id.blank?
+                @user = User.find @state.user_id
+                @page = Page.new
+            end
+            render :add_page
+        end
+
+        # GET /pages/1/edit
+        def edit(page_id) 
+            unless @state.user_id.blank?
+                @user = User.find @state.user_id
+            end
+            @page = Page.find page_id
+            @all_clips = Models::Clip.find :all
+            @these_pages_clips = @page.clips
+            @all_pages_tags = Models::Tag.find :all
+            @these_pages_tags = @page.tags
+            render :edit_page
+        end
+        
+    end
+    
     class Posts < REST 'posts'      
 
         # POST /posts
@@ -286,6 +379,7 @@ module Kambi::Controllers
         # GET /posts.xml
         def list
             @posts = Post.find :all
+            @pages = Page.find :all
             render :index
         end
         
@@ -424,10 +518,10 @@ module Kambi::Controllers
             @tag = Tag.find tag_id
             @tags = Tag.find :all
             @taggables = @tag.taggables
-            @posts = Array.new
-            @clips = Array.new
+            @posts = Array.new; @clips = Array.new; @pages = Array.new
             @taggables.each{|t|  if t.instance_of?(Kambi::Models::Post); @posts<<t; 
-                elsif t.instance_of?(Kambi::Models::Clip);  @clips<<t;  end; }
+                elsif t.instance_of?(Kambi::Models::Clip);  @clips<<t;
+                elsif t.instance_of?(Kambi::Models::Page); @pages<<t;  end; }
             render :view_tags
         end
         
@@ -526,6 +620,15 @@ module Kambi::Controllers
                 }
                 div.break{
                     clear:both;
+                }
+                div.page{
+                    font-family:georgia,"lucida bright","times new roman",serif;
+                    width:50%;
+                    float:left;
+                    text-align:justify;
+                    word-spacing:0.25em;
+                    border-bottom: 8px solid #990000;
+                    line-height:1.3em;
                 }
                 div.post {
                     font-family:georgia,"lucida bright","times new roman",serif;
@@ -629,6 +732,9 @@ module Kambi::Views
           if @posts.empty?
             p 'No posts found.'
           else
+            for page in @pages
+              a(page.title, :href => R(Pages, page.id))
+            end
             for post in @posts
               div.post do
                   _post(post)
@@ -647,6 +753,7 @@ module Kambi::Views
           end
           p do 
             unless @state.user_id.blank?
+              a('New Page', :href => R(Pages, 'new')); br
               a('New Post', :href => R(Posts, 'new')); br
               a('New Clip', :href => R(Clips, 'new')); br
               a('New Tag', :href => R(Tags)); br
@@ -667,6 +774,14 @@ module Kambi::Views
           p "You have been logged out."
           p { a 'Continue', :href => R(Posts) }
         end
+        
+        def add_page
+          if @user
+            _page_form(@page, :action => R(Pages))
+          else
+            _login
+          end
+        end
     
         def add_post
           if @user
@@ -679,6 +794,14 @@ module Kambi::Views
         def add_clip
           if @user
             _clip_form(@clip, :action => R(Clips))
+          else
+            _login
+          end
+        end
+        
+        def edit_page
+          if @user
+            _page_form(@page, :action => R(@page), :method => :put)
           else
             _login
           end
@@ -735,6 +858,17 @@ module Kambi::Views
           #end
         end
         
+        def view_page
+          div.page do
+            _page(@page)
+          end
+          for clip in @clips
+            div.clip do
+              _clip(clip)
+            end
+          end
+        end
+        
         def view_tags
           div.cloud do
             _cloud
@@ -753,6 +887,14 @@ module Kambi::Views
                 p "Clips tagged with " + @tag.name + ":"
                 for clip in @clips
                   a(clip.nickname, :href => R(Clips, clip.id))   
+                end
+              end
+            end
+            unless @pages.empty?
+              div.tags do
+                p "Pages tagged with " + @tag.name + ":"
+                for page in @pages
+                  a(page.nickname, :href => R(Pages, page.id))   
                 end
               end
             end
@@ -799,6 +941,27 @@ module Kambi::Views
           end
         end
         
+        def _page(page)
+          h1 do
+            a(page.title, :href => R(Pages, page.id))
+          end
+          ptags = page.tags if !page.tags.nil?
+          unless ptags.empty?
+            div.tags do
+              p "tagged with :"
+              for tag in ptags
+                a(tag.name, :href => R(Tags, tag.id))
+              end
+            end
+          end
+          p page.body
+          unless @state.user_id.blank?
+            p do
+              a("Edit Page", :href => R(Pages, page.id, 'edit'))
+            end
+          end
+        end
+        
         def _post(post)
           h1 do
             a(post.title, :href => R(Posts, post.id))
@@ -840,6 +1003,55 @@ module Kambi::Views
               a("Edit Clip", :href => R(Clips, clip.id, 'edit'))
             end
           end
+        end
+        
+        
+        def _page_form(page, opts)
+          form(:action => R(Sessions), :method => 'delete') do
+          p do 
+            span "You are logged in as #{@user.username}"
+            span " | "
+            button(:type => 'submit') {'Logout'}
+          end
+          a('Delete Page', :href => R(Pages, page.id, 'delete'))
+          end
+          form({:method => 'post'}.merge(opts)) do
+            label 'Title', :for => 'page_title'; br
+            input :name => 'page_title', :type => 'text', 
+                  :value => page.title; br
+                  
+            label 'Nickname', :for => 'page_nickname'; br
+            input :name => 'page_nickname', :type => 'text',
+                  :value => page.nickname; br
+    
+            label 'Body', :for => 'page_body'; br
+            textarea page.body, :name => 'page_body'; br
+             
+            if @all_pages_tags            
+              for tag in @all_pages_tags
+                if @these_pages_tags.include?(tag)
+                  input :type => 'checkbox', :name => tag.name, :value => tag.id, :checked => 'true'
+                  label tag.name, :for => tag.name; br
+                else
+                  input :type => 'checkbox', :name => tag.name, :value => tag.id
+                  label tag.name, :for => tag.name; br
+                end
+              end
+            end
+            if @all_clips
+                for clip in @all_clips
+                  if @these_pages_clips.include?(clip)
+                    input :type => 'checkbox', :name => clip.nickname, :value => clip, :checked => 'true'
+                    label clip.nickname, :for => clip.nickname; br
+                  else
+                    input :type => 'checkbox', :name => clip.nickname, :value => clip
+                    label clip.nickname, :for => clip.nickname; br
+                  end
+                end
+            end
+            input :type => 'hidden', :name => 'page_id', :value => page.id
+            input :type => 'submit', :value => 'Submit'
+          end 
         end
       
     
@@ -890,6 +1102,7 @@ module Kambi::Views
             input :type => 'submit', :value => 'Submit'
           end 
         end
+        
         
         def _clip_form(clip, opts)
           form(:action => R(Sessions), :method => 'delete') do
