@@ -53,6 +53,8 @@ module Kambi::Models
       validates_uniqueness_of :nickname
       has_many :taggings, :as => :taggable
       has_many :tags, :through => :taggings
+      has_many :authorships, :foreign_key => "post_id"
+      has_many :authors, :through => :authorships
       
       def pretty_time
         self.created_at.strftime("%A %B %d, %Y at %I %p")
@@ -91,6 +93,7 @@ module Kambi::Models
       belongs_to :clip, :class_name => "Clip", :foreign_key => "taggable_id"
       belongs_to :post, :class_name => "Post", :foreign_key => "taggable_id"
       belongs_to :page, :class_name => "Page", :foreign_key => "taggable_id"
+      belongs_to :author, :class_name => "Author", :foreign_key => "taggable_id"
     end
 
     class Tag < Base
@@ -99,16 +102,40 @@ module Kambi::Models
       has_many :clips, :through => :taggings, :source => :clip, :conditions => "kambi_taggings.taggable_type = 'Clip'"
       has_many :posts, :through => :taggings, :source => :post, :conditions => "kambi_taggings.taggable_type = 'Post'"
       has_many :pages, :through => :taggings, :source => :page, :conditions => "kambi_taggings.taggable_type = 'Page'"
+      has_many :authors, :through => :taggings, :source => :author, :conditions => "kambi_taggings.taggable_type = 'Author'"
       
       def taggables
         self.taggings.collect{|t| t.taggable}
       end  
     end
     
+    class Author < Base
+      validates_presence_of :first, :last, :bio
+      has_many :authorships, :foreign_key => "author_id"
+      has_many :posts, :through => :authorships#, :source => :post
+      has_many :taggings, :as => :taggable
+      has_many :tags, :through => :taggings
+    end
+    
+    class Authorship < Base
+      belongs_to :author, :class_name => "Author"
+      belongs_to :post, :foreign_key => "post_id"#:class_name => "Post",
+    end
+    
     class User < Base; end
 
-    class CreateTheBasics < V 1.6
+    class CreateTheBasics < V 1.7
       def self.up
+        create_table :kambi_authors, :force => true do |table|
+          table.string :first, :last, :url, :photo_url, :org, :org_url
+          table.text :bio
+        end
+        
+        create_table :kambi_authorships, :force => true do |table|
+          table.integer :author_id
+          table.integer :post_id
+        end
+        
         create_table :kambi_users, :force => true do |table|
           table.string :username, :password
         end
@@ -337,6 +364,7 @@ module Kambi::Controllers
             @comments = @post.comments
             clips_posts = Reference.find(:all, :conditions => ['post_id =?', @post.id])
             @clips = @post.clips
+            @authors = @post.authors
             render :view
         end
 
@@ -514,10 +542,11 @@ module Kambi::Controllers
             @tag = Tag.find tag_id
             @tags = Tag.find :all
             @taggables = @tag.taggables
-            @posts = Array.new; @clips = Array.new; @pages = Array.new
+            @posts = Array.new; @clips = Array.new; @pages = Array.new; @authors = Array.new;
             @taggables.each{|t|  if t.instance_of?(Kambi::Models::Post); @posts<<t; 
                 elsif t.instance_of?(Kambi::Models::Clip);  @clips<<t;
-                elsif t.instance_of?(Kambi::Models::Page); @pages<<t;  end; }
+                elsif t.instance_of?(Kambi::Models::Page); @pages<<t;  
+                elsif t.instance_of?(Kambi::Models::Author); @authors<<t; end; }
             render :view_tags
         end
         
@@ -571,6 +600,95 @@ module Kambi::Controllers
               _error("Unauthorized", 401)
             end
         end     
+    end
+    
+    class Authors < REST 'authors'
+      # POST /authors
+      def create
+        Models::Author.create(:first => input.author_first, :last => input.author_last,
+                    :url => input.author_url, :photo_url => input.author_photo_url,
+                    :org => input.author_org, :org_url => input.author_org_url,
+                    :bio => input.author_bio)
+        redirect R(Authors, input.author_id)
+      end
+      
+      # GET /authors
+      # GET /authors.xml
+      def list
+          @authors = Author.find :all
+          render :view_authors
+      end
+      
+      # GET /authors/1
+      # GET /authors/1.xml
+      def read(author_id) 
+          @author = Author.find author_id
+          @posts = @author.posts
+          render :view_author
+      end
+      
+      # DELETE /authors/1
+      def delete(author_id)
+          unless @state.user_id.blank?
+              @author = Models::Author.find author_id
+              if @author.destroy
+                redirect R(Posts)
+              else
+                _error("Unable to delete author #{@author.id}", 500)
+              end
+          else
+            _error("Unauthorized", 401)
+          end
+      end
+      
+      # GET /authors/new
+      def new
+          unless @state.user_id.blank?
+              @user = User.find @state.user_id
+              @author = Models::Author.new
+          end
+          render :add_author
+      end
+      
+      # GET /authors/1/edit
+      def edit(author_id) 
+          unless @state.user_id.blank?
+              @user = User.find @state.user_id
+          end
+          @author = Models::Author.find author_id
+          @all_posts = Models::Post.find :all        
+          @these_authors_posts = @author.posts
+          @all_tags = Models::Tag.find :all
+          @these_authors_tags = @author.tags
+          render :edit_author
+      end
+      
+      # PUT /authors/1
+      def update(author_id)
+          unless @state.user_id.blank?
+              author = Author.find author_id
+              all_tags = Models::Tag.find :all
+              author.update_attributes :first => input.author_first, :last => input.author_last,
+                          :url => input.author_url, :photo_url => input.author_photo_url,
+                          :org => input.author_org, :org_url => input.author_org_url,
+                          :bio => input.author_bio
+              these_tags = author.tags
+              these_tags.each{|d| unless input.include?(d.name); 
+                  author.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{author.id}"] )); end; }
+              not_these_tags = all_tags - these_tags
+              not_these_tags.each{|a| if input.include?(a.name); 
+                  author.taggings.push(Tagging.create(:taggable_id => author.id, :taggable_type => "Author", :tag_id => a.id)); end; }
+              all_posts = Models::Post.find :all
+              these_authors_posts = author.posts
+              these_authors_posts.each{|d|  author.authorships.delete(Authorship.find(:all, :conditions => ['post_id =?', d.id])) }
+              all_posts.each{|p| if input.include?(p.title); 
+                  author.authorships<<(Authorship.create :post_id => p.id, :author_id => author.id); end; }
+              redirect R(Authors)
+          else
+            _error("Unauthorized", 401)
+          end
+      end
+      
     end
     
     class Sessions < REST 'sessions'
@@ -653,6 +771,11 @@ module Kambi::Controllers
                     border-left: 1px solid #444;
                     padding-left:1em;
                 }
+                div.tags a:hover{
+                    background:yellow;
+                    border-bottom: 1px solid yellow;
+                    color:black;
+                }
                 a{
                     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
                 }
@@ -692,7 +815,6 @@ module Kambi::Controllers
                 div.cloud a:hover{
                     background:yellow;
                     border-bottom: 1px solid yellow;
-                    color:white
                 }
             }
         end
@@ -771,6 +893,14 @@ module Kambi::Views
           p { a 'Continue', :href => R(Posts) }
         end
         
+        def add_author
+          if @user
+            _author_form(@author, :action => R(Authors))
+          else
+            _login
+          end
+        end
+        
         def add_page
           if @user
             _page_form(@page, :action => R(Pages))
@@ -790,6 +920,14 @@ module Kambi::Views
         def add_clip
           if @user
             _clip_form(@clip, :action => R(Clips))
+          else
+            _login
+          end
+        end
+        
+        def edit_author
+          if @user
+            _author_form(@author, :action => R(@author), :method => :put)
           else
             _login
           end
@@ -853,6 +991,26 @@ module Kambi::Views
           end
         end
         
+        def view_authors
+          div.author do
+            for author in @authors
+              _author(author)
+            end
+          end
+        end
+        
+        def view_author
+          div.author do
+            _author(author)
+          end
+          div.post do
+            for post in @posts
+              p "Essays: "
+              a(post.title, :href => R(Posts, post.id))
+            end
+          end
+        end
+        
         def view_page
           div.page do
             _page(@page)
@@ -890,6 +1048,15 @@ module Kambi::Views
                 p "Pages tagged with " + @tag.name + ":"
                 for page in @pages
                   a(page.nickname, :href => R(Pages, page.id))   
+                end
+              end
+            end
+            unless @authors.empty?
+              div.tags do
+                p "Authors tagged with " + @tag.name + ":"
+                for author in @authors
+                  name = author.first + " " + author.last
+                  a(name, :href => R(Authors, author.id))   
                 end
               end
             end
@@ -961,6 +1128,12 @@ module Kambi::Views
           h1 do
             a(post.title, :href => R(Posts, post.id))
           end
+          unless @authors.empty?
+            for author in @authors
+              name = "by " + author.first + " " + author.last
+              a(name, :href => R(Authors, author.id))
+            end
+          end
           ptags = post.tags if !post.tags.nil?
           unless ptags.empty?
             div.tags do
@@ -996,6 +1169,28 @@ module Kambi::Views
           unless @state.user_id.blank?
             p do
               a("Edit Clip", :href => R(Clips, clip.id, 'edit'))
+            end
+          end
+        end
+        
+        def _author(author)
+          name = author.first + " " + author.last
+          a(name, :href => author.url)
+          atags = author.tags if !author.tags.nil?
+          unless atags.empty?
+            div.tags do
+              p "tagged with :"
+              for tag in atags
+                a(tag.name, :href => R(Tags, tag.id))
+              end
+            end
+          end
+          a(author.photo_url, :href => author.photo_url)
+          a(author.org, :href => author.org_url)
+          p author.bio
+          unless @state.user_id.blank?
+            p do
+              a("Edit Author", :href => R(Authors, author.id, 'edit'))
             end
           end
         end
@@ -1146,6 +1341,72 @@ module Kambi::Views
             input :type => 'submit', :value => 'Submit'
           end
         end 
+        
+        def _author_form(author, opts)
+           form(:action => R(Sessions), :method => 'delete') do
+           p do 
+             span "You are logged in as #{@user.username}"
+             span " | "
+             button(:type => 'submit') {'Logout'}
+           end
+           a('Delete Author', :href => R(Authors, author.id, 'delete'))
+           end
+           form({:method => 'post'}.merge(opts)) do
+             label 'First Name', :for => 'author_first'; br
+             input :name => 'author_first', :type => 'text', 
+                   :value => author.first; br
+                   
+             label 'Last Name', :for => 'author_last'; br
+             input :name => 'author_last', :type => 'text', 
+                   :value => author.last; br
+
+             label 'Url', :for => 'author_url'; br
+             input :name => 'author_url', :type => 'text', 
+                   :value => author.url; br
+                   
+             label 'Photo Url', :for => 'author_photo_url'; br
+             input :name => 'author_photo_url', :type => 'text', 
+                   :value => author.photo_url; br
+                   
+             label 'Organisation', :for => 'author_org'; br
+             input :name => 'author_org', :type => 'text', 
+                   :value => author.org; br
+                   
+             label 'Organisation Url', :for => 'author_org_url'; br
+             input :name => 'author_org_url', :type => 'text', 
+                   :value => author.org_url; br
+
+             label 'Bio', :for => 'author_bio'; br
+             textarea author.bio, :name => 'author_bio'; br
+             
+             if @all_tags
+               for tag in @all_tags
+                 if @these_authors_tags.include?(tag)
+                   input :type => 'checkbox', :name => tag.name, :value => tag, :checked => 'true'
+                   label tag.name, :for => tag.name; br
+                 else
+                   input :type => 'checkbox', :name => tag.name, :value => tag
+                   label tag.name, :for => tag.name; br
+                 end
+               end
+             end
+             
+             if @all_posts
+               for post in @all_posts
+                 if !@these_authors_posts.nil? and @these_authors_posts.include?(post)
+                   input :type => 'checkbox', :name => post.title, :value => post, :checked => 'true'
+                   label post.title, :for => post.title; br
+                 else
+                   input :type => 'checkbox', :name => post.title, :value => post
+                   label post.title, :for => post.title; br
+                 end
+               end
+             end
+             input :type => 'hidden', :name => 'author_id', :value => author.id
+             input :type => 'submit', :value => 'Submit'
+           end
+         end
+        
     end
 
     default_format :HTML
