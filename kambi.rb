@@ -10,7 +10,7 @@
 #
 # Tag cloud courtesy of: http://whomwah.com/2006/07/06/another-tag-cloud-script-for-ruby-on-rails/
 
-# TODO: author(id, first, last, bio, photo_url, url, org, org_url), authorships(id, post_id, author_id), photo/file uploads?
+# TODO: photo/file uploads?
 require 'rubygems'
 
 gem 'camping', '~> 1.5'
