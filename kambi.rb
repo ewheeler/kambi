@@ -885,6 +885,8 @@ module Kambi::Views
               a('New Post', :href => R(Posts, 'new')); br
               a('New Clip', :href => R(Clips, 'new')); br
               a('New Tag', :href => R(Tags)); br
+              a('Authors', :href => R(Authors)); br
+              a('New Author', :href => R(Authors, 'new'))
             end
           end
           div.cloud do
@@ -1006,6 +1008,7 @@ module Kambi::Views
               _author(author)
             end
           end
+          a('New Author', :href => R(Authors, 'new'))
         end
         
         def view_author
@@ -1139,8 +1142,10 @@ module Kambi::Views
           end
           unless @authors.empty?
             for author in @authors
-              name = "by " + author.first + " " + author.last
-              a(name, :href => R(Authors, author.id))
+              name = author.first + " " + author.last
+              p do 
+                "by " +  a(name, :href => R(Authors, author.id))
+              end
             end
           end
           ptags = post.tags if !post.tags.nil?
@@ -1278,7 +1283,7 @@ module Kambi::Views
             textarea post.body, :name => 'post_body'; br
             
             if @all_authors
-              p "Written by:"        
+              p "Author(s):"        
               for author in @all_authors
                 name = author.first + " " + author.last
                 if @these_posts_authors.include?(author)
