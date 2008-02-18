@@ -372,6 +372,12 @@ module Kambi::Controllers
         def update(post_id)
             unless @state.user_id.blank?
                 @post = Post.find post_id
+                
+                all_authors = Models::Author.find :all
+                @post.authors.each{|d| @post.authorships.delete(Authorship.find(:all, :conditions => ["author_id = #{d.id} AND  post_id = #{@post.id}"] )) }
+                all_authors.each{|a| name = a.first + " " + a.last; if input.include?(name); 
+                    @post.authorships<<(Authorship.create( :post_id => @post.id, :author_id => a.id)); end; }
+                    
                 all_clips = Models::Clip.find :all
                 @post.clips.each{|d| @post.references.delete(Reference.find(:all, :conditions => ["clip_id = #{d.id}"]))}
                 all_clips.each{|c| if input.include?(c.nickname); 
@@ -429,6 +435,8 @@ module Kambi::Controllers
             @these_posts_clips = @post.clips
             @all_posts_tags = Models::Tag.find :all
             @these_posts_tags = @post.tags
+            @all_authors = Models::Author.find :all
+            @these_posts_authors = @post.authors
             render :edit_post
         end
         
@@ -856,6 +864,7 @@ module Kambi::Views
             end
             for post in @posts
               div.post do
+                  @authors = post.authors
                   _post(post)
                 end
                 clips = post.clips
@@ -1217,7 +1226,8 @@ module Kambi::Views
             label 'Body', :for => 'page_body'; br
             textarea page.body, :name => 'page_body'; br
              
-            if @all_pages_tags            
+            if @all_pages_tags
+              p "Tagged with:"  
               for tag in @all_pages_tags
                 if @these_pages_tags.include?(tag)
                   input :type => 'checkbox', :name => tag.name, :value => tag.id, :checked => 'true'
@@ -1229,6 +1239,7 @@ module Kambi::Views
               end
             end
             if @all_clips
+              p "References:"
               for clip in @all_clips
                 if @these_pages_clips.include?(clip)
                   input :type => 'checkbox', :name => clip.nickname, :value => clip, :checked => 'true'
@@ -1265,8 +1276,23 @@ module Kambi::Views
     
             label 'Body', :for => 'post_body'; br
             textarea post.body, :name => 'post_body'; br
+            
+            if @all_authors
+              p "Written by:"        
+              for author in @all_authors
+                name = author.first + " " + author.last
+                if @these_posts_authors.include?(author)
+                  input :type => 'checkbox', :name => name, :value => author.id, :checked => 'true'
+                  label name, :for => name; br
+                else
+                  input :type => 'checkbox', :name => name, :value => author.id
+                  label name, :for => name; br
+                end
+              end
+            end
              
-            if @all_posts_tags            
+            if @all_posts_tags
+              p "Tagged with:"        
               for tag in @all_posts_tags
                 if @these_posts_tags.include?(tag)
                   input :type => 'checkbox', :name => tag.name, :value => tag.id, :checked => 'true'
@@ -1278,15 +1304,16 @@ module Kambi::Views
               end
             end
             if @all_clips
-                for clip in @all_clips
-                  if @these_posts_clips.include?(clip)
-                    input :type => 'checkbox', :name => clip.nickname, :value => clip, :checked => 'true'
-                    label clip.nickname, :for => clip.nickname; br
-                  else
-                    input :type => 'checkbox', :name => clip.nickname, :value => clip
-                    label clip.nickname, :for => clip.nickname; br
-                  end
+              p "References:"
+              for clip in @all_clips
+                if @these_posts_clips.include?(clip)
+                  input :type => 'checkbox', :name => clip.nickname, :value => clip, :checked => 'true'
+                  label clip.nickname, :for => clip.nickname; br
+                else
+                  input :type => 'checkbox', :name => clip.nickname, :value => clip
+                  label clip.nickname, :for => clip.nickname; br
                 end
+              end
             end
             input :type => 'hidden', :name => 'post_id', :value => post.id
             input :type => 'submit', :value => 'Submit'
@@ -1316,6 +1343,7 @@ module Kambi::Views
             textarea clip.body, :name => 'clip_body'; br
             
             if @all_clips_tags
+              p "Tagged with:"
               for tag in @all_clips_tags
                 if @these_clips_tags.include?(tag)
                   input :type => 'checkbox', :name => tag.name, :value => tag, :checked => 'true'
@@ -1327,6 +1355,7 @@ module Kambi::Views
               end
             end
             if @all_posts
+              p "Referenced in:"
               for post in @all_posts
                 if !@these_clips_posts.nil? and @these_clips_posts.include?(post)
                   input :type => 'checkbox', :name => post.title, :value => post, :checked => 'true'
@@ -1380,6 +1409,7 @@ module Kambi::Views
              textarea author.bio, :name => 'author_bio'; br
              
              if @all_tags
+               p "Tagged with:"
                for tag in @all_tags
                  if @these_authors_tags.include?(tag)
                    input :type => 'checkbox', :name => tag.name, :value => tag, :checked => 'true'
@@ -1392,6 +1422,7 @@ module Kambi::Views
              end
              
              if @all_posts
+               p "Authorships:"
                for post in @all_posts
                  if !@these_authors_posts.nil? and @these_authors_posts.include?(post)
                    input :type => 'checkbox', :name => post.title, :value => post, :checked => 'true'
