@@ -1231,6 +1231,7 @@ module Kambi::Views
           a(author.photo_url, :href => author.photo_url)
           p "Organization:"
           a(author.org, :href => author.org_url)
+          p "Bio:"
           p author.bio
           unless @state.user_id.blank?
             p do
