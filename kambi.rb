@@ -1104,13 +1104,13 @@ module Kambi::Views
         def _cloud
           all_tags = Kambi::Models::Tag.find(:all)
           all_tags_items = Array.new(all_tags)
-          all_tags_taggables = all_tags_items.collect!{|t| t.taggables}
+          all_tags_taggables = all_tags_items.collect!{|t| t.taggables.compact}
           all_taggables = Array.new(all_tags_taggables)
           tags_counts = all_taggables.collect!{|g| g.length}
           maxtc = 0; mintc = 3
-          tags_counts.each{|c| maxtc = c if c > maxtc; mintc = c if c < mintc }
+          tags_counts.each{|c| maxtc = c if c > maxtc; mintc = c if c < mintc}
           for c in all_tags
-            tag_index = all_tags.index(c).to_i
+            tag_index = all_tags.index(c)#.to_i
             a( c.name, :href => R(Tags, c.id), :style => font_size_for_tag_cloud( tags_counts.fetch(tag_index), mintc, maxtc) )
           end
         end
