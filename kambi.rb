@@ -1001,8 +1001,8 @@ module Kambi::Views
             _author(author)
           end
           div.post do
+            p "Essays: "
             for post in @posts
-              p "Essays: "
               a(post.title, :href => R(Posts, post.id))
             end
           end
@@ -1026,7 +1026,7 @@ module Kambi::Views
           if @tag
             unless @posts.empty?
               div.tags do
-                p "Posts tagged with " + @tag.name + ":"
+                p "Posts tagged with " << @tag.name << ":"
                 for post in @posts
                   a(post.title, :href => R(Posts, post.id)) 
                 end
@@ -1034,7 +1034,7 @@ module Kambi::Views
             end
             unless @clips.empty?
               div.tags do
-                p "Clips tagged with " + @tag.name + ":"
+                p "Clips tagged with " << @tag.name << ":"
                 for clip in @clips
                   a(clip.nickname, :href => R(Clips, clip.id))   
                 end
@@ -1042,7 +1042,7 @@ module Kambi::Views
             end
             unless @pages.empty?
               div.tags do
-                p "Pages tagged with " + @tag.name + ":"
+                p "Pages tagged with " << @tag.name << ":"
                 for page in @pages
                   a(page.nickname, :href => R(Pages, page.id))   
                 end
@@ -1050,9 +1050,9 @@ module Kambi::Views
             end
             unless @authors.empty?
               div.tags do
-                p "Authors tagged with " + @tag.name + ":"
+                p "Authors tagged with " << @tag.name << ":"
                 for author in @authors
-                  name = author.first + " " + author.last
+                  name = author.first << " " << author.last
                   a(name, :href => R(Authors, author.id))   
                 end
               end
@@ -1124,10 +1124,14 @@ module Kambi::Views
             a(post.title, :href => R(Posts, post.id))
           end
           unless @authors.empty?
-            for author in @authors
-              name = author.first + " " + author.last
-              p do 
-                "by " +  a(name, :href => R(Authors, author.id))
+            step = 0
+            p do h4 "by"
+              for author in @authors
+                name = author.first << " " << author.last
+                  a(name, :href => R(Authors, author.id)) if step == 0
+                  h4 "and " unless step == 0
+                  a(name, :href => R(Authors, author.id)) unless step == 0
+                  step = step.next
               end
             end
           end
@@ -1171,7 +1175,7 @@ module Kambi::Views
         end
         
         def _author(author)
-          name = author.first + " " + author.last
+          name = author.first << " " << author.last
           a(name, :href => author.url)
           tags = author.tags if !author.tags.nil?
           unless tags.empty?
@@ -1264,7 +1268,7 @@ module Kambi::Views
             if @all_authors
               p "Author(s):"        
               for author in @all_authors
-                name = author.first + " " + author.last
+                name = author.first << " " << author.last
                 if @these_posts_authors.include?(author)
                   input :type => 'checkbox', :name => name, :value => author.id, :checked => 'true'
                   label name, :for => name; br
