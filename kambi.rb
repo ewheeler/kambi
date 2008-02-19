@@ -1248,7 +1248,7 @@ module Kambi::Views
             span " | "
             button(:type => 'submit') {'Logout'}
           end
-          a('Delete Page', :href => R(Pages, page.id, 'delete'))
+          a('Delete Page', :href => R(Pages, page.id, 'delete')) unless @these_pages_tags.nil?
           end
           form({:method => 'post'}.merge(opts)) do
             label 'Title', :for => 'page_title'; br
