@@ -344,7 +344,7 @@ module Kambi::Controllers
         def new
             unless @state.user_id.blank?
                 @user = User.find @state.user_id
-                @page = Page.new
+                @page = Page.new; @these_pages_tags = nil;
             end
             render :add_page
         end
@@ -435,7 +435,7 @@ module Kambi::Controllers
         def new
             unless @state.user_id.blank?
                 @user = User.find @state.user_id
-                @post = Post.new
+                @post = Post.new; @these_posts_tags = nil;
             end
             render :add_post
         end
@@ -670,7 +670,7 @@ module Kambi::Controllers
       def new
           unless @state.user_id.blank?
               @user = User.find @state.user_id
-              @author = Models::Author.new
+              @author = Models::Author.new; @these_authors_tags = nil;
           end
           render :add_author
       end
@@ -1297,7 +1297,7 @@ module Kambi::Views
             span " | "
             button(:type => 'submit') {'Logout'}
           end
-          a('Delete Post', :href => R(Posts, post.id, 'delete'))
+          a('Delete Post', :href => R(Posts, post.id, 'delete')) unless @these_posts_tags.nil?
           end
           form({:method => 'post'}.merge(opts)) do
             label 'Title', :for => 'post_title'; br
@@ -1360,7 +1360,7 @@ module Kambi::Views
             span " | "
             button(:type => 'submit') {'Logout'}
           end
-          a('Delete Clip', :href => R(Clips, clip.id, 'delete')) unless @these_clips_posts.nil?
+          a('Delete Clip', :href => R(Clips, clip.id, 'delete')) unless @these_clips_tags.nil?
           end
           form({:method => 'post'}.merge(opts)) do
             label 'Nickname', :for => 'clip_nickname'; br
@@ -1408,7 +1408,7 @@ module Kambi::Views
              span " | "
              button(:type => 'submit') {'Logout'}
            end
-           a('Delete Author', :href => R(Authors, author.id, 'delete'))
+           a('Delete Author', :href => R(Authors, author.id, 'delete')) unless @these_authors_tags.nil?
            end
            form({:method => 'post'}.merge(opts)) do
              label 'First Name', :for => 'author_first'; br
