@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 
-# This is a RESTful adaptation of the Camping-based Blokk application:
+# This is a RESTful extension of the Camping-based Blokk project:
 # http://murfy.de/read/blokk
 #
 # The original Camping-based Blog can be found here: 
 # http://code.whytheluckystiff.net/camping/browser/trunk/examples/blog.rb
 #
-# Borrows from RESTstop's version: http://reststop.rubyforge.org/classes/Camping.html
+# Borrows from RESTstop's adaptation: http://reststop.rubyforge.org/classes/Camping.html
 #
 # Tag cloud courtesy of: http://whomwah.com/2006/07/06/another-tag-cloud-script-for-ruby-on-rails/
 
@@ -233,27 +233,27 @@ module Kambi::Helpers
    return [ size_txt, color_txt ].join
   end
 
-  # menu bar
-  def menu target = nil
-    if target
-      args = target.is_a?(Symbol) ? [] : [target]
-      for role, submenu in menu[target].sort_by { |k, v| [:visitor, :user].index k }
-        ul.menu.send(role) do
-          submenu.each do |x|
-            li { x[/\A\w+\z/] ? a(x, :href => R(Controllers.const_get(x), *args)) : x }
-          end
-        end unless submenu.empty?
-      end
-    else
-      @menu ||= Hash.new { |h, k| h[k] = { :visitor => [], :user => [] } }
-    end
-  end
-  
-  # shortcut for error-aware labels
-  def label_for name, record = nil, attr = name, options = {}
-    errors = record && !record.body.blank? && !record.valid? && record.errors.on(attr)
-    label name.to_s, { :for => name }, options.merge(errors ? { :class => :error } : {})
-  end
+  # # menu bar
+  # def menu target = nil
+  #   if target
+  #     args = target.is_a?(Symbol) ? [] : [target]
+  #     for role, submenu in menu[target].sort_by { |k, v| [:visitor, :user].index k }
+  #       ul.menu.send(role) do
+  #         submenu.each do |x|
+  #           li { x[/\A\w+\z/] ? a(x, :href => R(Controllers.const_get(x), *args)) : x }
+  #         end
+  #       end unless submenu.empty?
+  #     end
+  #   else
+  #     @menu ||= Hash.new { |h, k| h[k] = { :visitor => [], :user => [] } }
+  #   end
+  # end
+  # 
+  # # shortcut for error-aware labels
+  # def label_for name, record = nil, attr = name, options = {}
+  #   errors = record && !record.body.blank? && !record.valid? && record.errors.on(attr)
+  #   label name.to_s, { :for => name }, options.merge(errors ? { :class => :error } : {})
+  # end
   
 end
 
@@ -379,7 +379,7 @@ module Kambi::Controllers
                     @post.authorships<<(Authorship.create( :post_id => @post.id, :author_id => a.id)); end; }
                     
                 all_clips = Models::Clip.find :all
-                @post.clips.each{|d| @post.references.delete(Reference.find(:all, :conditions => ["clip_id = #{d.id}"]))}
+                @post.clips.each{|d| @post.references.delete(Reference.find(:all, :conditions => ["clip_id = #{d.id}"] )) }
                 all_clips.each{|c| if input.include?(c.nickname); 
                     @post.references<<(Reference.create :post_id => @post.id, :clip_id => c.id); end; }
                 
