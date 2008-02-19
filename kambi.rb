@@ -187,6 +187,22 @@ module Kambi::Models
 end
 
 def Kambi.create
+    # NOTE: when using mysql, you have to make the sessions table manually:
+    # CREATE TABLE `sessions` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `hashid` varchar(32) DEFAULT NULL, `created_at` datetime DEFAULT NULL, `ivars` text DEFAULT NULL)
+    #
+    # then make a .campingrc file in users home folder:
+    # host : 127.0.0.1
+    # port : 3301
+    # server : mongrel
+    # database :
+    #   :adapter: mysql
+    #   :database: kambi
+    #   :hostname: localhost
+    #   :username: root
+    #   :password: root
+    # log:
+    #   kambi.log
+    
     Camping::Models::Session.create_schema
     Kambi::Models.create_schema
 end
