@@ -1043,7 +1043,7 @@ module Kambi::Views
             _clip(@clip)
           end
           div.post do
-            p "Essays: "
+            p "Essays with references to " << @clip.nickname
             for post in @posts
               a(post.title, :href => R(Posts, post.id))
             end
