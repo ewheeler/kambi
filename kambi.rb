@@ -1360,7 +1360,7 @@ module Kambi::Views
             span " | "
             button(:type => 'submit') {'Logout'}
           end
-          a('Delete Clip', :href => R(Clips, clip.id, 'delete'))
+          a('Delete Clip', :href => R(Clips, clip.id, 'delete')) unless @these_clips_posts.nil?
           end
           form({:method => 'post'}.merge(opts)) do
             label 'Nickname', :for => 'clip_nickname'; br
