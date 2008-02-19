@@ -1102,7 +1102,7 @@ module Kambi::Views
           h1 do
             a(page.title, :href => R(Pages, page.id))
           end
-          tags = page.tags if !page.tags.nil?
+          tags = page.tags unless page.tags.nil?
           unless tags.empty?
             div.tags do
               p "tagged with :"
@@ -1135,7 +1135,7 @@ module Kambi::Views
               end
             end
           end
-          tags = post.tags if !post.tags.nil?
+          tags = post.tags unless post.tags.nil?
           unless tags.empty?
             div.tags do
               p "tagged with :"
@@ -1157,7 +1157,7 @@ module Kambi::Views
         
         def _clip(clip)
           a(clip.nickname, :href => clip.url)
-          tags = clip.tags if !clip.tags.nil?
+          tags = clip.tags unless clip.tags.nil?
           unless tags.empty?
             div.tags do
               p "tagged with :"
@@ -1177,7 +1177,7 @@ module Kambi::Views
         def _author(author)
           name = author.first << " " << author.last
           a(name, :href => author.url)
-          tags = author.tags if !author.tags.nil?
+          tags = author.tags unless author.tags.nil?
           unless tags.empty?
             div.tags do
               p "tagged with :"
