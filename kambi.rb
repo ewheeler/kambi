@@ -472,6 +472,14 @@ module Kambi::Controllers
             redirect R(Posts)
         end
         
+        # GET /clips/1
+        # GET /clips/1.xml
+        def read(clip_id) 
+            @clip = Clip.find clip_id;
+            @posts = @clip.posts
+            render :view_clip
+        end
+        
         # GET /clips
         # GET /clips.xml
         def list
@@ -1021,6 +1029,18 @@ module Kambi::Views
         def view_author
           div.author do
             _author(author)
+          end
+          div.post do
+            p "Essays: "
+            for post in @posts
+              a(post.title, :href => R(Posts, post.id))
+            end
+          end
+        end
+        
+        def view_clip
+          div.clip do
+            _clip(@clip)
           end
           div.post do
             p "Essays: "
