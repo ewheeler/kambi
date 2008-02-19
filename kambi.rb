@@ -1110,7 +1110,7 @@ module Kambi::Views
           maxtc = 0; mintc = 3
           tags_counts.each{|c| maxtc = c if c > maxtc; mintc = c if c < mintc}
           for c in all_tags
-            tag_index = all_tags.index(c)#.to_i
+            tag_index = all_tags.index(c)
             a( c.name, :href => R(Tags, c.id), :style => font_size_for_tag_cloud( tags_counts.fetch(tag_index), mintc, maxtc) )
           end
         end
