@@ -287,6 +287,12 @@ class Mab
 end
 
 module Kambi::Controllers
+    class Index < R '/', '/index', '/all()()', '/(rss)', '/(rss)/([-\w]+)'
+      def get format = 'html'
+        redirect R(Posts)
+      end
+    end
+    
     class Pages < REST 'pages'      
 
         # POST /pages
