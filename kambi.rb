@@ -1421,10 +1421,10 @@ module Kambi::Views
              label 'Photo Url', :for => 'author_photo_url'; br
              input :name => 'author_photo_url', :type => 'text', 
                    :value => author.photo_url; br
-             label 'Organisation', :for => 'author_org'; br
+             label 'Organization', :for => 'author_org'; br
              input :name => 'author_org', :type => 'text', 
                    :value => author.org; br
-             label 'Organisation Url', :for => 'author_org_url'; br
+             label 'Organization Url', :for => 'author_org_url'; br
              input :name => 'author_org_url', :type => 'text', 
                    :value => author.org_url; br
              label 'Bio', :for => 'author_bio'; br
