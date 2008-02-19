@@ -287,7 +287,6 @@ module Kambi::Controllers
         # GET /pages/1.xml
         def read(page_id) 
             @page = Page.find page_id
-            clips_pages = Reference.find(:all, :conditions => ['page_id =?', @page.id])
             @clips = @page.clips
             render :view_page
         end
@@ -297,7 +296,7 @@ module Kambi::Controllers
             unless @state.user_id.blank?
                 @page = Page.find page_id
                 all_clips = Models::Clip.find :all
-                @page.clips.each{|d| @page.references.delete(Reference.find(:all, :conditions => ["clip_id = #{d.id}"]))}
+                @page.clips.each{|d| @page.references.delete(Reference.find(:all, :conditions => ["clip_id = #{d.id}"] )) }
                 all_clips.each{|c| if input.include?(c.nickname); 
                     @page.references<<(Reference.create :page_id => @page.id, :clip_id => c.id); end; }
                 
@@ -315,8 +314,7 @@ module Kambi::Controllers
         # GET /pages
         # GET /pages.xml
         def list
-            @pages = Page.find :all
-            @posts = Post.find :all
+            @pages = Page.find :all; @posts = Post.find :all
             render :index
         end
         
@@ -335,10 +333,8 @@ module Kambi::Controllers
                 @user = User.find @state.user_id
             end
             @page = Page.find page_id
-            @all_clips = Models::Clip.find :all
-            @these_pages_clips = @page.clips
-            @all_pages_tags = Models::Tag.find :all
-            @these_pages_tags = @page.tags
+            @all_clips = Models::Clip.find :all;      @these_pages_clips = @page.clips
+            @all_pages_tags = Models::Tag.find :all;  @these_pages_tags = @page.tags
             render :edit_page
         end
         
@@ -360,11 +356,8 @@ module Kambi::Controllers
         # GET /posts/1
         # GET /posts/1.xml
         def read(post_id) 
-            @post = Post.find post_id
-            @comments = @post.comments
-            clips_posts = Reference.find(:all, :conditions => ['post_id =?', @post.id])
-            @clips = @post.clips
-            @authors = @post.authors
+            @post = Post.find post_id;  @comments = @post.comments
+            @clips = @post.clips;       @authors = @post.authors
             render :view
         end
 
@@ -387,6 +380,7 @@ module Kambi::Controllers
                 @post.tags.each{|d| @post.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@post.id}"] )) }
                 all_tags.each{|a| if input.include?(a.name); 
                     @post.taggings<<(Tagging.create( :taggable_id => @post.id, :taggable_type => "Post", :tag_id => a.id)); end; }
+                    
                 @post.update_attributes :title => input.post_title, :body => input.post_body, :nickname => input.post_nickname
                 redirect R(@post)
             else
@@ -411,8 +405,7 @@ module Kambi::Controllers
         # GET /posts
         # GET /posts.xml
         def list
-            @posts = Post.find :all
-            @pages = Page.find :all
+            @posts = Post.find :all; @pages = Page.find :all
             render :index
         end
               
@@ -431,12 +424,9 @@ module Kambi::Controllers
                 @user = User.find @state.user_id
             end
             @post = Post.find post_id
-            @all_clips = Models::Clip.find :all
-            @these_posts_clips = @post.clips
-            @all_posts_tags = Models::Tag.find :all
-            @these_posts_tags = @post.tags
-            @all_authors = Models::Author.find :all
-            @these_posts_authors = @post.authors
+            @all_clips = Models::Clip.find :all;      @these_posts_clips = @post.clips
+            @all_posts_tags = Models::Tag.find :all;  @these_posts_tags = @post.tags
+            @all_authors = Models::Author.find :all;  @these_posts_authors = @post.authors
             render :edit_post
         end
         
@@ -471,8 +461,7 @@ module Kambi::Controllers
         def new
             unless @state.user_id.blank?
                 @user = User.find @state.user_id
-                @all_posts = Models::Post.find :all
-                @these_clips_posts = nil
+                @all_posts = Models::Post.find :all; @these_clips_posts = nil
                 @clip = Clip.new
             end
             render :add_clip
@@ -498,10 +487,8 @@ module Kambi::Controllers
                 @user = User.find @state.user_id
             end
             @clip = Models::Clip.find clip_id
-            @all_posts = Models::Post.find :all        
-            @these_clips_posts = @clip.posts
-            @all_clips_tags = Models::Tag.find :all            
-            @these_clips_tags = @clip.tags
+            @all_posts = Models::Post.find :all;      @these_clips_posts = @clip.posts
+            @all_clips_tags = Models::Tag.find :all;  @these_clips_tags = @clip.tags
             render :edit_clip
         end
         
@@ -664,10 +651,8 @@ module Kambi::Controllers
               @user = User.find @state.user_id
           end
           @author = Models::Author.find author_id
-          @all_posts = Models::Post.find :all        
-          @these_authors_posts = @author.posts
-          @all_tags = Models::Tag.find :all
-          @these_authors_tags = @author.tags
+          @all_posts = Models::Post.find :all;  @these_authors_posts = @author.posts
+          @all_tags = Models::Tag.find :all;    @these_authors_tags = @author.tags
           render :edit_author
       end
       
@@ -1093,10 +1078,8 @@ module Kambi::Views
           form :action => R(Sessions), :method => 'post' do
             label 'Username', :for => 'username'; br
             input :name => 'username', :type => 'text'; br
-    
             label 'Password', :for => 'password'; br
             input :name => 'password', :type => 'password'; br
-    
             input :type => 'submit', :name => 'login', :value => 'Login'
           end
         end
@@ -1119,11 +1102,11 @@ module Kambi::Views
           h1 do
             a(page.title, :href => R(Pages, page.id))
           end
-          ptags = page.tags if !page.tags.nil?
-          unless ptags.empty?
+          tags = page.tags if !page.tags.nil?
+          unless tags.empty?
             div.tags do
               p "tagged with :"
-              for tag in ptags
+              for tag in tags
                 a(tag.name, :href => R(Tags, tag.id))
               end
             end
@@ -1148,11 +1131,11 @@ module Kambi::Views
               end
             end
           end
-          ptags = post.tags if !post.tags.nil?
-          unless ptags.empty?
+          tags = post.tags if !post.tags.nil?
+          unless tags.empty?
             div.tags do
               p "tagged with :"
-              for tag in ptags
+              for tag in tags
                 a(tag.name, :href => R(Tags, tag.id))
               end
             end
@@ -1170,11 +1153,11 @@ module Kambi::Views
         
         def _clip(clip)
           a(clip.nickname, :href => clip.url)
-          ctags = clip.tags if !clip.tags.nil?
-          unless ctags.empty?
+          tags = clip.tags if !clip.tags.nil?
+          unless tags.empty?
             div.tags do
               p "tagged with :"
-              for tag in ctags
+              for tag in tags
                 a(tag.name, :href => R(Tags, tag.id))
               end
             end
@@ -1190,11 +1173,11 @@ module Kambi::Views
         def _author(author)
           name = author.first + " " + author.last
           a(name, :href => author.url)
-          atags = author.tags if !author.tags.nil?
-          unless atags.empty?
+          tags = author.tags if !author.tags.nil?
+          unless tags.empty?
             div.tags do
               p "tagged with :"
-              for tag in atags
+              for tag in tags
                 a(tag.name, :href => R(Tags, tag.id))
               end
             end
@@ -1223,11 +1206,9 @@ module Kambi::Views
             label 'Title', :for => 'page_title'; br
             input :name => 'page_title', :type => 'text', 
                   :value => page.title; br
-                  
             label 'Nickname', :for => 'page_nickname'; br
             input :name => 'page_nickname', :type => 'text',
                   :value => page.nickname; br
-    
             label 'Body', :for => 'page_body'; br
             textarea page.body, :name => 'page_body'; br
              
@@ -1274,11 +1255,9 @@ module Kambi::Views
             label 'Title', :for => 'post_title'; br
             input :name => 'post_title', :type => 'text', 
                   :value => post.title; br
-                  
             label 'Nickname', :for => 'post_nickname'; br
             input :name => 'post_nickname', :type => 'text',
                   :value => post.nickname; br
-    
             label 'Body', :for => 'post_body'; br
             textarea post.body, :name => 'post_body'; br
             
@@ -1339,11 +1318,9 @@ module Kambi::Views
             label 'Nickname', :for => 'clip_nickname'; br
             input :name => 'clip_nickname', :type => 'text', 
                   :value => clip.nickname; br
-                  
             label 'Url', :for => 'clip_url'; br
             input :name => 'clip_url', :type => 'text', 
-                  :value => clip.url; br
-                  
+                  :value => clip.url; br   
             label 'Body', :for => 'clip_body'; br
             textarea clip.body, :name => 'clip_body'; br
             
@@ -1389,27 +1366,21 @@ module Kambi::Views
              label 'First Name', :for => 'author_first'; br
              input :name => 'author_first', :type => 'text', 
                    :value => author.first; br
-                   
              label 'Last Name', :for => 'author_last'; br
              input :name => 'author_last', :type => 'text', 
                    :value => author.last; br
-
              label 'Url', :for => 'author_url'; br
              input :name => 'author_url', :type => 'text', 
                    :value => author.url; br
-                   
              label 'Photo Url', :for => 'author_photo_url'; br
              input :name => 'author_photo_url', :type => 'text', 
                    :value => author.photo_url; br
-                   
              label 'Organisation', :for => 'author_org'; br
              input :name => 'author_org', :type => 'text', 
                    :value => author.org; br
-                   
              label 'Organisation Url', :for => 'author_org_url'; br
              input :name => 'author_org_url', :type => 'text', 
                    :value => author.org_url; br
-
              label 'Bio', :for => 'author_bio'; br
              textarea author.bio, :name => 'author_bio'; br
              
