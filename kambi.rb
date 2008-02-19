@@ -1088,8 +1088,7 @@ module Kambi::Views
           all_tags = Kambi::Models::Tag.find(:all)
           all_tags_items = Array.new(all_tags)
           all_tags_taggables = all_tags_items.collect!{|t| t.taggables.compact}
-          all_taggables = Array.new(all_tags_taggables)
-          tags_counts = all_taggables.collect!{|g| g.length}
+          tags_counts = all_tags_taggables.collect!{|g| g.length}
           maxtc = 0; mintc = 3
           tags_counts.each{|c| maxtc = c if c > maxtc; mintc = c if c < mintc}
           for c in all_tags
@@ -1105,7 +1104,7 @@ module Kambi::Views
           tags = page.tags unless page.tags.nil?
           unless tags.empty?
             div.tags do
-              p "tagged with :"
+              p "tagged with:"
               for tag in tags
                 a(tag.name, :href => R(Tags, tag.id))
               end
@@ -1138,7 +1137,7 @@ module Kambi::Views
           tags = post.tags unless post.tags.nil?
           unless tags.empty?
             div.tags do
-              p "tagged with :"
+              p "tagged with:"
               for tag in tags
                 a(tag.name, :href => R(Tags, tag.id))
               end
@@ -1160,7 +1159,7 @@ module Kambi::Views
           tags = clip.tags unless clip.tags.nil?
           unless tags.empty?
             div.tags do
-              p "tagged with :"
+              p "tagged with:"
               for tag in tags
                 a(tag.name, :href => R(Tags, tag.id))
               end
@@ -1180,7 +1179,7 @@ module Kambi::Views
           tags = author.tags unless author.tags.nil?
           unless tags.empty?
             div.tags do
-              p "tagged with :"
+              p "tagged with:"
               for tag in tags
                 a(tag.name, :href => R(Tags, tag.id))
               end
