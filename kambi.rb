@@ -788,6 +788,9 @@ module Kambi::Controllers
                     word-spacing:0.25em;
                     font-size:90%;
                 }
+                div.author{
+                    border-bottom: 8px solid #990000;
+                }
                 div.tags {
                     font-size: 80%;
                     color: #990000;
@@ -1030,11 +1033,9 @@ module Kambi::Views
           div.author do
             _author(author)
           end
-          div.post do
-            p "Essays: "
-            for post in @posts
-              a(post.title, :href => R(Posts, post.id))
-            end
+          p "Essays written by "<< author.first << " " << author.last << ":"
+          for post in @posts
+            a(post.title, :href => R(Posts, post.id))
           end
         end
         
