@@ -1033,7 +1033,7 @@ module Kambi::Views
           div.author do
             _author(author)
           end
-          p "Essays written by "<< author.first << " " << author.last << ":"
+          p "Essays written by "+ author.first + " " + author.last + ":"
           for post in @posts
             a(post.title, :href => R(Posts, post.id))
           end
