@@ -81,8 +81,6 @@ end
 
 Markaby::Builder.set(:indent, 2)
 
-
- 
 # 
 # if __FILE__ == $0
 #   require 'mongrel/camping'
@@ -100,5 +98,3 @@ Markaby::Builder.set(:indent, 2)
 #   puts "Kambi is running at http://localhost:80/"
 #   server.run.join
 # end
-
-

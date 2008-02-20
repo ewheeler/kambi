@@ -464,10 +464,30 @@ module Kambi::Controllers
                 body {
                     font-family: Georga, Utopia, serif;
                 }
-                h1.header {
-                    background-color: #e5e5e5;
-                    margin: 0; padding: 10px;
+                div.header{
+                    background-color: #433C2A;
+                    color:  #e5e5e5;
+                    min-height:180px;
+                    padding: 0pt;
+                    margin: 0pt;
                     border-top: 8px solid #990000;
+                }
+                div.header h1 a{
+                    font-family: Georgia, Utopia, serif;
+                    color:  #e5e5e5;
+                    font-size:150%;
+                    margin-left: 20%;
+                    border-bottom: 1px solid #433C2A;
+                }
+                div.header a{
+                    font-family: Georgia, Utopia, serif;
+                    color:  #A59E8F;
+                    font-size:120%;
+                    margin-left:5%;
+                    border-bottom: 1px solid #433C2A;
+                }
+                h1, h2, h3{
+                  color: #433C2A;
                 }
                 div.content {
                     padding: 10px;
@@ -495,7 +515,7 @@ module Kambi::Controllers
                 }
                 div.clip{
                     padding: 1em;
-                    border-top: 4px solid #444;
+                    border-top: 4px solid #433C2A;
                     width:20%;
                     text-align:justify;
                     float:right;
@@ -509,9 +529,9 @@ module Kambi::Controllers
                     border-bottom: 8px solid #990000;
                 }
                 div.tags {
-                    font-size: 80%;
+                    font-size: 90%;
                     color: #990000;
-                    border-left: 1px solid #444;
+                    border-left: 1px solid #433C2A;
                     padding-left:1em;
                 }
                 div.tags a:hover{
@@ -523,7 +543,7 @@ module Kambi::Controllers
                     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
                 }
                 a:link,a:visited {
-                    color:black;
+                    color:#433C2A;
                     border-bottom: 1px dotted #990000;
                     text-decoration:none;
                 }
@@ -535,7 +555,7 @@ module Kambi::Controllers
                 div.comments{
                     padding: 1em;
                     margin-top: 1em;
-                    border-left: 4px solid #444;
+                    border-left: 4px solid #433C2A;
                     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
                     float:left;
                     clear:both;
@@ -543,12 +563,12 @@ module Kambi::Controllers
                 div.comment{
                     padding: 1em;
                     margin-right: 4em;
-                    border-left: 1px solid #444;
+                    border-left: 1px solid #433C2A;
                 }
                 div.time{
                     font-size:70%;
                     color: #990000;
-                    border-left: 1px solid #444;
+                    border-left: 1px solid #433C2A;
                     padding-left:1em;
                     font-family:georgia,"lucida bright","times new roman",serif;   
                 }

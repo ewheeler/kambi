@@ -13,11 +13,30 @@ module Kambi::Views
                    :href => self/'/styles.css', :media => 'screen'
             end
             body do
-              h1.header { a 'Kambi', :href => R(Posts) }
-              div.content do
-                if @state.user_id.blank?
-                  a('Login', :href => R(Sessions, 'new'))
+              div.header do
+                h1.header { a 'Kambi', :href => R(Posts) }
+                for page in Page.find :all
+                  a("Home", :href => R(Posts))
+                  a(page.title, :href => R(Pages, page.id))
+                  a("All Essays", :href => R(Posts))
+                  a("All Resources", :href => R(Clips))
+                  a("All Tags", :href => R(Tags))
+                  a('Authors', :href => R(Authors))
+                  if @state.user_id.blank?
+                    a('Login', :href => R(Sessions, 'new'))
+                  else
+                    br;br
+                    a(' ', :href=> '#')
+                    a(' ', :href=> '#')
+                    a('New Page', :href => R(Pages, 'new'))
+                    a('New Essay', :href => R(Posts, 'new'))
+                    a('New Resource', :href => R(Clips, 'new'))
+                    a('New Tag', :href => R(Tags))
+                    a('New Author', :href => R(Authors, 'new'))
+                  end
                 end
+              end
+              div.content do
                 self << yield
               end
             end
@@ -28,9 +47,7 @@ module Kambi::Views
           if @posts.empty?
             p 'No posts found.'
           else
-            for page in @pages
-              a(page.title, :href => R(Pages, page.id))
-            end
+
             for post in @posts
               div.post do
                   @authors = post.authors
@@ -48,16 +65,16 @@ module Kambi::Views
               end
             end
           end
-          p do 
-            unless @state.user_id.blank?
-              a('New Page', :href => R(Pages, 'new')); br
-              a('New Post', :href => R(Posts, 'new')); br
-              a('New Clip', :href => R(Clips, 'new')); br
-              a('New Tag', :href => R(Tags)); br
-              a('Authors', :href => R(Authors)); br
-              a('New Author', :href => R(Authors, 'new'))
-            end
-          end
+          # p do 
+          #   unless @state.user_id.blank?
+          #     a('New Page', :href => R(Pages, 'new')); br
+          #     a('New Essay', :href => R(Posts, 'new')); br
+          #     a('New Resource', :href => R(Clips, 'new')); br
+          #     a('New Tag', :href => R(Tags)); br
+          #     a('Authors', :href => R(Authors)); br
+          #     a('New Author', :href => R(Authors, 'new'))
+          #   end
+          # end
           div.cloud do
             _cloud
           end
@@ -220,7 +237,7 @@ module Kambi::Views
           if @tag
             unless @posts.empty?
               div.tags do
-                p "Posts tagged with " + @tag.name + ":"
+                p "Essays tagged with " + @tag.name + ":"
                 for post in @posts
                   a(post.title, :href => R(Posts, post.id)) 
                 end
@@ -228,7 +245,7 @@ module Kambi::Views
             end
             unless @clips.empty?
               div.tags do
-                p "Clips tagged with " + @tag.name + ":"
+                p "Resources tagged with " + @tag.name + ":"
                 for clip in @clips
                   a(clip.nickname, :href => R(Clips, clip.id))   
                 end
@@ -252,17 +269,29 @@ module Kambi::Views
               end
             end
           end
-          form :action => R(Tags), :method => 'post' do
-            label 'New tag', :for => 'tag_name'; br
-            input :name => 'tag_name', :type => 'text'; br
-            input :type => 'submit', :value => 'Submit'
+          unless @state.user_id.blank?
+            form :action => R(Tags), :method => 'post' do
+              label 'New tag', :for => 'tag_name'; br
+              input :name => 'tag_name', :type => 'text'; br
+              input :type => 'submit', :value => 'Submit'
+            end
           end
         end
         
         def view_clips
+          h2 "Resources:"
           for clip in @clips
             p do
               a(clip.nickname, :href => R(Clips, clip.id, 'edit'))
+              h3 "Tagged with:"
+              for tag in clip.tags
+                a(tag.name, :href => R(Tags, tag.id))
+              end
+              p clip.body
+              h3 "Referenced in:"
+              for post in clip.posts
+                a(post.title, :href => R(Posts, post.id))
+              end
             end
           end
         end
@@ -279,6 +308,7 @@ module Kambi::Views
         end
         
         def _cloud
+          h2 "Tags:"
           all_tags = Kambi::Models::Tag.find(:all)
           all_tags_items = Array.new(all_tags)
           all_tags_taggables = all_tags_items.collect!{|t| t.taggables.compact}
@@ -343,7 +373,7 @@ module Kambi::Views
           end
           unless @state.user_id.blank?
             p do
-              a("Edit Post", :href => R(Posts, post.id, 'edit'))
+              a("Edit Essay", :href => R(Posts, post.id, 'edit'))
             end
           end
         end
@@ -362,7 +392,7 @@ module Kambi::Views
           p clip.body
           unless @state.user_id.blank?
             p do
-              a("Edit Clip", :href => R(Clips, clip.id, 'edit'))
+              a("Edit Resource", :href => R(Clips, clip.id, 'edit'))
             end
           end
         end
@@ -448,7 +478,7 @@ module Kambi::Views
             span " | "
             button(:type => 'submit') {'Logout'}
           end
-          a('Delete Post', :href => R(Posts, post.id, 'delete')) unless @these_posts_tags.nil?
+          a('Delete Essay', :href => R(Posts, post.id, 'delete')) unless @these_posts_tags.nil?
           end
           form({:method => 'post'}.merge(opts)) do
             label 'Title', :for => 'post_title'; br
@@ -511,7 +541,7 @@ module Kambi::Views
             span " | "
             button(:type => 'submit') {'Logout'}
           end
-          a('Delete Clip', :href => R(Clips, clip.id, 'delete')) unless @these_clips_tags.nil?
+          a('Delete Resource', :href => R(Clips, clip.id, 'delete')) unless @these_clips_tags.nil?
           end
           form({:method => 'post'}.merge(opts)) do
             label 'Nickname', :for => 'clip_nickname'; br
