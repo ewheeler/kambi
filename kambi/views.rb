@@ -15,27 +15,26 @@ module Kambi::Views
             body do
               div.header do
                 h1.header { a 'Kambi', :href => R(Posts) }
-                
-                  a("Home", :href => R(Posts))
-                  for page in Page.find :all
-                    a(page.title, :href => R(Pages, page.id))
-                  end
-                  a("All Essays", :href => R(Posts))
-                  a("All Resources", :href => R(Clips))
-                  a("All Tags", :href => R(Tags))
-                  a('Authors', :href => R(Authors))
-                  if @state.user_id.blank?
-                    a('Login', :href => R(Sessions, 'new'))
-                  else
-                    br;br
-                    a(' ', :href=> '#')
-                    a(' ', :href=> '#')
-                    a('New Page', :href => R(Pages, 'new'))
-                    a('New Essay', :href => R(Posts, 'new'))
-                    a('New Resource', :href => R(Clips, 'new'))
-                    a('New Tag', :href => R(Tags))
-                    a('New Author', :href => R(Authors, 'new'))
-                  end
+                a("Home", :href => R(Posts))
+                for page in Page.find :all
+                  a(page.title, :href => R(Pages, page.id))
+                end
+                a("All Essays", :href => R(Posts))
+                a("All Resources", :href => R(Clips))
+                a("All Tags", :href => R(Tags))
+                a('Authors', :href => R(Authors))
+                if @state.user_id.blank?
+                  a('Login', :href => R(Sessions, 'new'))
+                else
+                  br;br
+                  a(' ', :href=> '#')
+                  a(' ', :href=> '#')
+                  a('New Page', :href => R(Pages, 'new'))
+                  a('New Essay', :href => R(Posts, 'new'))
+                  a('New Resource', :href => R(Clips, 'new'))
+                  a('New Tag', :href => R(Tags))
+                  a('New Author', :href => R(Authors, 'new'))
+                end
               end
               div.content do
                 self << yield
