@@ -110,7 +110,7 @@ module Kambi::Controllers
                 
                 all_authors = Models::Author.find :all
                 @post.authors.each{|d| @post.authorships.delete(Authorship.find(:all, :conditions => ["author_id = #{d.id} AND  post_id = #{@post.id}"] )) }
-                all_authors.each{|a| name = a.first + " " + a.last; if input.include?(name); 
+                all_authors.each{|a|  if input.include?(a.name); 
                     @post.authorships<<(Authorship.create( :post_id => @post.id, :author_id => a.id)); end; }
                     
                 all_clips = Models::Clip.find :all

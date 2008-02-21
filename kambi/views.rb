@@ -47,7 +47,6 @@ module Kambi::Views
           if @posts.empty?
             p 'No posts found.'
           else
-
             for post in @posts
               div.post do
                   @authors = post.authors
@@ -59,22 +58,11 @@ module Kambi::Views
                     _clip(clip)
                   end
                 end
-              #end
               div.break do
                 p ''
               end
             end
           end
-          # p do 
-          #   unless @state.user_id.blank?
-          #     a('New Page', :href => R(Pages, 'new')); br
-          #     a('New Essay', :href => R(Posts, 'new')); br
-          #     a('New Resource', :href => R(Clips, 'new')); br
-          #     a('New Tag', :href => R(Tags)); br
-          #     a('Authors', :href => R(Authors)); br
-          #     a('New Author', :href => R(Authors, 'new'))
-          #   end
-          # end
           div.cloud do
             _cloud
           end
@@ -223,7 +211,7 @@ module Kambi::Views
           div.author do
             _author(author)
           end
-          p "Essays written by "+ author.first + " " + author.last + ":"
+          p "Essays written by "+ author.name + ":"
           for post in @posts
             a(post.title, :href => R(Posts, post.id))
           end
@@ -286,8 +274,7 @@ module Kambi::Views
               div.tags do
                 p "Authors tagged with " + @tag.name + ":"
                 for author in @authors
-                  name = author.first + " " + author.last
-                  a(name, :href => R(Authors, author.id))   
+                  a(author.name, :href => R(Authors, author.id))   
                 end
               end
             end
@@ -369,24 +356,23 @@ module Kambi::Views
           h1 do
             a(post.title, :href => R(Posts, post.id))
           end
-          unless @authors.empty?
-            step = 0
-            p do h4 "by"
-              for author in @authors
-                name = author.first + " " + author.last
-                  a(name, :href => R(Authors, author.id)) if step == 0
-                  h4 "and " unless step == 0
-                  a(name, :href => R(Authors, author.id)) unless step == 0
-                  step = step.next
-              end
-            end
-          end
           tags = post.tags unless post.tags.nil?
           unless tags.empty?
             div.tags do
               p "tagged with:"
               for tag in tags
                 a(tag.name, :href => R(Tags, tag.id))
+              end
+            end
+          end
+          unless @authors.empty?
+            step = 0
+            p do h4 "by"
+              for author in @authors
+                  a(author.name, :href => R(Authors, author.id)) if step == 0
+                  h4 "and " unless step == 0
+                  a(author.name, :href => R(Authors, author.id)) unless step == 0
+                  step = step.next
               end
             end
           end
@@ -421,8 +407,7 @@ module Kambi::Views
         end
         
         def _author(author)
-          name = author.first + " " + author.last
-          a(name, :href => author.url)
+          a(author.name, :href => author.url)
           tags = author.tags unless author.tags.nil?
           unless tags.empty?
             div.tags do
@@ -516,13 +501,12 @@ module Kambi::Views
             if @all_authors
               p "Author(s):"        
               for author in @all_authors
-                name = author.first + " " + author.last
                 if !@these_posts_authors.nil? and @these_posts_authors.include?(author)
-                  input :type => 'checkbox', :name => name, :value => author.id, :checked => 'true'
-                  label name, :for => name; br
+                  input :type => 'checkbox', :name => author.name, :value => author.id, :checked => 'true'
+                  label author.name, :for => author.name; br
                 else
-                  input :type => 'checkbox', :name => name, :value => author.id
-                  label name, :for => name; br
+                  input :type => 'checkbox', :name => author.name, :value => author.id
+                  label author.name, :for => author.name; br
                 end
               end
             end

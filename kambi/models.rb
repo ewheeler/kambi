@@ -57,19 +57,19 @@ module Kambi::Models
     class Tagging < Base
       belongs_to :tag
       belongs_to :taggable, :polymorphic => true
-      belongs_to :clip, :class_name => "Clip", :foreign_key => "taggable_id"
-      belongs_to :post, :class_name => "Post", :foreign_key => "taggable_id"
-      belongs_to :page, :class_name => "Page", :foreign_key => "taggable_id"
-      belongs_to :author, :class_name => "Author", :foreign_key => "taggable_id"
+      belongs_to :clip,   :class_name => "Clip",    :foreign_key => "taggable_id"
+      belongs_to :post,   :class_name => "Post",    :foreign_key => "taggable_id"
+      belongs_to :page,   :class_name => "Page",    :foreign_key => "taggable_id"
+      belongs_to :author, :class_name => "Author",  :foreign_key => "taggable_id"
     end
 
     class Tag < Base
       validates_presence_of :name
       has_many :taggings
-      has_many :clips, :through => :taggings, :source => :clip, :conditions => "kambi_taggings.taggable_type = 'Clip'"
-      has_many :posts, :through => :taggings, :source => :post, :conditions => "kambi_taggings.taggable_type = 'Post'"
-      has_many :pages, :through => :taggings, :source => :page, :conditions => "kambi_taggings.taggable_type = 'Page'"
-      has_many :authors, :through => :taggings, :source => :author, :conditions => "kambi_taggings.taggable_type = 'Author'"
+      has_many :clips,    :through => :taggings, :source => :clip,    :conditions => "kambi_taggings.taggable_type = 'Clip'"
+      has_many :posts,    :through => :taggings, :source => :post,    :conditions => "kambi_taggings.taggable_type = 'Post'"
+      has_many :pages,    :through => :taggings, :source => :page,    :conditions => "kambi_taggings.taggable_type = 'Page'"
+      has_many :authors,  :through => :taggings, :source => :author,  :conditions => "kambi_taggings.taggable_type = 'Author'"
       
       def taggables
         self.taggings.collect{|t| t.taggable}
@@ -82,6 +82,10 @@ module Kambi::Models
       has_many :posts, :through => :authorships#, :source => :post
       has_many :taggings, :as => :taggable
       has_many :tags, :through => :taggings
+      
+      def name
+        name = self.first + " " + self.last
+      end
     end
     
     class Authorship < Base
