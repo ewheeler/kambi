@@ -201,7 +201,6 @@ module Kambi::Views
               _author(author)
             end
           end
-          a('New Author', :href => R(Authors, 'new'))
         end
         
         def view_author

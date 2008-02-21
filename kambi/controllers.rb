@@ -251,7 +251,7 @@ module Kambi::Controllers
                     clip.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{clip.id}"] )); end; }
                 not_these_tags = all_tags - these_tags
                 not_these_tags.each{|a| if input.include?(a.name); 
-                    clip.taggings.push(Tagging.create(:taggable_id => clip.id, :taggable_type => "Clip", :tag_id => a.id)); end; }
+                    clip.taggings<<(Tagging.create(:taggable_id => clip.id, :taggable_type => "Clip", :tag_id => a.id)); end; }
                 all_posts = Models::Post.find :all
                 these_clips_posts = clip.posts
                 these_clips_posts.each{|d|  clip.references.delete(Reference.find(:all, :conditions => ['post_id =?', d.id])) }
