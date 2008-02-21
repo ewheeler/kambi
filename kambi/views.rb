@@ -249,6 +249,7 @@ module Kambi::Views
             _cloud
           end
           if @tag
+            h3 @tag.name
             unless @posts.nil? or @posts.empty?
               div.tags do
                 p "Essays tagged with " + @tag.name + ":"
