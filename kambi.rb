@@ -31,7 +31,11 @@ end
 
 require 'camping/db'
 require 'camping/session'
-    
+   
+gem 'turing'
+require 'turing'
+# ti = Turing::Image.new(:width => 280, :height => 115)
+# ti.generate(File.join(Dir.getwd, 'a.jpg'), "mepemepe")
     
 Camping.goes :Kambi
 
@@ -42,6 +46,7 @@ module Kambi
     require 'kambi/controllers'
     
     include Camping::Session
+
 end
 
 
@@ -78,6 +83,8 @@ class Mab
     self
   end
 end
+
+
 
 Markaby::Builder.set(:indent, 2)
 

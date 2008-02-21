@@ -97,6 +97,7 @@ module Kambi::Controllers
         def read(post_id) 
             @post = Post.find post_id;  @comments = @post.comments
             @clips = @post.clips;       @authors = @post.authors
+            @captcha = image
             render :view
         end
 
@@ -324,8 +325,12 @@ module Kambi::Controllers
     class Comments < REST 'comments'
         # POST /comments
         def create
-            Models::Comment.create(:username => input.post_username,
-                       :body => input.post_body, :post_id => input.post_id)
+
+          if input.captcha == input.hushhush
+              Models::Comment.create(:username => input.post_username,
+                         :body => input.post_body, :post_id => input.post_id)
+          
+          end
             redirect R(Posts, input.post_id)
         end
         
@@ -454,6 +459,22 @@ module Kambi::Controllers
             @state.user_id = nil
             render :logout
         end
+    end
+    
+    class Static < R '/static/(.+)'         
+      MIME_TYPES = {'.css' => 'text/css', '.js' => 'text/javascript', 
+                    '.jpg' => 'image/jpeg'}
+      PATH = File.expand_path("../" + File.dirname(__FILE__))
+
+      def get(path)
+        @headers['Content-Type'] = MIME_TYPES[path[/\.\w+$/, 0]] || "text/plain"
+        unless path.include? ".." # prevent directory traversal attacks
+          @headers['X-Sendfile'] = "#{PATH}/static/#{path}"
+        else
+          @status = "403"
+          "403 - Invalid path"
+        end
+      end
     end
     
     # You can use old-fashioned Camping controllers too!
