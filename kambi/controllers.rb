@@ -97,7 +97,7 @@ module Kambi::Controllers
         def read(post_id) 
             @post = Post.find post_id;  @comments = @post.comments
             @clips = @post.clips;       @authors = @post.authors
-            @captcha = image
+            @captcha = turing_image
             render :view
         end
 

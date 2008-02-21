@@ -66,64 +66,64 @@ module Kambi::Helpers
   #   label name.to_s, { :for => name }, options.merge(errors ? { :class => :error } : {})
   # end
 
-  def send_file(path, options = {}) #:doc:
-    raise MissingFile, "Cannot read file #{path}" unless File.file?(path) and File.readable?(path)
-
-    options[:length]   ||= File.size(path)
-    options[:filename] ||= File.basename(path) unless options[:url_based_filename]
-    options[:status] ||= 200
-    send_file_headers! options
-
-    @performed_render = false
-
-    # if options[:stream]
-    #   # render :status => options[:status], :text => Proc.new{ |response, output|
-    #   return :text => Proc.new{ |response, output|
-    #   #logger.info "Streaming file #{path}" unless logger.nil?
-    #   len = options[:buffer_size] || 4096
-    #   File.open(path, 'rb') do |file|
-    #     while buf = file.read(len)
-    #       output.write(buf)
-    #     end
-    #   end
-    # }
-    # else
-      #logger.info "Sending file #{path}" unless logger.nil?
-      # File.open(path, 'rb') { |file| render :status => options[:status], :text => file.read }
-      # File.open(path, 'rb') { |file| return file.read }
-      
-     # end
-  end
-  
-  def send_file_headers!(options)
-    default_send_file_options = { :type => 'application/octet-stream'.freeze, :disposition => 'attachment'.freeze, :stream => true, :buffer_size => 4096}
-    options.update(default_send_file_options.merge(options))
-    [:length, :type, :disposition].each do |arg|
-      raise ArgumentError, ":#{arg} option required" if options[arg].nil?
-    end
-
-    disposition = options[:disposition].dup || 'attachment'
-
-    disposition <<= %(; filename="#{options[:filename]}") if options[:filename]
-
-    @headers.update(
-      'Content-Length'            => options[:length],
-      'Content-Type'              => options[:type].strip,  # fixes a problem with extra with some browsers
-      'Content-Disposition'       => disposition,
-      'Content-Transfer-Encoding' => 'binary'
-    )
-
-    # Fix a problem with IE 6.0 on opening downloaded files:
-    # If Cache-Control: no-cache is set (which Rails does by default), 
-    # IE removes the file it just downloaded from its cache immediately 
-    # after it displays the "open/save" dialog, which means that if you 
-    # hit "open" the file isn't there anymore when the application that 
-    # is called for handling the download is run, so let's workaround that
-    @headers['Cache-Control'] = 'private' if @headers['Cache-Control'] == 'no-cache'
-  end
+  # def send_file(path, options = {}) #:doc:
+  #   raise MissingFile, "Cannot read file #{path}" unless File.file?(path) and File.readable?(path)
+  # 
+  #   options[:length]   ||= File.size(path)
+  #   options[:filename] ||= File.basename(path) unless options[:url_based_filename]
+  #   options[:status] ||= 200
+  #   send_file_headers! options
+  # 
+  #   @performed_render = false
+  # 
+  #   # if options[:stream]
+  #   #   # render :status => options[:status], :text => Proc.new{ |response, output|
+  #   #   return :text => Proc.new{ |response, output|
+  #   #   #logger.info "Streaming file #{path}" unless logger.nil?
+  #   #   len = options[:buffer_size] || 4096
+  #   #   File.open(path, 'rb') do |file|
+  #   #     while buf = file.read(len)
+  #   #       output.write(buf)
+  #   #     end
+  #   #   end
+  #   # }
+  #   # else
+  #     #logger.info "Sending file #{path}" unless logger.nil?
+  #     # File.open(path, 'rb') { |file| render :status => options[:status], :text => file.read }
+  #     # File.open(path, 'rb') { |file| return file.read }
+  #     
+  #    # end
+  # end
+  # 
+  # def send_file_headers!(options)
+  #   default_send_file_options = { :type => 'application/octet-stream'.freeze, :disposition => 'attachment'.freeze, :stream => true, :buffer_size => 4096}
+  #   options.update(default_send_file_options.merge(options))
+  #   [:length, :type, :disposition].each do |arg|
+  #     raise ArgumentError, ":#{arg} option required" if options[arg].nil?
+  #   end
+  # 
+  #   disposition = options[:disposition].dup || 'attachment'
+  # 
+  #   disposition <<= %(; filename="#{options[:filename]}") if options[:filename]
+  # 
+  #   @headers.update(
+  #     'Content-Length'            => options[:length],
+  #     'Content-Type'              => options[:type].strip,  # fixes a problem with extra with some browsers
+  #     'Content-Disposition'       => disposition,
+  #     'Content-Transfer-Encoding' => 'binary'
+  #   )
+  # 
+  #   # Fix a problem with IE 6.0 on opening downloaded files:
+  #   # If Cache-Control: no-cache is set (which Rails does by default), 
+  #   # IE removes the file it just downloaded from its cache immediately 
+  #   # after it displays the "open/save" dialog, which means that if you 
+  #   # hit "open" the file isn't there anymore when the application that 
+  #   # is called for handling the download is run, so let's workaround that
+  #   @headers['Cache-Control'] = 'private' if @headers['Cache-Control'] == 'no-cache'
+  # end
         
   
-  def image
+  def turing_image
      ti = Turing::Image.new(:width => 150, :height => 75)
      pat = "tmpf-%s-%s-%s"
      name =  pat % [Process::pid, Time.now.to_f.to_s.tr(".",""), rand(1e8)]
