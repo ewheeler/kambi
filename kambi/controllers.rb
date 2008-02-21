@@ -321,6 +321,12 @@ module Kambi::Controllers
             unless @state.user_id.blank?
                 @tag = Tag.find tag_id
                 @tag.update_attributes :name => input.tag_name
+                @taggables = @tag.taggables
+                @posts = Array.new; @clips = Array.new; @pages = Array.new; @authors = Array.new;
+                @taggables.each{|t|  if t.instance_of?(Kambi::Models::Post); @posts<<t; 
+                    elsif t.instance_of?(Kambi::Models::Clip);  @clips<<t;
+                    elsif t.instance_of?(Kambi::Models::Page); @pages<<t;  
+                    elsif t.instance_of?(Kambi::Models::Author); @authors<<t; end; }
                 render :view_tags
             else
               _error("Unauthorized", 401)

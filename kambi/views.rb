@@ -154,6 +154,14 @@ module Kambi::Views
           end
         end
         
+        def edit_tag
+          if @user
+            _tag_form(@tag, :action => R(@tag), :method => :put)
+          else
+            _login
+          end
+        end
+        
         def view
           div.post do
             _post(@post)
@@ -241,7 +249,7 @@ module Kambi::Views
             _cloud
           end
           if @tag
-            unless @posts.empty?
+            unless @posts.nil? or @posts.empty?
               div.tags do
                 p "Essays tagged with " + @tag.name + ":"
                 for post in @posts
@@ -249,7 +257,7 @@ module Kambi::Views
                 end
               end
             end
-            unless @clips.empty?
+            unless @clips.nil? or @clips.empty?
               div.tags do
                 p "Resources tagged with " + @tag.name + ":"
                 for clip in @clips
@@ -257,7 +265,7 @@ module Kambi::Views
                 end
               end
             end
-            unless @pages.empty?
+            unless @pages.nil? or @pages.empty?
               div.tags do
                 p "Pages tagged with " + @tag.name + ":"
                 for page in @pages
@@ -265,7 +273,7 @@ module Kambi::Views
                 end
               end
             end
-            unless @authors.empty?
+            unless @authors.nil? or @authors.empty?
               div.tags do
                 p "Authors tagged with " + @tag.name + ":"
                 for author in @authors
@@ -274,12 +282,8 @@ module Kambi::Views
                 end
               end
             end
-          end
-          unless @state.user_id.blank?
-            form :action => R(Tags), :method => 'post' do
-              label 'New tag', :for => 'tag_name'; br
-              input :name => 'tag_name', :type => 'text'; br
-              input :type => 'submit', :value => 'Submit'
+            unless @state.user_id.blank?
+              _tag(@tag)
             end
           end
         end
@@ -325,6 +329,10 @@ module Kambi::Views
             tag_index = all_tags.index(c)
             a( c.name, :href => R(Tags, c.id), :style => font_size_for_tag_cloud( tags_counts.fetch(tag_index), mintc, maxtc) )
           end
+        end
+        
+        def _tag(tag)
+          a("Edit " + tag.name, :href => R(Tags, tag.id, 'edit'))
         end
         
         def _page(page)
@@ -647,7 +655,23 @@ module Kambi::Views
              input :type => 'hidden', :name => 'author_id', :value => author.id
              input :type => 'submit', :value => 'Submit'
            end
-         end
+        end
+        
+        def _tag_form(tag, opts)
+          form(:action => R(Sessions), :method => 'delete') do
+          p do 
+            span "You are logged in as #{@user.username}"
+            span " | "
+            button(:type => 'submit') {'Logout'}
+          end
+          a('Delete Tag', :href => R(Tags, tag.id, 'delete')) if Tag.find(tag.id)
+          end
+          form({:method => 'post'}.merge(opts)) do
+            label 'Tag Name', :for => 'tag_name'; br
+            input :name => 'tag_name', :type => 'text', :value => tag.name; br
+            input :type => 'submit', :value => 'Submit'
+          end
+        end
         
     end
 
