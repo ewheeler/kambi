@@ -450,7 +450,7 @@ module Kambi::Views
             if @all_pages_tags
               p "Tagged with:"  
               for tag in @all_pages_tags
-                if @these_pages_tags.include?(tag)
+                if !@these_pages_tags.nil? and @these_pages_tags.include?(tag)
                   input :type => 'checkbox', :name => tag.name, :value => tag.id, :checked => 'true'
                   label tag.name, :for => tag.name; br
                 else
@@ -462,7 +462,7 @@ module Kambi::Views
             if @all_clips
               p "References:"
               for clip in @all_clips
-                if @these_pages_clips.include?(clip)
+                if !@these_pages_clips.nil? and @these_pages_clips.include?(clip)
                   input :type => 'checkbox', :name => clip.nickname, :value => clip, :checked => 'true'
                   label clip.nickname, :for => clip.nickname; br
                 else
@@ -500,7 +500,7 @@ module Kambi::Views
               p "Author(s):"        
               for author in @all_authors
                 name = author.first + " " + author.last
-                if @these_posts_authors.include?(author)
+                if !@these_posts_authors.nil? and @these_posts_authors.include?(author)
                   input :type => 'checkbox', :name => name, :value => author.id, :checked => 'true'
                   label name, :for => name; br
                 else
@@ -513,7 +513,7 @@ module Kambi::Views
             if @all_posts_tags
               p "Tagged with:"        
               for tag in @all_posts_tags
-                if @these_posts_tags.include?(tag)
+                if !@these_posts_tags.nil? and @these_posts_tags.include?(tag)
                   input :type => 'checkbox', :name => tag.name, :value => tag.id, :checked => 'true'
                   label tag.name, :for => tag.name; br
                 else
@@ -525,7 +525,7 @@ module Kambi::Views
             if @all_clips
               p "References:"
               for clip in @all_clips
-                if @these_posts_clips.include?(clip)
+                if !@these_posts_clips.nil? and @these_posts_clips.include?(clip)
                   input :type => 'checkbox', :name => clip.nickname, :value => clip, :checked => 'true'
                   label clip.nickname, :for => clip.nickname; br
                 else
@@ -562,7 +562,7 @@ module Kambi::Views
             if @all_clips_tags
               p "Tagged with:"
               for tag in @all_clips_tags
-                if @these_clips_tags.include?(tag)
+                if !@these_clips_tags.nil? and @these_clips_tags.include?(tag)
                   input :type => 'checkbox', :name => tag.name, :value => tag, :checked => 'true'
                   label tag.name, :for => tag.name; br
                 else
@@ -622,7 +622,7 @@ module Kambi::Views
              if @all_tags
                p "Tagged with:"
                for tag in @all_tags
-                 if @these_authors_tags.include?(tag)
+                 if !@these_authors_tags.nil? and @these_authors_tags.include?(tag)
                    input :type => 'checkbox', :name => tag.name, :value => tag, :checked => 'true'
                    label tag.name, :for => tag.name; br
                  else

@@ -61,7 +61,9 @@ module Kambi::Controllers
         def new
             unless @state.user_id.blank?
                 @user = User.find @state.user_id
-                @page = Page.new; @these_pages_tags = nil;
+                @page = Page.new; 
+                @all_clips = Models::Clip.find :all;      @these_pages_clips = nil
+                @all_pages_tags = Models::Tag.find :all;  @these_pages_tags = nil
             end
             render :add_page
         end
@@ -153,7 +155,10 @@ module Kambi::Controllers
         def new
             unless @state.user_id.blank?
                 @user = User.find @state.user_id
-                @post = Post.new; @these_posts_tags = nil;
+                @post = Post.new;
+                @all_clips = Models::Clip.find :all;      @these_posts_clips = nil
+                @all_posts_tags = Models::Tag.find :all;  @these_posts_tags = nil
+                @all_authors = Models::Author.find :all;  @these_posts_authors = nil
             end
             render :add_post
         end
@@ -210,6 +215,7 @@ module Kambi::Controllers
             unless @state.user_id.blank?
                 @user = User.find @state.user_id
                 @all_posts = Models::Post.find :all; @these_clips_posts = nil
+                @all_clips_tags = Models::Tag.find :all;  @these_clips_tags = nil
                 @clip = Clip.new
             end
             render :add_clip
@@ -392,7 +398,9 @@ module Kambi::Controllers
       def new
           unless @state.user_id.blank?
               @user = User.find @state.user_id
-              @author = Models::Author.new; @these_authors_tags = nil;
+              @author = Models::Author.new; 
+              @all_posts = Models::Post.find :all;  @these_authors_posts = nil
+              @all_tags = Models::Tag.find :all;    @these_authors_tags = nil
           end
           render :add_author
       end
