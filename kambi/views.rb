@@ -32,7 +32,7 @@ module Kambi::Views
                   a('New Page', :href => R(Pages, 'new'))
                   a('New Essay', :href => R(Posts, 'new'))
                   a('New Resource', :href => R(Clips, 'new'))
-                  a('New Tag', :href => R(Tags))
+                  a('New Tag', :href => R(Tags, 'new'))
                   a('New Author', :href => R(Authors, 'new'))
                 end
               end
@@ -117,6 +117,14 @@ module Kambi::Views
         def add_clip
           if @user
             _clip_form(@clip, :action => R(Clips))
+          else
+            _login
+          end
+        end
+        
+        def add_tag
+          if @user
+            _tag_form(@tag, :action => R(Tags))
           else
             _login
           end
@@ -665,7 +673,7 @@ module Kambi::Views
             span " | "
             button(:type => 'submit') {'Logout'}
           end
-          a('Delete Tag', :href => R(Tags, tag.id, 'delete')) if Tag.find(tag.id)
+          a('Delete Tag', :href => R(Tags, tag.id, 'delete')) if tag.name
           end
           form({:method => 'post'}.merge(opts)) do
             label 'Tag Name', :for => 'tag_name'; br

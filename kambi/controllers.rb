@@ -302,8 +302,9 @@ module Kambi::Controllers
         # GET /tags/new
         def new
             unless @state.user_id.blank?
-                @tag = Tag.new
+                @user = User.find @state.user_id
             end
+            @tag = Tag.new
             render :add_tag
         end
         

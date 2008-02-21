@@ -34,8 +34,7 @@ require 'camping/session'
    
 gem 'turing'
 require 'turing'
-# ti = Turing::Image.new(:width => 280, :height => 115)
-# ti.generate(File.join(Dir.getwd, 'a.jpg'), "mepemepe")
+
     
 Camping.goes :Kambi
 
