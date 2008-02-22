@@ -243,6 +243,12 @@ module Kambi::Views
               a(post.title, :href => R(Posts, post.id))
             end
           end
+          div.page do
+            p "Pages referring to " + @clip.nickname + " :"
+            for page in @pages
+              a(page.title, :href => R(Pages, page.id))
+            end
+          end
         end
         
         def view_page
@@ -323,7 +329,7 @@ module Kambi::Views
                 end
               end
               p clip.body
-              h3 "Referenced in:"
+              h3 "Referenced in:" unless clip.references.empty?
               for post in clip.posts
                 a(post.title, :href => R(Posts, post.id))
               end
@@ -559,6 +565,7 @@ module Kambi::Views
             if @all_posts
               p "Referenced in:"
                 _post_checks(@all_posts, @these_posts)
+                _page_checks(@all_pages, @these_pages)
             end
             input :type => 'hidden', :name => 'clip_id', :value => clip.id
             input :type => 'submit', :value => 'Submit'
@@ -669,6 +676,18 @@ module Kambi::Views
             else
               input :type => 'checkbox', :name => 'author-' + author.id.to_s, :value => author
               label author.name, :for => 'author-' + author.id.to_s; br
+            end
+          end
+        end
+        
+        def _page_checks(all_pages, these_pages)
+          for page in all_pages
+            if !these_pages.nil? and these_pages.include?(page)
+              input :type => 'checkbox', :name => 'page-' + page.id.to_s, :value => page, :checked => 'true'
+              label page.title, :for => 'page-' + page.id.to_s; br
+            else
+              input :type => 'checkbox', :name => 'page-' + page.id.to_s, :value => page
+              label page.title, :for => 'page-' + page.id.to_s; br
             end
           end
         end

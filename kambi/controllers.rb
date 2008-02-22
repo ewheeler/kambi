@@ -204,6 +204,7 @@ module Kambi::Controllers
         def read(clip_id) 
             @clip = Clip.find clip_id;
             @posts = @clip.posts
+            @pages = @clip.pages
             render :view_clip
         end
         
@@ -220,6 +221,7 @@ module Kambi::Controllers
                 @user = User.find @state.user_id
                 @all_posts = Models::Post.find :all; @these_posts = nil
                 @all_tags = Models::Tag.find :all;  @these_tags = nil
+                @all_pages = Models::Page.find :all; @these_pages = nil
                 @clip = Clip.new
             end
             render :add_clip
@@ -247,6 +249,7 @@ module Kambi::Controllers
             @clip = Models::Clip.find clip_id
             @all_posts = Models::Post.find :all;      @these_posts = @clip.posts
             @all_tags = Models::Tag.find :all;  @these_tags = @clip.tags
+            @all_pages = Models::Page.find :all; @these_pages = @clip.pages
             render :edit_clip
         end
         
@@ -262,12 +265,34 @@ module Kambi::Controllers
                 
                 all_tags.each{|a| if input.include?('tag-' + a.id.to_s); 
                     clip.taggings<<(Tagging.create(:taggable_id => clip.id, :taggable_type => 'Clip', :tag_id => a.id)); end; }
-               
+                
                 all_posts = Models::Post.find :all
                 these_clips_posts = clip.posts
                 these_clips_posts.each{|d|  clip.references.delete(Reference.find(:all, :conditions => ['post_id =?', d.id])) }
                 all_posts.each{|p| if input.include?('post-' + p.id.to_s); 
                     clip.references<<(Reference.create :post_id => p.id, :clip_id => clip.id); end; }
+                    
+                all_pages = Models::Page.find :all
+                these_clips_pages = clip.pages
+                these_clips_pages.each{|d|  clip.references.delete(Reference.find(:all, :conditions => ['page_id =?', d.id])) }
+                all_pages.each{|p| if input.include?('page-' + p.id.to_s); 
+                    clip.references<<(Reference.create :page_id => p.id, :clip_id => clip.id); end; }
+            
+                # all_pages = Models::Page.find :all
+                # these_references = Array.new(clip.references)
+                # these_references.each{|r| clip.references.delete(r)}
+                # 
+                # all_referables = all_posts + all_pages
+                # all_referables.each{|r| 
+                #     if input.include?('post-' + r.id.to_s);
+                #       puts r.title;
+                #       clip.references<<(Reference.create :post_id => r.id, :clip_id => clip.id); 
+                #     end;
+                #     if input.include?('page-' + r.id.to_s);
+                #       puts r.title;
+                #       clip.references<<(Reference.create :page_id => r.id, :clip_id => clip.id); 
+                #     end;}
+                
                 redirect R(Posts)
             else
               _error("Unauthorized", 401)
