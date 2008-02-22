@@ -16,7 +16,13 @@ module Kambi::Controllers
         def create
             unless @state.user_id.blank?
                 page = Page.create :title => input.page_title, :body => input.page_body, :nickname => input.page_nickname
-                redirect R(Pages)
+                all_clips = Models::Clip.find :all
+                all_clips.each{|c| if input.include?('clip-' + c.id.to_s); 
+                    page.references<<(Reference.create :page_id => page.id, :clip_id => c.id); end; }
+                all_tags = Models::Tag.find :all
+                all_tags.each{|a| if input.include?('tag-' + a.id.to_s); 
+                    page.taggings<<(Tagging.create( :taggable_id => page.id, :taggable_type => 'Page', :tag_id => a.id)); end; }
+                redirect R(Pages, page.id)
             else
               _error("Unauthorized", 401)
             end
@@ -88,9 +94,17 @@ module Kambi::Controllers
         # POST /posts
         def create
             unless @state.user_id.blank?
-                post = Post.create :title => input.post_title, :body => input.post_body,
-                                   :user_id => @state.user_id, :nickname => input.post_nickname
-                redirect R(Posts)
+                post = Post.create :title => input.post_title, :body => input.post_body, :user_id => @state.user_id, :nickname => input.post_nickname                       
+                all_clips = Models::Clip.find :all
+                all_clips.each{|c| if input.include?('clip-' + c.id.to_s); 
+                     post.references<<(Reference.create :post_id => post.id, :clip_id => c.id); end; }
+                all_tags = Models::Tag.find :all
+                all_tags.each{|a| if input.include?('tag-' + a.id.to_s); 
+                    post.taggings<<(Tagging.create( :taggable_id => post.id, :taggable_type => 'Post', :tag_id => a.id)); end; }
+                all_authors = Models::Author.find :all
+                all_authors.each{|a| if input.include?('author-' + a.id.to_s); 
+                    post.authorships<<(Authorship.create( :post_id => post.id, :author_id => a.id)); end; }
+                redirect R(Posts, post.id)
             else
               _error("Unauthorized", 401)
             end
@@ -196,6 +210,12 @@ module Kambi::Controllers
             all_posts = Models::Post.find :all
             all_posts.each{|p| if input.include?('post-' + p.id.to_s); 
                 clip.references<<(Reference.create :post_id => p.id, :clip_id => clip.id); end; }
+            all_tags = Models::Tag.find :all
+            all_tags.each{|a| if input.include?('tag-' + a.id.to_s); 
+                clip.taggings<<(Tagging.create(:taggable_id => clip.id, :taggable_type => 'Clip', :tag_id => a.id)); end; }
+            all_pages = Models::Page.find :all
+            all_pages.each{|p| if input.include?('page-' + p.id.to_s); 
+                clip.references<<(Reference.create :page_id => p.id, :clip_id => clip.id); end; }
             redirect R(Posts)
         end
         
@@ -395,10 +415,16 @@ module Kambi::Controllers
     class Authors < REST 'authors'
       # POST /authors
       def create
-        Models::Author.create(:first => input.author_first, :last => input.author_last,
+        author = Models::Author.create(:first => input.author_first, :last => input.author_last,
                     :url => input.author_url, :photo_url => input.author_photo_url,
                     :org => input.author_org, :org_url => input.author_org_url,
                     :bio => input.author_bio)
+        all_tags = Models::Tag.find :all
+        all_tags.each{|a| if input.include?('tag-' + a.id.to_s); 
+            author.taggings<<(Tagging.create(:taggable_id => author.id, :taggable_type => 'Author', :tag_id => a.id)); end; }
+        all_posts = Models::Post.find :all
+        all_posts.each{|p| if input.include?('post-' + p.id.to_s); 
+            author.authorships<<(Authorship.create :post_id => p.id, :author_id => author.id); end; }
         redirect R(Authors, input.author_id)
       end
       

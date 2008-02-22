@@ -49,9 +49,9 @@ module Kambi::Views
           else
             for post in @posts
               div.post do
-                  @authors = post.authors
-                  _post(post)
-                end
+                @authors = post.authors
+                _post(post)
+              end
                 clips = post.clips
                 for clip in clips
                   tag_names = clip.tags.collect{|t| t.name}
