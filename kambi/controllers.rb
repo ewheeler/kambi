@@ -40,9 +40,12 @@ module Kambi::Controllers
                     @page.references<<(Reference.create :page_id => @page.id, :clip_id => c.id); end; }
                 
                 all_tags = Models::Tag.find :all
-                @page.tags.each{|d| @page.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@page.id}"] )) }
+                #@page.tags.each{|d| @page.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@page.id}  "] )) }
+                these_taggings = Array.new(@page.taggings)
+                these_taggings.each{|d| @page.taggings.delete(d) }
+                
                 all_tags.each{|a| if input.include?(a.name); 
-                    @page.taggings<<(Tagging.create( :taggable_id => @page.id, :taggable_type => "Page", :tag_id => a.id)); end; }
+                    @page.taggings<<(Tagging.create( :taggable_id => @page.id, :taggable_type => 'Page', :tag_id => a.id)); end; }
                 @page.update_attributes :title => input.page_title, :body => input.page_body, :nickname => input.page_nickname
                 redirect R(@page)
             else
@@ -62,8 +65,8 @@ module Kambi::Controllers
             unless @state.user_id.blank?
                 @user = User.find @state.user_id
                 @page = Page.new; 
-                @all_clips = Models::Clip.find :all;      @these_pages_clips = nil
-                @all_pages_tags = Models::Tag.find :all;  @these_pages_tags = nil
+                @all_clips = Models::Clip.find :all;      @these_clips = nil
+                @all_tags = Models::Tag.find :all;  @these_tags = nil
             end
             render :add_page
         end
@@ -74,8 +77,8 @@ module Kambi::Controllers
                 @user = User.find @state.user_id
             end
             @page = Page.find page_id
-            @all_clips = Models::Clip.find :all;      @these_pages_clips = @page.clips
-            @all_pages_tags = Models::Tag.find :all;  @these_pages_tags = @page.tags
+            @all_clips = Models::Clip.find :all;      @these_clips = @page.clips
+            @all_tags = Models::Tag.find :all;  @these_tags = @page.tags
             render :edit_page
         end
         
@@ -110,7 +113,7 @@ module Kambi::Controllers
                 
                 all_authors = Models::Author.find :all
                 @post.authors.each{|d| @post.authorships.delete(Authorship.find(:all, :conditions => ["author_id = #{d.id} AND  post_id = #{@post.id}"] )) }
-                all_authors.each{|a|  if input.include?(a.name); 
+                all_authors.each{|a| if input.include?(a.name); 
                     @post.authorships<<(Authorship.create( :post_id => @post.id, :author_id => a.id)); end; }
                     
                 all_clips = Models::Clip.find :all
@@ -118,10 +121,14 @@ module Kambi::Controllers
                 all_clips.each{|c| if input.include?(c.nickname); 
                     @post.references<<(Reference.create :post_id => @post.id, :clip_id => c.id); end; }
                 
-                all_tags = Models::Tag.find :all
-                @post.tags.each{|d| @post.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@post.id}"] )) }
+                # all_tags = Models::Tag.find :all
+                #                @post.tags.each{|d| @post.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@post.id} AND taggable_type = Post"] )) }
+                
+                these_taggings = Array.new(@post.taggings)
+                these_taggings.each{|d| @post.taggings.delete(d) }
+                
                 all_tags.each{|a| if input.include?(a.name); 
-                    @post.taggings<<(Tagging.create( :taggable_id => @post.id, :taggable_type => "Post", :tag_id => a.id)); end; }
+                    @post.taggings<<(Tagging.create( :taggable_id => @post.id, :taggable_type => 'Post', :tag_id => a.id)); end; }
                     
                 @post.update_attributes :title => input.post_title, :body => input.post_body, :nickname => input.post_nickname
                 redirect R(@post)
@@ -156,9 +163,9 @@ module Kambi::Controllers
             unless @state.user_id.blank?
                 @user = User.find @state.user_id
                 @post = Post.new;
-                @all_clips = Models::Clip.find :all;      @these_posts_clips = nil
-                @all_posts_tags = Models::Tag.find :all;  @these_posts_tags = nil
-                @all_authors = Models::Author.find :all;  @these_posts_authors = nil
+                @all_clips = Models::Clip.find :all;      @these_clips = nil
+                @all_tags = Models::Tag.find :all;  @these_tags = nil
+                @all_authors = Models::Author.find :all;  @these_authors = nil
             end
             render :add_post
         end
@@ -169,9 +176,9 @@ module Kambi::Controllers
                 @user = User.find @state.user_id
             end
             @post = Post.find post_id
-            @all_clips = Models::Clip.find :all;      @these_posts_clips = @post.clips
-            @all_posts_tags = Models::Tag.find :all;  @these_posts_tags = @post.tags
-            @all_authors = Models::Author.find :all;  @these_posts_authors = @post.authors
+            @all_clips = Models::Clip.find :all;      @these_clips = @post.clips
+            @all_tags = Models::Tag.find :all;  @these_tags = @post.tags
+            @all_authors = Models::Author.find :all;  @these_authors = @post.authors
             render :edit_post
         end
         
@@ -214,8 +221,8 @@ module Kambi::Controllers
         def new
             unless @state.user_id.blank?
                 @user = User.find @state.user_id
-                @all_posts = Models::Post.find :all; @these_clips_posts = nil
-                @all_clips_tags = Models::Tag.find :all;  @these_clips_tags = nil
+                @all_posts = Models::Post.find :all; @these_posts = nil
+                @all_tags = Models::Tag.find :all;  @these_tags = nil
                 @clip = Clip.new
             end
             render :add_clip
@@ -223,16 +230,16 @@ module Kambi::Controllers
         
         # DELETE /clips/1
         def delete(clip_id)
-            unless @state.user_id.blank?
-                @clip = Clip.find clip_id
-                if @clip.destroy
-                  redirect R(Posts)
-                else
-                  _error("Unable to delete clip #{@clip.id}", 500)
-                end
-            else
-              _error("Unauthorized", 401)
-            end
+          unless @state.user_id.blank?
+              @clip = Clip.find clip_id
+              if @clip.destroy
+                redirect R(Posts)
+              else
+                _error("Unable to delete clip #{@clip.id}", 500)
+              end
+          else
+            _error("Unauthorized", 401)
+          end
         end
                 
         # GET /clips/1/edit
@@ -241,8 +248,8 @@ module Kambi::Controllers
                 @user = User.find @state.user_id
             end
             @clip = Models::Clip.find clip_id
-            @all_posts = Models::Post.find :all;      @these_clips_posts = @clip.posts
-            @all_clips_tags = Models::Tag.find :all;  @these_clips_tags = @clip.tags
+            @all_posts = Models::Post.find :all;      @these_posts = @clip.posts
+            @all_tags = Models::Tag.find :all;  @these_tags = @clip.tags
             render :edit_clip
         end
         
@@ -252,12 +259,17 @@ module Kambi::Controllers
                 clip = Clip.find clip_id
                 all_tags = Models::Tag.find :all
                 clip.update_attributes :url => input.clip_url, :body => input.clip_body, :nickname => input.clip_nickname
-                these_tags = clip.tags
-                these_tags.each{|d| unless input.include?(d.name); 
-                    clip.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{clip.id}"] )); end; }
-                not_these_tags = all_tags - these_tags
-                not_these_tags.each{|a| if input.include?(a.name); 
-                    clip.taggings<<(Tagging.create(:taggable_id => clip.id, :taggable_type => "Clip", :tag_id => a.id)); end; }
+                # these_tags = clip.tags
+                # these_tags.each{|d| unless input.include?(d.name); 
+                #     clip.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{clip.id} AND taggable_type = Clip"] )); end; }
+                # not_these_tags = all_tags - these_tags
+                
+                these_taggings = Array.new(clip.taggings)
+                these_taggings.each{|d| clip.taggings.delete(d) }
+                
+                all_tags.each{|a| if input.include?(a.name); 
+                    clip.taggings<<(Tagging.create(:taggable_id => clip.id, :taggable_type => 'Clip', :tag_id => a.id)); end; }
+               
                 all_posts = Models::Post.find :all
                 these_clips_posts = clip.posts
                 these_clips_posts.each{|d|  clip.references.delete(Reference.find(:all, :conditions => ['post_id =?', d.id])) }
@@ -308,31 +320,31 @@ module Kambi::Controllers
             render :add_tag
         end
         
-        # GET /tag/1/edit
-        def edit(tag_id) 
-            unless @state.user_id.blank?
-                @user = User.find @state.user_id
-            end
-            @tag = Tag.find tag_id
-            render :edit_tag
-        end
-        
-        # PUT /tags/1
-        def update(tag_id)
-            unless @state.user_id.blank?
-                @tag = Tag.find tag_id
-                @tag.update_attributes :name => input.tag_name
-                @taggables = @tag.taggables
-                @posts = Array.new; @clips = Array.new; @pages = Array.new; @authors = Array.new;
-                @taggables.each{|t|  if t.instance_of?(Kambi::Models::Post); @posts<<t; 
-                    elsif t.instance_of?(Kambi::Models::Clip);  @clips<<t;
-                    elsif t.instance_of?(Kambi::Models::Page); @pages<<t;  
-                    elsif t.instance_of?(Kambi::Models::Author); @authors<<t; end; }
-                render :view_tags
-            else
-              _error("Unauthorized", 401)
-            end
-        end
+        # # GET /tag/1/edit
+        # def edit(tag_id) 
+        #     unless @state.user_id.blank?
+        #         @user = User.find @state.user_id
+        #     end
+        #     @tag = Tag.find tag_id
+        #     render :edit_tag
+        # end
+        # 
+        # # PUT /tags/1
+        # def update(tag_id)
+        #     unless @state.user_id.blank?
+        #         @tag = Tag.find tag_id
+        #         @tag.update_attributes :name => input.tag_name
+        #         @taggables = @tag.taggables
+        #         @posts = Array.new; @clips = Array.new; @pages = Array.new; @authors = Array.new;
+        #         @taggables.each{|t|  if t.instance_of?(Kambi::Models::Post); @posts<<t; 
+        #             elsif t.instance_of?(Kambi::Models::Clip);  @clips<<t;
+        #             elsif t.instance_of?(Kambi::Models::Page); @pages<<t;  
+        #             elsif t.instance_of?(Kambi::Models::Author); @authors<<t; end; }
+        #         render :view_tags
+        #     else
+        #       _error("Unauthorized", 401)
+        #     end
+        # end
     end 
      
     class Comments < REST 'comments'
@@ -406,8 +418,8 @@ module Kambi::Controllers
           unless @state.user_id.blank?
               @user = User.find @state.user_id
               @author = Models::Author.new; 
-              @all_posts = Models::Post.find :all;  @these_authors_posts = nil
-              @all_tags = Models::Tag.find :all;    @these_authors_tags = nil
+              @all_posts = Models::Post.find :all;  @these_posts = nil
+              @all_tags = Models::Tag.find :all;    @these_tags = nil
           end
           render :add_author
       end
@@ -418,8 +430,8 @@ module Kambi::Controllers
               @user = User.find @state.user_id
           end
           @author = Models::Author.find author_id
-          @all_posts = Models::Post.find :all;  @these_authors_posts = @author.posts
-          @all_tags = Models::Tag.find :all;    @these_authors_tags = @author.tags
+          @all_posts = Models::Post.find :all;  @these_posts = @author.posts
+          @all_tags = Models::Tag.find :all;    @these_tags = @author.tags
           render :edit_author
       end
       
@@ -432,12 +444,16 @@ module Kambi::Controllers
                           :url => input.author_url, :photo_url => input.author_photo_url,
                           :org => input.author_org, :org_url => input.author_org_url,
                           :bio => input.author_bio
-              these_tags = author.tags
-              these_tags.each{|d| unless input.include?(d.name); 
-                  author.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{author.id}"] )); end; }
-              not_these_tags = all_tags - these_tags
-              not_these_tags.each{|a| if input.include?(a.name); 
-                  author.taggings.push(Tagging.create(:taggable_id => author.id, :taggable_type => "Author", :tag_id => a.id)); end; }
+              # these_tags = author.tags
+              #              these_tags.each{|d| unless input.include?(d.name); 
+              #                  author.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{author.id} AND taggable_type = Author"] )); end; }
+              #              not_these_tags = all_tags - these_tags
+              
+              these_taggings = Array.new(author.taggings)
+              these_taggings.each{|d| author.taggings.delete(d) }
+              
+              all_tags.each{|a| if input.include?(a.name); 
+                  author.taggings<<(Tagging.create(:taggable_id => author.id, :taggable_type => 'Author', :tag_id => a.id)); end; }
               all_posts = Models::Post.find :all
               these_authors_posts = author.posts
               these_authors_posts.each{|d|  author.authorships.delete(Authorship.find(:all, :conditions => ['post_id =?', d.id])) }

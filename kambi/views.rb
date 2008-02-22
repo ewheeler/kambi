@@ -150,13 +150,13 @@ module Kambi::Views
           end
         end
         
-        def edit_tag
-          if @user
-            _tag_form(@tag, :action => R(@tag), :method => :put)
-          else
-            _login
-          end
-        end
+        # def edit_tag
+        #   if @user
+        #     _tag_form(@tag, :action => R(@tag), :method => :put)
+        #   else
+        #     _login
+        #   end
+        # end
         
         def view
           div.post do
@@ -328,7 +328,7 @@ module Kambi::Views
         end
         
         def _tag(tag)
-          a("Edit " + tag.name, :href => R(Tags, tag.id, 'edit'))
+          a('Delete ' + tag.name, :href => R(Tags, tag.id, 'delete')) 
         end
         
         def _page(page)
@@ -437,7 +437,7 @@ module Kambi::Views
             span " | "
             button(:type => 'submit') {'Logout'}
           end
-          a('Delete Page', :href => R(Pages, page.id, 'delete')) unless @these_pages_tags.nil?
+          a('Delete Page', :href => R(Pages, page.id, 'delete')) unless @these_tags.nil?
           end
           form({:method => 'post'}.merge(opts)) do
             label 'Title', :for => 'page_title'; br
@@ -449,29 +449,13 @@ module Kambi::Views
             label 'Body', :for => 'page_body'; br
             textarea page.body, :name => 'page_body'; br
              
-            if @all_pages_tags
+            if @all_tags
               p "Tagged with:"  
-              for tag in @all_pages_tags
-                if !@these_pages_tags.nil? and @these_pages_tags.include?(tag)
-                  input :type => 'checkbox', :name => tag.name, :value => tag.id, :checked => 'true'
-                  label tag.name, :for => tag.name; br
-                else
-                  input :type => 'checkbox', :name => tag.name, :value => tag.id
-                  label tag.name, :for => tag.name; br
-                end
-              end
+              _tag_checks(@all_tags, @these_tags)
             end
             if @all_clips
               p "References:"
-              for clip in @all_clips
-                if !@these_pages_clips.nil? and @these_pages_clips.include?(clip)
-                  input :type => 'checkbox', :name => clip.nickname, :value => clip, :checked => 'true'
-                  label clip.nickname, :for => clip.nickname; br
-                else
-                  input :type => 'checkbox', :name => clip.nickname, :value => clip
-                  label clip.nickname, :for => clip.nickname; br
-                end
-              end
+              _clip_checks(@all_clips, @these_clips)
             end
             input :type => 'hidden', :name => 'page_id', :value => page.id
             input :type => 'submit', :value => 'Submit'
@@ -486,7 +470,7 @@ module Kambi::Views
             span " | "
             button(:type => 'submit') {'Logout'}
           end
-          a('Delete Essay', :href => R(Posts, post.id, 'delete')) unless @these_posts_tags.nil?
+          a('Delete Essay', :href => R(Posts, post.id, 'delete')) unless @these_tags.nil?
           end
           form({:method => 'post'}.merge(opts)) do
             label 'Title', :for => 'post_title'; br
@@ -500,40 +484,16 @@ module Kambi::Views
             
             if @all_authors
               p "Author(s):"        
-              for author in @all_authors
-                if !@these_posts_authors.nil? and @these_posts_authors.include?(author)
-                  input :type => 'checkbox', :name => author.name, :value => author.id, :checked => 'true'
-                  label author.name, :for => author.name; br
-                else
-                  input :type => 'checkbox', :name => author.name, :value => author.id
-                  label author.name, :for => author.name; br
-                end
-              end
+              _author_checks(@all_authors, @these_authors)
             end
              
-            if @all_posts_tags
+            if @all_tags
               p "Tagged with:"        
-              for tag in @all_posts_tags
-                if !@these_posts_tags.nil? and @these_posts_tags.include?(tag)
-                  input :type => 'checkbox', :name => tag.name, :value => tag.id, :checked => 'true'
-                  label tag.name, :for => tag.name; br
-                else
-                  input :type => 'checkbox', :name => tag.name, :value => tag.id
-                  label tag.name, :for => tag.name; br
-                end
-              end
+             _tag_checks(@all_tags, @these_tags)
             end
             if @all_clips
               p "References:"
-              for clip in @all_clips
-                if !@these_posts_clips.nil? and @these_posts_clips.include?(clip)
-                  input :type => 'checkbox', :name => clip.nickname, :value => clip, :checked => 'true'
-                  label clip.nickname, :for => clip.nickname; br
-                else
-                  input :type => 'checkbox', :name => clip.nickname, :value => clip
-                  label clip.nickname, :for => clip.nickname; br
-                end
-              end
+              _clip_checks(@all_clips, @these_clips)
             end
             input :type => 'hidden', :name => 'post_id', :value => post.id
             input :type => 'submit', :value => 'Submit'
@@ -548,7 +508,7 @@ module Kambi::Views
             span " | "
             button(:type => 'submit') {'Logout'}
           end
-          a('Delete Resource', :href => R(Clips, clip.id, 'delete')) unless @these_clips_tags.nil?
+          a('Delete Resource', :href => R(Clips, clip.id, 'delete')) unless @these_tags.nil?
           end
           form({:method => 'post'}.merge(opts)) do
             label 'Nickname', :for => 'clip_nickname'; br
@@ -560,29 +520,13 @@ module Kambi::Views
             label 'Body', :for => 'clip_body'; br
             textarea clip.body, :name => 'clip_body'; br
             
-            if @all_clips_tags
+            if @all_tags
               p "Tagged with:"
-              for tag in @all_clips_tags
-                if !@these_clips_tags.nil? and @these_clips_tags.include?(tag)
-                  input :type => 'checkbox', :name => tag.name, :value => tag, :checked => 'true'
-                  label tag.name, :for => tag.name; br
-                else
-                  input :type => 'checkbox', :name => tag.name, :value => tag
-                  label tag.name, :for => tag.name; br
-                end
-              end
+              _tag_checks(@all_tags, @these_tags)
             end
             if @all_posts
               p "Referenced in:"
-              for post in @all_posts
-                if !@these_clips_posts.nil? and @these_clips_posts.include?(post)
-                  input :type => 'checkbox', :name => post.title, :value => post, :checked => 'true'
-                  label post.title, :for => post.title; br
-                else
-                  input :type => 'checkbox', :name => post.title, :value => post
-                  label post.title, :for => post.title; br
-                end
-              end
+                _post_checks(@all_posts, @these_posts)
             end
             input :type => 'hidden', :name => 'clip_id', :value => clip.id
             input :type => 'submit', :value => 'Submit'
@@ -596,7 +540,7 @@ module Kambi::Views
              span " | "
              button(:type => 'submit') {'Logout'}
            end
-           a('Delete Author', :href => R(Authors, author.id, 'delete')) unless @these_authors_tags.nil?
+           a('Delete Author', :href => R(Authors, author.id, 'delete')) unless @these_tags.nil?
            end
            form({:method => 'post'}.merge(opts)) do
              label 'First Name', :for => 'author_first'; br
@@ -622,28 +566,12 @@ module Kambi::Views
              
              if @all_tags
                p "Tagged with:"
-               for tag in @all_tags
-                 if !@these_authors_tags.nil? and @these_authors_tags.include?(tag)
-                   input :type => 'checkbox', :name => tag.name, :value => tag, :checked => 'true'
-                   label tag.name, :for => tag.name; br
-                 else
-                   input :type => 'checkbox', :name => tag.name, :value => tag
-                   label tag.name, :for => tag.name; br
-                 end
-               end
+               _tag_checks(@all_tags, @these_tags)
              end
              
              if @all_posts
                p "Authorships:"
-               for post in @all_posts
-                 if !@these_authors_posts.nil? and @these_authors_posts.include?(post)
-                   input :type => 'checkbox', :name => post.title, :value => post, :checked => 'true'
-                   label post.title, :for => post.title; br
-                 else
-                   input :type => 'checkbox', :name => post.title, :value => post
-                   label post.title, :for => post.title; br
-                 end
-               end
+               _post_checks(@all_posts, @these_posts)
              end
              input :type => 'hidden', :name => 'author_id', :value => author.id
              input :type => 'submit', :value => 'Submit'
@@ -651,18 +579,65 @@ module Kambi::Views
         end
         
         def _tag_form(tag, opts)
-          form(:action => R(Sessions), :method => 'delete') do
-          p do 
-            span "You are logged in as #{@user.username}"
-            span " | "
-            button(:type => 'submit') {'Logout'}
-          end
-          a('Delete Tag', :href => R(Tags, tag.id, 'delete')) if tag.name
+          form(:action => R(Sessions), :method => 'delete') do          
+            p do 
+              span "You are logged in as #{@user.username}"
+              span " | "
+              button(:type => 'submit') {'Logout'}
+            end
           end
           form({:method => 'post'}.merge(opts)) do
             label 'Tag Name', :for => 'tag_name'; br
             input :name => 'tag_name', :type => 'text', :value => tag.name; br
             input :type => 'submit', :value => 'Submit'
+          end
+        end
+        
+        def _post_checks(all_posts, these_posts)
+          for post in all_posts
+            if !these_posts.nil? and these_posts.include?(post)
+              input :type => 'checkbox', :name => post.title, :value => post, :checked => 'true'
+              label post.title, :for => post.title; br
+            else
+              input :type => 'checkbox', :name => post.title, :value => post
+              label post.title, :for => post.title; br
+            end
+          end
+        end
+        
+        def _tag_checks(all_tags, these_tags)
+          for tag in all_tags
+            if !these_tags.nil? and these_tags.include?(tag)
+              input :type => 'checkbox', :name => tag.name, :value => tag, :checked => 'true'
+              label tag.name, :for => tag.name; br
+            else
+              input :type => 'checkbox', :name => tag.name, :value => tag
+              label tag.name, :for => tag.name; br
+            end
+          end
+        end
+        
+        def _clip_checks(all_clips, these_clips)
+          for clip in all_clips
+            if !these_clips.nil? and these_clips.include?(clip)
+              input :type => 'checkbox', :name => clip.nickname, :value => clip, :checked => 'true'
+              label clip.nickname, :for => clip.nickname; br
+            else
+              input :type => 'checkbox', :name => clip.nickname, :value => clip
+              label clip.nickname, :for => clip.nickname; br
+            end
+          end
+        end
+        
+        def _author_checks(all_authors, these_authors)
+          for author in all_authors
+            if !these_authors.nil? and these_authors.include?(author)
+              input :type => 'checkbox', :name => author.name, :value => author.id, :checked => 'true'
+              label author.name, :for => author.name; br
+            else
+              input :type => 'checkbox', :name => author.name, :value => author.id
+              label author.name, :for => author.name; br
+            end
           end
         end
         
