@@ -287,11 +287,16 @@ module Kambi::Views
         def view_clips
           h2 "Resources:"
           for clip in @clips
-            p do
+            div.clip do
               a(clip.nickname, :href => R(Clips, clip.id, 'edit'))
-              h3 "Tagged with:"
-              for tag in clip.tags
-                a(tag.name, :href => R(Tags, tag.id))
+              tags = clip.tags unless clip.tags.nil?
+              unless tags.empty?
+                div.tags do
+                  p "tagged with:"
+                  for tag in tags
+                    a(tag.name, :href => R(Tags, tag.id))
+                  end
+                end
               end
               p clip.body
               h3 "Referenced in:"
