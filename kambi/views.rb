@@ -54,8 +54,16 @@ module Kambi::Views
                 end
                 clips = post.clips
                 for clip in clips
-                  div.clip do
-                    _clip(clip)
+                  tag_names = clip.tags.collect{|t| t.name}
+                  tag_names.to_s
+                  if tag_names.include?('project')
+                      div.project do
+                        _clip(clip)
+                      end
+                  else
+                    div.clip do
+                      _clip(clip)
+                    end
                   end
                 end
               div.break do
@@ -163,8 +171,16 @@ module Kambi::Views
             _post(@post)
           end
             for clip in @clips
-              div.clip do
-                _clip(clip)
+              tag_names = clip.tags.collect{|t| t.name}
+              tag_names.to_s
+              if tag_names.include?('project')
+                  div.project do
+                    _clip(clip)
+                  end
+              else
+                div.clip do
+                  _clip(clip)
+                end
               end
             end
             div.comments do
@@ -234,8 +250,16 @@ module Kambi::Views
             _page(@page)
           end
           for clip in @clips
-            div.clip do
-              _clip(clip)
+            tag_names = clip.tags.collect{|t| t.name}
+            tag_names.to_s
+            if tag_names.include?('project')
+                div.project do
+                  _clip(clip)
+                end
+            else
+              div.clip do
+                _clip(clip)
+              end
             end
           end
         end

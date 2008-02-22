@@ -40,7 +40,6 @@ module Kambi::Controllers
                     @page.references<<(Reference.create :page_id => @page.id, :clip_id => c.id); end; }
                 
                 all_tags = Models::Tag.find :all
-                #@page.tags.each{|d| @page.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@page.id}  "] )) }
                 these_taggings = Array.new(@page.taggings)
                 these_taggings.each{|d| @page.taggings.delete(d) }
                 
@@ -121,9 +120,7 @@ module Kambi::Controllers
                 all_clips.each{|c| if input.include?('clip-' + c.id.to_s); 
                     @post.references<<(Reference.create :post_id => @post.id, :clip_id => c.id); end; }
                 
-                all_tags = Models::Tag.find :all
-                #                @post.tags.each{|d| @post.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@post.id} AND taggable_type = Post"] )) }
-                
+                all_tags = Models::Tag.find :all                
                 these_taggings = Array.new(@post.taggings)
                 these_taggings.each{|d| @post.taggings.delete(d) }
                 
@@ -259,10 +256,6 @@ module Kambi::Controllers
                 clip = Clip.find clip_id
                 all_tags = Models::Tag.find :all
                 clip.update_attributes :url => input.clip_url, :body => input.clip_body, :nickname => input.clip_nickname
-                # these_tags = clip.tags
-                # these_tags.each{|d| unless input.include?(d.name); 
-                #     clip.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{clip.id} AND taggable_type = Clip"] )); end; }
-                # not_these_tags = all_tags - these_tags
                 
                 these_taggings = Array.new(clip.taggings)
                 these_taggings.each{|d| clip.taggings.delete(d) }
@@ -444,10 +437,6 @@ module Kambi::Controllers
                           :url => input.author_url, :photo_url => input.author_photo_url,
                           :org => input.author_org, :org_url => input.author_org_url,
                           :bio => input.author_bio
-              # these_tags = author.tags
-              #              these_tags.each{|d| unless input.include?(d.name); 
-              #                  author.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{author.id} AND taggable_type = Author"] )); end; }
-              #              not_these_tags = all_tags - these_tags
               
               these_taggings = Array.new(author.taggings)
               these_taggings.each{|d| author.taggings.delete(d) }
@@ -566,6 +555,18 @@ module Kambi::Controllers
                     line-height:1.3em;
                 }
                 div.clip{
+                    padding: 1em;
+                    border-top: 4px solid #433C2A;
+                    width:20%;
+                    text-align:justify;
+                    float:right;
+                    clear:right;
+                    margin-right:20%;
+                    line-height:1.3em;
+                    word-spacing:0.25em;
+                    font-size:90%;
+                }
+                div.project{
                     padding: 1em;
                     border-top: 4px solid #433C2A;
                     width:20%;
