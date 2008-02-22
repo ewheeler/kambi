@@ -303,6 +303,9 @@ module Kambi::Views
               for post in clip.posts
                 a(post.title, :href => R(Posts, post.id))
               end
+              for page in clip.pages
+                a(page.title, :href => R(Pages, page.id))
+              end
             end
           end
         end
