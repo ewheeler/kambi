@@ -604,11 +604,11 @@ module Kambi::Views
         def _post_checks(all_posts, these_posts)
           for post in all_posts
             if !these_posts.nil? and these_posts.include?(post)
-              input :type => 'checkbox', :name => post.title, :value => post, :checked => 'true'
-              label post.title, :for => post.title; br
+              input :type => 'checkbox', :name => 'post-' + post.id.to_s, :value => post, :checked => 'true'
+              label post.title, :for => 'post-' + post.id.to_s; br
             else
-              input :type => 'checkbox', :name => post.title, :value => post
-              label post.title, :for => post.title; br
+              input :type => 'checkbox', :name => 'post-' + post.id.to_s, :value => post
+              label post.title, :for => 'post-' + post.id.to_s; br
             end
           end
         end
@@ -616,11 +616,11 @@ module Kambi::Views
         def _tag_checks(all_tags, these_tags)
           for tag in all_tags
             if !these_tags.nil? and these_tags.include?(tag)
-              input :type => 'checkbox', :name => tag.name, :value => tag, :checked => 'true'
-              label tag.name, :for => tag.name; br
+              input :type => 'checkbox', :name => 'tag-' + tag.id.to_s, :value => tag, :checked => 'true'
+              label tag.name, :for => tag.name.to_s; br
             else
-              input :type => 'checkbox', :name => tag.name, :value => tag
-              label tag.name, :for => tag.name; br
+              input :type => 'checkbox', :name => 'tag-' + tag.id.to_s, :value => tag
+              label tag.name, :for => 'tag-' + tag.id.to_s; br
             end
           end
         end
@@ -628,11 +628,11 @@ module Kambi::Views
         def _clip_checks(all_clips, these_clips)
           for clip in all_clips
             if !these_clips.nil? and these_clips.include?(clip)
-              input :type => 'checkbox', :name => clip.nickname, :value => clip, :checked => 'true'
-              label clip.nickname, :for => clip.nickname; br
+              input :type => 'checkbox', :name => 'clip-' + clip.id.to_s, :value => clip, :checked => 'true'
+              label clip.nickname, :for => 'clip-' + clip.id.to_s; br
             else
-              input :type => 'checkbox', :name => clip.nickname, :value => clip
-              label clip.nickname, :for => clip.nickname; br
+              input :type => 'checkbox', :name => 'clip-' + clip.id.to_s, :value => clip
+              label clip.nickname, :for => 'clip-' + clip.id.to_s; br
             end
           end
         end
@@ -640,11 +640,11 @@ module Kambi::Views
         def _author_checks(all_authors, these_authors)
           for author in all_authors
             if !these_authors.nil? and these_authors.include?(author)
-              input :type => 'checkbox', :name => author.name, :value => author.id, :checked => 'true'
-              label author.name, :for => author.name; br
+              input :type => 'checkbox', :name => 'author-' + author.id.to_s, :value => author, :checked => 'true'
+              label author.name, :for => 'author-' + author.id.to_s; br
             else
-              input :type => 'checkbox', :name => author.name, :value => author.id
-              label author.name, :for => author.name; br
+              input :type => 'checkbox', :name => 'author-' + author.id.to_s, :value => author
+              label author.name, :for => 'author-' + author.id.to_s; br
             end
           end
         end

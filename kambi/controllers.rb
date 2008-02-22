@@ -36,7 +36,7 @@ module Kambi::Controllers
                 @page = Page.find page_id
                 all_clips = Models::Clip.find :all
                 @page.clips.each{|d| @page.references.delete(Reference.find(:all, :conditions => ["clip_id = #{d.id}"] )) }
-                all_clips.each{|c| if input.include?(c.nickname); 
+                all_clips.each{|c| if input.include?('clip-' + c.id.to_s); 
                     @page.references<<(Reference.create :page_id => @page.id, :clip_id => c.id); end; }
                 
                 all_tags = Models::Tag.find :all
@@ -44,7 +44,7 @@ module Kambi::Controllers
                 these_taggings = Array.new(@page.taggings)
                 these_taggings.each{|d| @page.taggings.delete(d) }
                 
-                all_tags.each{|a| if input.include?(a.name); 
+                all_tags.each{|a| if input.include?('tag-' + a.id.to_s); 
                     @page.taggings<<(Tagging.create( :taggable_id => @page.id, :taggable_type => 'Page', :tag_id => a.id)); end; }
                 @page.update_attributes :title => input.page_title, :body => input.page_body, :nickname => input.page_nickname
                 redirect R(@page)
@@ -113,21 +113,21 @@ module Kambi::Controllers
                 
                 all_authors = Models::Author.find :all
                 @post.authors.each{|d| @post.authorships.delete(Authorship.find(:all, :conditions => ["author_id = #{d.id} AND  post_id = #{@post.id}"] )) }
-                all_authors.each{|a| if input.include?(a.name); 
+                all_authors.each{|a| if input.include?('author-' + a.id.to_s); 
                     @post.authorships<<(Authorship.create( :post_id => @post.id, :author_id => a.id)); end; }
                     
                 all_clips = Models::Clip.find :all
                 @post.clips.each{|d| @post.references.delete(Reference.find(:all, :conditions => ["clip_id = #{d.id}"] )) }
-                all_clips.each{|c| if input.include?(c.nickname); 
+                all_clips.each{|c| if input.include?('clip-' + c.id.to_s); 
                     @post.references<<(Reference.create :post_id => @post.id, :clip_id => c.id); end; }
                 
-                # all_tags = Models::Tag.find :all
+                all_tags = Models::Tag.find :all
                 #                @post.tags.each{|d| @post.taggings.delete(Tagging.find(:all, :conditions => ["tag_id = #{d.id} AND  taggable_id = #{@post.id} AND taggable_type = Post"] )) }
                 
                 these_taggings = Array.new(@post.taggings)
                 these_taggings.each{|d| @post.taggings.delete(d) }
                 
-                all_tags.each{|a| if input.include?(a.name); 
+                all_tags.each{|a| if input.include?('tag-' + a.id.to_s); 
                     @post.taggings<<(Tagging.create( :taggable_id => @post.id, :taggable_type => 'Post', :tag_id => a.id)); end; }
                     
                 @post.update_attributes :title => input.post_title, :body => input.post_body, :nickname => input.post_nickname
@@ -197,7 +197,7 @@ module Kambi::Controllers
         def create
             clip = Clip.create(:nickname => input.clip_nickname, :url => input.clip_url, :body => input.clip_body)
             all_posts = Models::Post.find :all
-            all_posts.each{|p| if input.include?(p.title); 
+            all_posts.each{|p| if input.include?('post-' + p.id.to_s); 
                 clip.references<<(Reference.create :post_id => p.id, :clip_id => clip.id); end; }
             redirect R(Posts)
         end
@@ -267,13 +267,13 @@ module Kambi::Controllers
                 these_taggings = Array.new(clip.taggings)
                 these_taggings.each{|d| clip.taggings.delete(d) }
                 
-                all_tags.each{|a| if input.include?(a.name); 
+                all_tags.each{|a| if input.include?('tag-' + a.id.to_s); 
                     clip.taggings<<(Tagging.create(:taggable_id => clip.id, :taggable_type => 'Clip', :tag_id => a.id)); end; }
                
                 all_posts = Models::Post.find :all
                 these_clips_posts = clip.posts
                 these_clips_posts.each{|d|  clip.references.delete(Reference.find(:all, :conditions => ['post_id =?', d.id])) }
-                all_posts.each{|p| if input.include?(p.title); 
+                all_posts.each{|p| if input.include?('post-' + p.id.to_s); 
                     clip.references<<(Reference.create :post_id => p.id, :clip_id => clip.id); end; }
                 redirect R(Posts)
             else
@@ -452,12 +452,12 @@ module Kambi::Controllers
               these_taggings = Array.new(author.taggings)
               these_taggings.each{|d| author.taggings.delete(d) }
               
-              all_tags.each{|a| if input.include?(a.name); 
+              all_tags.each{|a| if input.include?('tag-' + a.id.to_s); 
                   author.taggings<<(Tagging.create(:taggable_id => author.id, :taggable_type => 'Author', :tag_id => a.id)); end; }
               all_posts = Models::Post.find :all
               these_authors_posts = author.posts
               these_authors_posts.each{|d|  author.authorships.delete(Authorship.find(:all, :conditions => ['post_id =?', d.id])) }
-              all_posts.each{|p| if input.include?(p.title); 
+              all_posts.each{|p| if input.include?('post-' + p.id.to_s); 
                   author.authorships<<(Authorship.create :post_id => p.id, :author_id => author.id); end; }
               redirect R(Authors)
           else
