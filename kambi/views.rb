@@ -427,6 +427,7 @@ module Kambi::Views
         
         def _clip(clip)
           a(clip.nickname, :href => clip.url)
+          p clip.source
           tags = clip.tags unless clip.tags.nil?
           unless tags.empty?
             div.tags do
@@ -555,6 +556,9 @@ module Kambi::Views
             label 'Url', :for => 'clip_url'; br
             input :name => 'clip_url', :type => 'text', 
                   :value => clip.url; br   
+            label 'Source', :for => 'clip_source'; br
+            input :name => 'clip_source', :type => 'text', 
+                  :value => clip.source; br
             label 'Body', :for => 'clip_body'; br
             textarea clip.body, :name => 'clip_body'; br
             

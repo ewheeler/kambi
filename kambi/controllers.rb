@@ -206,7 +206,7 @@ module Kambi::Controllers
     class Clips < REST 'clips'
         # POST /clips
         def create
-            clip = Clip.create(:nickname => input.clip_nickname, :url => input.clip_url, :body => input.clip_body)
+            clip = Clip.create(:nickname => input.clip_nickname, :url => input.clip_url, :body => input.clip_body, :source => input.clip_source)
             all_posts = Models::Post.find :all
             all_posts.each{|p| if input.include?('post-' + p.id.to_s); 
                 clip.references<<(Reference.create :post_id => p.id, :clip_id => clip.id); end; }
@@ -278,7 +278,7 @@ module Kambi::Controllers
             unless @state.user_id.blank?
                 clip = Clip.find clip_id
                 all_tags = Models::Tag.find :all
-                clip.update_attributes :url => input.clip_url, :body => input.clip_body, :nickname => input.clip_nickname
+                clip.update_attributes :url => input.clip_url, :body => input.clip_body, :nickname => input.clip_nickname, :source => input.clip_source
                 
                 these_taggings = Array.new(clip.taggings)
                 these_taggings.each{|d| clip.taggings.delete(d) }
@@ -604,6 +604,7 @@ module Kambi::Controllers
                     float:left;
                     border-bottom: 8px solid #990000;
                     line-height:1.3em;
+                    padding:2em 0pt 2em 0pt;
                 }
                 div.clip{
                     padding: 1em;
@@ -616,6 +617,8 @@ module Kambi::Controllers
                     line-height:1.3em;
                     word-spacing:0.25em;
                     font-size:90%;
+                    background-color: #ECE9D4;
+                    margin-bottom: 2em;
                 }
                 div.project{
                     padding: 1em;
@@ -628,6 +631,8 @@ module Kambi::Controllers
                     line-height:1.3em;
                     word-spacing:0.25em;
                     font-size:90%;
+                    background-color: #E5F1F4;
+                    margin-bottom: 2em;
                 }
                 div.author{
                     border-bottom: 8px solid #990000;

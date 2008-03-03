@@ -125,7 +125,7 @@ module Kambi::Models
         end
         
         create_table :kambi_clips, :force => true do |table|
-          table.string :url, :nickname
+          table.string :url, :nickname, :source
           table.text :body
           table.timestamps
         end
