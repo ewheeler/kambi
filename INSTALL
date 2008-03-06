@@ -1,0 +1,29 @@
+Making kambi work is easy!
+==========================
+
+
+1. Install the libsqlite3-ruby package via apt-get
+   (this will also install libsqlite3-0 for you)
+   TODO: What about OSX? :'(
+
+
+2. Install the following ruby gems:
+     * camping
+     * reststop
+     * activerecord
+     * turing
+   (there are actually more dependancies, but you
+   will be prompted by ruby gems to install those)
+
+
+3. Add the ruby gems bin to your $PATH. I do this by
+   adding the following to my .bashrc:
+
+     # add the ruby gems bin to my path
+     GEMS_BIN=`ruby -r rubygems -e "print Gem.bindir"`
+     PATH="${GEMS_BIN}:${PATH}"
+
+
+4. Start Kambi by running (in this dir):
+     $ camping kambi.rb
+
