@@ -342,10 +342,13 @@ module Kambi::Controllers
             @tags = Tag.find :all
             @taggables = @tag.taggables
             @posts = Array.new; @clips = Array.new; @pages = Array.new; @authors = Array.new;
-            @taggables.each{|t|  if t.instance_of?(Kambi::Models::Post); @posts<<t; 
-                elsif t.instance_of?(Kambi::Models::Clip);  @clips<<t;
-                elsif t.instance_of?(Kambi::Models::Page); @pages<<t;  
-                elsif t.instance_of?(Kambi::Models::Author); @authors<<t; end; }
+            @taggables.each { |t|
+                if    t.instance_of?(Kambi::Models::Post);   @posts   << t; 
+                elsif t.instance_of?(Kambi::Models::Clip);   @clips   << t;
+                elsif t.instance_of?(Kambi::Models::Page);   @pages   << t;  
+                elsif t.instance_of?(Kambi::Models::Author); @authors << t;
+                end;
+            }
             render :view_tags
         end
         
@@ -532,163 +535,62 @@ module Kambi::Controllers
         end
     end
     
-    class Static < R '/static/(.+)'         
-      MIME_TYPES = {'.css' => 'text/css', '.js' => 'text/javascript', 
-                    '.jpg' => 'image/jpeg'}
-      PATH = File.expand_path("../" + File.dirname(__FILE__))
+    
+    class Static < R '/static/(.+)'
+      PATH = File.expand_path(File.dirname(__FILE__) + "/..") + "/static"
+      MIME_TYPES = {
+        '.css' => 'text/css',
+        '.js'  => 'text/javascript', 
+        '.jpg' => 'image/jpeg',
+        '.png' => 'image/png'
+      }
 
       def get(path)
-        @headers['Content-Type'] = MIME_TYPES[path[/\.\w+$/, 0]] || "text/plain"
-        unless path.include? ".." # prevent directory traversal attacks
-          @headers['X-Sendfile'] = "#{PATH}/static/#{path}"
+        # prevent ../ attacks
+        if path.include? ".."
+          @status = 403
+          return "Invalid Path"
+        end
+        
+        file = "#{PATH}/#{path}"
+        
+        # return the file contents (x-sendfile
+        # seems to be broken), or a 404 error
+        if File.exists?(file)
+          ext = path[/\.\w+$/, 0]
+          @headers['Content-Type'] = MIME_TYPES[ext] || "text/plain"
+          return File.read(file)
+          
         else
-          @status = "403"
-          "403 - Invalid path"
+          @status = 404
+          return "Not Found"
         end
       end
     end
     
-    # You can use old-fashioned Camping controllers too!
+    
+    # this magic url returns all of the stylesheets found in ./static/css
+    # to keep them physically separate, but cut down on the http hits
     class Style < R '/styles.css'
-        def get
-            @headers["Content-Type"] = "text/css; charset=utf-8"
-            @body = %{
-                body {
-                    font-family: Georga, Utopia, serif;
-                }
-                div.header{
-                    background-color: #433C2A;
-                    color:  #e5e5e5;
-                    min-height:180px;
-                    padding: 0pt;
-                    margin: 0pt;
-                    border-top: 8px solid #990000;
-                }
-                div.header h1 a{
-                    font-family: Georgia, Utopia, serif;
-                    color:  #e5e5e5;
-                    font-size:150%;
-                    margin-left: 20%;
-                    border-bottom: 1px solid #433C2A;
-                }
-                div.header a{
-                    font-family: Georgia, Utopia, serif;
-                    color:  #A59E8F;
-                    font-size:120%;
-                    margin-left:5%;
-                    border-bottom: 1px solid #433C2A;
-                }
-                h1, h2, h3{
-                  color: #433C2A;
-                }
-                div.content {
-                    padding: 10px;
-                }
-                div.break{
-                    clear:both;
-                }
-                div.page{
-                    font-family:georgia,"lucida bright","times new roman",serif;
-                    width:50%;
-                    float:left;
-                    text-align:justify;
-                    word-spacing:0.25em;
-                    border-bottom: 8px solid #990000;
-                    line-height:1.3em;
-                }
-                div.post {
-                    font-family:georgia,"lucida bright","times new roman",serif;
-                    width: 50%;
-                    text-align:justify;
-                    word-spacing:0.25em;
-                    float:left;
-                    border-bottom: 8px solid #990000;
-                    line-height:1.3em;
-                    padding:2em 0pt 2em 0pt;
-                }
-                div.clip{
-                    padding: 1em;
-                    border-top: 4px solid #433C2A;
-                    width:20%;
-                    text-align:justify;
-                    float:right;
-                    clear:right;
-                    margin-right:20%;
-                    line-height:1.3em;
-                    word-spacing:0.25em;
-                    font-size:90%;
-                    background-color: #ECE9D4;
-                    margin-bottom: 2em;
-                }
-                div.project{
-                    padding: 1em;
-                    border-top: 4px solid #433C2A;
-                    width:20%;
-                    text-align:justify;
-                    float:right;
-                    clear:right;
-                    margin-right:20%;
-                    line-height:1.3em;
-                    word-spacing:0.25em;
-                    font-size:90%;
-                    background-color: #E5F1F4;
-                    margin-bottom: 2em;
-                }
-                div.author{
-                    border-bottom: 8px solid #990000;
-                }
-                div.tags {
-                    font-size: 90%;
-                    color: #990000;
-                    border-left: 1px solid #433C2A;
-                    padding-left:1em;
-                }
-                div.tags a:hover{
-                    background:yellow;
-                    border-bottom: 1px solid yellow;
-                    color:black;
-                }
-                a{
-                    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
-                }
-                a:link,a:visited {
-                    color:#433C2A;
-                    border-bottom: 1px dotted #990000;
-                    text-decoration:none;
-                }
-                a:hover {
-                    color:white;
-                    background:#990000;
-                    text-decoration:none;
-                }
-                div.comments{
-                    padding: 1em;
-                    margin-top: 1em;
-                    border-left: 4px solid #433C2A;
-                    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
-                    float:left;
-                    clear:both;
-                }
-                div.comment{
-                    padding: 1em;
-                    margin-right: 4em;
-                    border-left: 1px solid #433C2A;
-                }
-                div.time{
-                    font-size:70%;
-                    color: #990000;
-                    border-left: 1px solid #433C2A;
-                    padding-left:1em;
-                    font-family:georgia,"lucida bright","times new roman",serif;   
-                }
-                div.cloud{
-                    padding-left:10%;
-                }
-                div.cloud a:hover{
-                    background:yellow;
-                    border-bottom: 1px solid yellow;
-                }
-            }
+      def get
+        @headers["Content-Type"] = "text/css; charset=utf-8"
+        files = []
+        
+        # iterate (sorted) all files in the css dir,
+        # stashing the filename and contents of each
+        path = Static.const_get(:PATH) + "/css"
+        Dir.entries(path).sort.each do |f|
+          if f.match /\.css$/
+            files.push(
+              f + "\n" +
+              ("=" * f.length) + "\n\n" +
+              File.read("#{path}/#{f}")
+            )
+          end
         end
+        
+        return files.join("\n"*2)
+      end
     end
 end
+

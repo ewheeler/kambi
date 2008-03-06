@@ -714,3 +714,4 @@ module Kambi::Views
       end
     end
 end
+
