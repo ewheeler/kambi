@@ -6,3 +6,44 @@ body {
   width: 800px;
   margin: 0 auto;
 }
+
+#header {
+  margin-bottom: 1em;
+}
+
+  #nav {
+  }
+
+    #nav li {
+      float: left;
+      list-style: none;
+      display: block;
+      padding: 1em;
+      width: 8em;
+    }
+
+      #nav li a {
+        color: #fff;
+        font-weight: bold;
+        text-decoration: none;
+      }
+
+      #nav li.home  { background: pink; }
+      #nav li.about { background: purple; }
+
+  #places {
+    display: none;
+  }
+
+  #content {
+  }
+  
+  .cloud {
+    border: 0.5em solid cyan;
+    margin-top: 1em;
+    padding: 1em;
+  }
+  
+    .cloud h2 {
+      display: none;
+    }

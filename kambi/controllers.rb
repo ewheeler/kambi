@@ -582,8 +582,7 @@ module Kambi::Controllers
         Dir.entries(path).sort.each do |f|
           if f.match /\.css$/
             files.push(
-              f + "\n" +
-              ("=" * f.length) + "\n\n" +
+              "/* -- " + f + " -- */\n\n" +
               File.read("#{path}/#{f}")
             )
           end

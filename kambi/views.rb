@@ -6,38 +6,64 @@ module Kambi::Views
       include Kambi::Models
       include Kambi::Controllers
         def layout
-          html do
-            head do
-              title 'Kambi'
-              link :rel => 'stylesheet', :type => 'text/css', 
-                   :href => self/'/styles.css', :media => 'screen'
-            end
-            body do
-              div.header do
-                h1.header { a 'Kambi', :href => R(Posts) }
-                a("Home", :href => R(Posts))
-                for page in Page.find :all
-                  a(page.title, :href => R(Pages, page.id))
-                end
-                a("All Essays", :href => R(Posts))
-                a("All Resources", :href => R(Clips))
-                a("All Tags", :href => R(Tags))
-                a('Authors', :href => R(Authors))
-                if @state.user_id.blank?
-                  a('Login', :href => R(Sessions, 'new'))
-                else
-                  br;br
-                  a(' ', :href=> '#')
-                  a(' ', :href=> '#')
-                  a('New Page', :href => R(Pages, 'new'))
-                  a('New Essay', :href => R(Posts, 'new'))
-                  a('New Resource', :href => R(Clips, 'new'))
-                  a('New Tag', :href => R(Tags, 'new'))
-                  a('New Author', :href => R(Authors, 'new'))
-                end
+          
+          # include xhtml strict doctype
+          @output_xml_instruction = false
+          fragment do
+            xhtml_strict do
+              
+              head do
+                title "Kambi"
+                link(
+                  :rel   => "stylesheet",
+                  :type  => "text/css", 
+                  :href  => "/styles.css",
+                  :media => "screen"
+                )
               end
-              div.content do
-                self << yield
+              body do
+                div.wrapper! do
+                  div.header! do
+                    h1 { a 'Kambi', :href => R(Posts) }
+                    
+                    ul.nav! do
+                      # the small left nav
+                      li.home  { a("Home",  :href => R(Posts) )}
+                      li.about { a("About", :href => "NOT-YET" )}
+                    end
+                    
+                    for page in Page.find :all
+                      a(page.title, :href => R(Pages, page.id))
+                    end
+                    
+                    ul.places! do
+                      # the top-right "places" nav
+                      li { a("All Essays",    :href => R(Posts)   )}
+                      li { a("All Resources", :href => R(Clips)   )}
+                      li { a("All Tags",      :href => R(Tags)    )}
+                      li { a("Authors",       :href => R(Authors) )}
+                    end
+                    
+                    if @state.user_id.blank?
+                      #a("Login", :href => R(Sessions, "new"))  
+                      
+                    else
+                      ul.admin! do
+                        # the floaty admin navigation
+                        li { a("New Page",     :href => R(Pages,   "new")) }
+                        li { a("New Essay",    :href => R(Posts,   "new")) }
+                        li { a("New Resource", :href => R(Clips,   "new")) }
+                        li { a("New Tag",      :href => R(Tags,    "new")) }
+                        li { a("New Author",   :href => R(Authors, "new")) }
+                      end
+                    end
+                    
+                    div.clear_hack ""
+                  end
+                  div.content! do
+                    self << yield
+                  end
+                end
               end
             end
           end
