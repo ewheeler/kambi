@@ -516,7 +516,8 @@ module Kambi::Controllers
             @user = User.find :first, :conditions => ['username = ? AND password = ?', input.username, input.password]
             if @user
                 @login = 'login success !'
-                @state.user_id = @user.id
+                @state.user_id   = @user.id
+                @state.user_name = @user.username
             else
                 @login = 'wrong user name or password'
             end
@@ -530,7 +531,8 @@ module Kambi::Controllers
 
         # DELETE /sessions
         def delete
-            @state.user_id = nil
+            @state.user_id   = nil
+            @state.user_name = nil
             render :logout
         end
     end
@@ -565,30 +567,6 @@ module Kambi::Controllers
           @status = 404
           return "Not Found"
         end
-      end
-    end
-    
-    
-    # this magic url returns all of the stylesheets found in ./static/css
-    # to keep them physically separate, but cut down on the http hits
-    class Style < R '/styles.css'
-      def get
-        @headers["Content-Type"] = "text/css; charset=utf-8"
-        files = []
-        
-        # iterate (sorted) all files in the css dir,
-        # stashing the filename and contents of each
-        path = Static.const_get(:PATH) + "/css"
-        Dir.entries(path).sort.each do |f|
-          if f.match /\.css$/
-            files.push(
-              "/* -- " + f + " -- */\n\n" +
-              File.read("#{path}/#{f}")
-            )
-          end
-        end
-        
-        return files.join("\n"*2)
       end
     end
 end

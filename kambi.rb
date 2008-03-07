@@ -70,7 +70,8 @@ def Kambi.create
     Kambi::Models.create_schema
 end
 
-# beautiful XHTML 11
+# TODO: what is this class? removing
+# it seem to have no effect at all
 class Mab
   def initialize(assigns = {}, helpers = nil, &block)
     super(assigns.merge({:indent => 2}), helpers, &block)

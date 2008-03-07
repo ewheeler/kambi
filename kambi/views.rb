@@ -5,64 +5,86 @@ module Kambi::Views
       include Kambi::Helpers
       include Kambi::Models
       include Kambi::Controllers
+        
+        # the markaby gem doesn't seem to provide
+        # a way of switching to xhtml 1.1 strict,
+        # so i've manually implemented it here.
+        # TODO: is there a cleaner way to do this?
+        def xhtml11(&block)
+          self.tagset = Markaby::XHTMLStrict
+          declare! :DOCTYPE, :html, :PUBLIC, "-//W3C//DTD XHTML 1.1//EN", "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"
+          tag! :html, :xmlns => "http://www.w3.org/1999/xhtml", 'xml:lang' => "en", &block
+          self
+        end
+        
+        # only execute the block if the current
+        # user is logged in to the website
+        def when_logged_in(&block)
+          unless @state.user_id.blank?
+            yield
+          end
+        end
+        
         def layout
-          
-          # include xhtml strict doctype
-          @output_xml_instruction = false
-          fragment do
-            xhtml_strict do
-              
-              head do
-                title "Kambi"
-                link(
-                  :rel   => "stylesheet",
-                  :type  => "text/css", 
-                  :href  => "/styles.css",
-                  :media => "screen"
-                )
-              end
-              body do
-                div.wrapper! do
-                  div.header! do
-                    h1 { a 'Kambi', :href => R(Posts) }
-                    
-                    ul.nav! do
-                      # the small left nav
-                      li.home  { a("Home",  :href => R(Posts) )}
-                      li.about { a("About", :href => "NOT-YET" )}
+          xhtml11 do
+            head do
+              title "Kambi"
+              link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/base.css",    :media => "screen")
+              link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/anserai.css", :media => "screen")
+            end
+            
+            body do
+              div.wrapper! do
+                div.header! do
+                  h1 { a 'Kambi', :href => R(Posts) }
+                  
+                  when_logged_in do
+                    div.logged_in_as! do
+                        span "You are logged in as "
+                        span.username(@state.user_name)
                     end
-                    
-                    for page in Page.find :all
-                      a(page.title, :href => R(Pages, page.id))
-                    end
-                    
-                    ul.places! do
-                      # the top-right "places" nav
-                      li { a("All Essays",    :href => R(Posts)   )}
-                      li { a("All Resources", :href => R(Clips)   )}
-                      li { a("All Tags",      :href => R(Tags)    )}
-                      li { a("Authors",       :href => R(Authors) )}
-                    end
-                    
-                    if @state.user_id.blank?
-                      #a("Login", :href => R(Sessions, "new"))  
-                      
-                    else
-                      ul.admin! do
-                        # the floaty admin navigation
+                  end
+                  
+                  ul.nav! do
+                    # the small left nav
+                    li.home  { a("Home",  :href => R(Posts) )}
+                    li.about { a("About", :href => "TODO" )}
+                  end
+                  
+                  for page in Page.find :all
+                    a(page.title, :href => R(Pages, page.id))
+                  end
+                  
+                  ul.places! do
+                    # the top-right "places" nav
+                    li { a("All Essays",    :href => R(Posts)   )}
+                    li { a("All Resources", :href => R(Clips)   )}
+                    li { a("All Tags",      :href => R(Tags)    )}
+                    li { a("Authors",       :href => R(Authors) )}
+                  end
+                  
+                  # the floaty admin navigation
+                  # only appears when logged in
+                  when_logged_in do
+                    div.admin_toolbox! do
+                      h3 "Admin Toolbox"
+                      ul do
                         li { a("New Page",     :href => R(Pages,   "new")) }
                         li { a("New Essay",    :href => R(Posts,   "new")) }
                         li { a("New Resource", :href => R(Clips,   "new")) }
                         li { a("New Tag",      :href => R(Tags,    "new")) }
                         li { a("New Author",   :href => R(Authors, "new")) }
+                        
+                        # requires class for css hackery (ie<7 compat)
+                        li.last { a(:href => "TODO") { "Log out &raquo;" } }
                       end
                     end
-                    
-                    div.clear_hack ""
                   end
-                  div.content! do
-                    self << yield
-                  end
+                  
+                  div.clear_hack ""
+                end
+                div.content! do
+                  self << yield
                 end
               end
             end
@@ -423,7 +445,7 @@ module Kambi::Views
           tags = post.tags unless post.tags.nil?
           unless tags.empty?
             div.tags do
-              p "tagged with:"
+              span "Tags:"
               for tag in tags
                 a(tag.name, :href => R(Tags, tag.id))
               end
@@ -496,14 +518,7 @@ module Kambi::Views
         
         
         def _page_form(page, opts)
-          form(:action => R(Sessions), :method => 'delete') do
-          p do 
-            span "You are logged in as #{@user.username}"
-            span " | "
-            button(:type => 'submit') {'Logout'}
-          end
           a('Delete Page', :href => R(Pages, page.id, 'delete')) unless @these_tags.nil?
-          end
           form({:method => 'post'}.merge(opts)) do
             label 'Title', :for => 'page_title'; br
             input :name => 'page_title', :type => 'text', 
