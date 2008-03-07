@@ -1,4 +1,14 @@
 #!ruby
+
+class String
+  def trim
+    s = self
+    s.gsub! /^\s+/, ""
+    s.gsub! /\s+$/, ""
+    return s
+  end
+end
+
 module Kambi::Helpers
   # include Kambi::Controllers
   # include Kambi::Models
@@ -55,7 +65,5 @@ module Kambi::Helpers
      ti.generate(fn, captcha) 
      src = {:filename => File.basename(fn), :hushhush => captcha, :type => "image/jpeg", :disposition => "inline"}
   end
-
-  
 end
 

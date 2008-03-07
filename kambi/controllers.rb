@@ -57,6 +57,20 @@ module Kambi::Controllers
               _error("Unauthorized", 401)
             end
         end
+
+        # DELETE /pages/1
+        def delete(page_id)
+            unless @state.user_id.blank?
+                @page = Page.find page_id
+                if @page.destroy
+                  redirect R(Pages)
+                else
+                  _error("Unable to delete page #{@page.id}", 500)
+                end
+            else
+              _error("Unauthorized", 401)
+            end
+        end
         
         # GET /pages
         # GET /pages.xml

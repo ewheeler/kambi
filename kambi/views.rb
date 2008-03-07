@@ -45,22 +45,23 @@ module Kambi::Views
                     end
                   end
                   
-                  ul.nav! do
-                    # the small left nav
-                    li.home  { a("Home",  :href => R(Posts) )}
-                    li.about { a("About", :href => "TODO" )}
+                  ul.pages! do
+                    # the index page is hard-coded
+                    li.p1 { a("Home", :href => R(Posts) )}
+                    
+                    # but others can be added dynamically
+                    Page.find(:all).each_with_index do |page,i|
+                      li(:class=>"p#{i+2}") { a(page.title, :href => R(Pages, page.id)) }
+                    end
                   end
                   
-                  for page in Page.find :all
-                    a(page.title, :href => R(Pages, page.id))
-                  end
                   
                   ul.places! do
                     # the top-right "places" nav
-                    li { a("All Essays",    :href => R(Posts)   )}
-                    li { a("All Resources", :href => R(Clips)   )}
-                    li { a("All Tags",      :href => R(Tags)    )}
-                    li { a("Authors",       :href => R(Authors) )}
+                    li.p1 { a("All Essays",    :href => R(Posts)   )}
+                    li.p2 { a("All Resources", :href => R(Clips)   )}
+                    li.p3 { a("All Tags",      :href => R(Tags)    )}
+                    #li.p4 { a("All Authors",   :href => R(Authors) )}
                   end
                   
                   # the floaty admin navigation
@@ -92,32 +93,37 @@ module Kambi::Views
         end
     
         def index
-          if @posts.empty?
-            p 'No posts found.'
-          else
-            for post in @posts
-              div.post do
-                @authors = post.authors
+          unless @posts.empty?
+            @posts.each_with_index do |post,i|
+              
+              # attach nice css hooks to each post,
+              # to make styling the page waaay easier
+              c = ["post", "p#{i+1}"]
+              c.push("first") if (i==0)
+              c.push("last")  if (i==(@posts.length-1))
+              
+              div(:class=>c.join(" ")) do
                 _post(post)
               end
-                clips = post.clips
-                for clip in clips
-                  tag_names = clip.tags.collect{|t| t.name}
-                  tag_names.to_s
-                  if tag_names.include?('project')
-                      div.project do
-                        _clip(clip)
-                      end
-                  else
-                    div.clip do
-                      _clip(clip)
-                    end
+              
+              clips = post.clips
+              for clip in clips
+                tag_names = clip.tags.collect { |t| t.name }
+                tag_names.to_s
+                if tag_names.include?('project')
+                  div.project do
+                    _clip(clip)
+                  end
+                else
+                  div.clip do
+                    _clip(clip)
                   end
                 end
-              div.break do
-                p ''
               end
             end
+            
+          else
+            p "No posts found."
           end
           div.cloud do
             _cloud
@@ -439,26 +445,41 @@ module Kambi::Views
         end
         
         def _post(post)
-          h1 do
-            a(post.title, :href => R(Posts, post.id))
+          h1 { a(post.title, :href => R(Posts, post.id)) }
+          
+          p.date do
+            day = post.created_at.mday
+            ord = (day < 10 or day > 20)\
+                ? %w{th st nd rd th th th th th th}[day % 10]\
+                : "th" # all the teens are "th"
+            
+            # display the day including the ordinal
+            span post.created_at.strftime("%B #{day}#{ord} %Y")
           end
-          tags = post.tags unless post.tags.nil?
-          unless tags.empty?
-            div.tags do
-              span "Tags:"
-              for tag in tags
-                a(tag.name, :href => R(Tags, tag.id))
+          
+          # TODO: why is this passed as an instance var,
+          # rather than inferred via the 'post' argument?
+          pa = post.authors
+          unless pa.empty?
+            p.authors do
+              span "By"
+              pa.each_with_index do |author,i|
+                
+                # capture the link as text, and add a join (COMMA or AND)
+                link = capture { a(author.name, :href => R(Authors, author.id)) }
+                join = (i < (pa.length-1)) ? (i < (pa.length-2) ? "," : " and ") : ""
+                text link.trim + join + "\n"
               end
             end
           end
-          unless @authors.empty?
-            step = 0
-            p do h4 "by"
-              for author in @authors
-                  a(author.name, :href => R(Authors, author.id)) if step == 0
-                  h4 "and " unless step == 0
-                  a(author.name, :href => R(Authors, author.id)) unless step == 0
-                  step = step.next
+          
+          tags = post.tags unless post.tags.nil?
+          
+          unless tags.empty?
+            p.tags do
+              span "Tags:"
+              for tag in tags
+                a(tag.name, :href => R(Tags, tag.id))
               end
             end
           end

@@ -35,7 +35,7 @@ h2 {
   /* for adding and removing things from
      the site. only displayed when logged in */
   #admin_toolbox {
-    position: absolute;
+    position: fixed;
     top: 10px;
     right: 10px;
     font-size: 8pt;
