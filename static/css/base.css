@@ -30,6 +30,16 @@ h2 {
   margin: 0.625em 0;
 }
 
+a.edit {
+  color: #fff;
+  padding: 0.4em;
+  background: #c00;
+}
+
+a.edit:hover {
+  background: #f00;
+}
+
 #header { }
   
   /* for adding and removing things from

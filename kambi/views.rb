@@ -25,6 +25,14 @@ module Kambi::Views
           end
         end
         
+        def render_text(text)
+          unless text.nil? or text.empty?
+            text.gsub("\r","").each("") do |chunk|
+              p chunk.trim
+            end
+          end
+        end
+        
         def layout
           xhtml11 do
             head do
@@ -64,28 +72,43 @@ module Kambi::Views
                     #li.p4 { a("All Authors",   :href => R(Authors) )}
                   end
                   
-                  # the floaty admin navigation
-                  # only appears when logged in
-                  when_logged_in do
-                    div.admin_toolbox! do
-                      h3 "Admin Toolbox"
-                      ul do
-                        li { a("New Page",     :href => R(Pages,   "new")) }
-                        li { a("New Essay",    :href => R(Posts,   "new")) }
-                        li { a("New Resource", :href => R(Clips,   "new")) }
-                        li { a("New Tag",      :href => R(Tags,    "new")) }
-                        li { a("New Author",   :href => R(Authors, "new")) }
-                        
-                        # requires class for css hackery (ie<7 compat)
-                        li.last { a(:href => "TODO") { "Log out &raquo;" } }
-                      end
-                    end
-                  end
-                  
                   div.clear_hack ""
                 end
-                div.content! do
-                  self << yield
+                
+                # wrapped for css hackery
+                div.content_wrap! do
+                  div.content! do
+                    self << yield
+                  end
+                end
+                
+                div.footer! do
+                  div do
+                    p.links do
+                      a( "Disclaimer", :href=>"TODO" ); span { "&bull;" }
+                      a( "About",      :href=>"TODO" ); span { "&bull;" }
+                      a( "Legal",      :href=>"TODO" )
+                    end
+                    p.rights "Copyright United Nations 2008. All Rights Reserved."
+                  end
+                end
+                
+                # the floaty admin navigation
+                # only appears when logged in
+                when_logged_in do
+                  div.admin_toolbox! do
+                    h3 "Admin Toolbox"
+                    ul do
+                      li { a("New Page",     :href => R(Pages,   "new")) }
+                      li { a("New Essay",    :href => R(Posts,   "new")) }
+                      li { a("New Resource", :href => R(Clips,   "new")) }
+                      li { a("New Tag",      :href => R(Tags,    "new")) }
+                      li { a("New Author",   :href => R(Authors, "new")) }
+                      
+                      # requires class for css hackery (ie<7 compat)
+                      li.last { a( "Log out", :href => "TODO") }
+                    end
+                  end
                 end
               end
             end
@@ -394,7 +417,8 @@ module Kambi::Views
           end
         end
     
-        # partials
+        # partials 
+        
         def _login
           form :action => R(Sessions), :method => 'post' do
             label 'Username', :for => 'username'; br
@@ -423,25 +447,28 @@ module Kambi::Views
           a('Delete ' + tag.name, :href => R(Tags, tag.id, 'delete')) 
         end
         
-        def _page(page)
-          h1 do
-            a(page.title, :href => R(Pages, page.id))
-          end
-          tags = page.tags unless page.tags.nil?
-          unless tags.empty?
-            div.tags do
-              p "tagged with:"
-              for tag in tags
+        def _tagged_with(tags)
+          
+          # ignore invalid arguments
+          unless(tags.nil? or tags.empty?)
+            p.tags do
+              span "Tags:"
+              tags.each do |tag|
                 a(tag.name, :href => R(Tags, tag.id))
               end
             end
           end
-          p page.body
-          unless @state.user_id.blank?
-            p do
-              a("Edit Page", :href => R(Pages, page.id, 'edit'))
-            end
-          end
+        end
+        
+        def _page(page)
+          h1 { a(page.title, :href => R(Pages, page.id)) }
+          when_logged_in {
+            a.edit( "Edit this Page",
+                    :href => R(Pages, page.id, 'edit'))
+          }
+          
+          _tagged_with(page.tags)
+          render_text(page.body)
         end
         
         def _post(post)
@@ -457,8 +484,6 @@ module Kambi::Views
             span post.created_at.strftime("%B #{day}#{ord} %Y")
           end
           
-          # TODO: why is this passed as an instance var,
-          # rather than inferred via the 'post' argument?
           pa = post.authors
           unless pa.empty?
             p.authors do
@@ -473,25 +498,13 @@ module Kambi::Views
             end
           end
           
-          tags = post.tags unless post.tags.nil?
+          when_logged_in {
+            a.edit( "Edit this Essay",
+                    :href => R(Posts, post.id, 'edit'))
+          }
           
-          unless tags.empty?
-            p.tags do
-              span "Tags:"
-              for tag in tags
-                a(tag.name, :href => R(Tags, tag.id))
-              end
-            end
-          end
-          p post.body
-          div.time do
-            p post.pretty_time
-          end
-          unless @state.user_id.blank?
-            p do
-              a("Edit Essay", :href => R(Posts, post.id, 'edit'))
-            end
-          end
+          _tagged_with(post.tags)
+          render_text(post.body)
         end
         
         def _clip(clip)
