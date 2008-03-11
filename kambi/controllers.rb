@@ -1,12 +1,10 @@
 #!ruby
 
 module Kambi::Controllers
-  # include Kambi::Helpers
-  # include Kambi::Models
-  # include Kambi::Views
-    class Index < R '/', '/index', '/all()()', '/(rss)', '/(rss)/([-\w]+)'
-      def get format = 'html'
-        redirect R(Posts)
+    class Index < R "/"
+      def get
+          @posts = [Post.find(:first)]
+          render :index
       end
     end
     

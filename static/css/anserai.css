@@ -23,25 +23,6 @@ a:hover { text-decoration: underline; }
     background: url("../png/header.png") no-repeat;
   }
   
-  #logged_in_as {
-    font-size: 7pt;
-    text-align: center;
-    
-    position: fixed;
-    top: 0;
-    left: 50%;
-    width: 460px;
-    margin-left: -250px;
-    padding: 4px 20px;
-    
-    background: url("../png/logged-in-banner.png") no-repeat 0 100%;
-  }
-
-    #logged_in_as .username {
-      text-transform: uppercase;
-      color: #aa0;
-    }
-  
   #pages {
   }
 
@@ -107,21 +88,95 @@ a:hover { text-decoration: underline; }
     position: relative;
   }
     
+    /* the main (left) contents of
+     * the post / page */
+    #content .body {
+      float: left;
+      width: 70%;
+    }
+    
+      #content .body p {
+        padding-right: 1em; }
+      
+      /* all links in post body */
+      #content .body a {
+        color: #00a4e1; }
+      
+      #content .body a.complete {
+        font-size: 150%;
+        float: right;
+        text-align: right;
+        background: #feffc8;
+        padding: 0.25em;
+      }
+      
+    /* the additional stuff on
+     * the right hand side */
+    #content .post .clips {
+      float: left;
+      width: 30%;
+    }
+    
+      #content .clips h3 {
+        font-size: 150%;
+      }
+      
+      #content .clip {
+        position: relative;
+        padding-left: 21px;
+        margin-top: 1em;
+        background: url("../png/ref-arrow.png") no-repeat;
+      }
+      
+        #content .clip blockquote,
+        #content .clip .tags {
+          font-size: 90%;
+          line-height: 1.6em;
+          margin: 1em 0;
+        }
+        
+        #content .clip .source a {
+          margin-bottom: 0.5em;
+          display: block;
+        }
+        
+        #content .clip .tags {
+          border-top: 0;
+        }
+          
+          /* the "tagged with" caption */
+          #content .clip .tags p {
+            display: none; }
+            
+      #content .post .clip a.edit,
+      #content .page .clip a.edit {
+        margin-top: 0;
+        top: 0;
+      }
+      
+      /* show "edit" link when hovering
+       * over the clip to edit */
+      #content .clip:hover a.edit {
+        display: block; }
+    
+    #content .post p {
+    }
+    
+    /* serves both posts and pages */
     #content .edit {
       position: absolute;
       right: 0;
       top: 0;
     }
-    
-    #content .post .edit {
-      margin-top: 14px;
-      top: 5.5em;
-    }
-    
-    #content .page .edit {
-      margin-top: 2px;
-      top: 3em;
-    }
+      
+      /* show "edit" link when hovering
+       * over the clip to edit */
+      #content .post:hover a.ed-post,
+      #content .page:hover a.ed-page {
+        display: block; }
+      
+      #content .ed-post { margin-top: 14px; top: 5.5em; }
+      #content .ed-page { margin-top: 2px;  top: 3em;   }
   
   #content h1 {
     font-weight: bold;
@@ -138,11 +193,15 @@ a:hover { text-decoration: underline; }
     }
   
   #content .date {
-    float: right;
-    padding-top: 12px;
-    margin-top: 0.5em;
+    position: absolute;
     line-height: 1;
     color: #ccc;
+    right: 0;
+    
+    /* 3.5em = 2em(h1) + 1.5em (p.authors),
+     * 12px  = 6px (authors padding) * 2 (top+bottom) */
+    top: 12px;
+    margin-top: 3.5em;
   }
   
   #content .authors {
@@ -171,7 +230,7 @@ a:hover { text-decoration: underline; }
     line-height: 1.6em;
     margin-bottom: 1em;
   }
-  
+    
   .cloud {
     border: 0.5em solid #aff3ff;
     background: #eff;

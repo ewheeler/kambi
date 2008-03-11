@@ -55,7 +55,7 @@ module Kambi::Views
                   
                   ul.pages! do
                     # the index page is hard-coded
-                    li.p1 { a("Home", :href => R(Posts) )}
+                    li.p1 { a("Home", :href => "/" )}
                     
                     # but others can be added dynamically
                     Page.find(:all).each_with_index do |page,i|
@@ -126,22 +126,7 @@ module Kambi::Views
               c.push("last")  if (i==(@posts.length-1))
               
               div(:class=>c.join(" ")) do
-                _post(post)
-              end
-              
-              clips = post.clips
-              for clip in clips
-                tag_names = clip.tags.collect { |t| t.name }
-                tag_names.to_s
-                if tag_names.include?('project')
-                  div.project do
-                    _clip(clip)
-                  end
-                else
-                  div.clip do
-                    _clip(clip)
-                  end
-                end
+                _post(post,:summary)
               end
             end
             
@@ -244,7 +229,9 @@ module Kambi::Views
         # end
         
         def view
-          div.post do
+          # only one on page, both first and last
+          # add classes to recycle css styles
+          div( :class=>"post n1 first last" ) do
             _post(@post)
           end
             for clip in @clips
@@ -463,17 +450,21 @@ module Kambi::Views
         def _page(page)
           h1 { a(page.title, :href => R(Pages, page.id)) }
           when_logged_in {
-            a.edit( "Edit this Page",
-                    :href => R(Pages, page.id, 'edit'))
+            a( "Edit this Page",
+               :class => "edit ed-page",
+               :href  => R(Pages, page.id, 'edit'))
           }
           
           _tagged_with(page.tags)
           render_text(page.body)
         end
         
-        def _post(post)
-          h1 { a(post.title, :href => R(Posts, post.id)) }
+        def _post( post,summary=false )
+          full = R(Posts, post.id)
+          h1 { a(post.title, :href => full) }
           
+          # the date in human readable
+          # format: March 11th 2008
           p.date do
             day = post.created_at.mday
             ord = (day < 10 or day > 20)\
@@ -484,6 +475,8 @@ module Kambi::Views
             span post.created_at.strftime("%B #{day}#{ord} %Y")
           end
           
+          # the authors that produced this
+          # post: Tom, Dick and Harry
           pa = post.authors
           unless pa.empty?
             p.authors do
@@ -498,18 +491,63 @@ module Kambi::Views
             end
           end
           
-          when_logged_in {
-            a.edit( "Edit this Essay",
-                    :href => R(Posts, post.id, 'edit'))
-          }
+          when_logged_in do
+            a( "Edit this Essay",
+               :class => "edit ed-post",
+               :href  => R(Posts, post.id, 'edit'))
+          end
           
           _tagged_with(post.tags)
-          render_text(post.body)
+          
+          div.body do
+            # abridge the essay (first paragraph only)
+            post.body.gsub!(%r|\n+.*|, "") if summary
+            render_text(post.body)
+            
+            p do
+              a.complete("View Complete Essay", :href=>full)
+            end
+          end
+          
+          pc = post.clips
+          unless pc.empty?
+            div.clips do
+              h3 "References"
+              
+              # if we are only displaying a summary
+              # of this post, then randomly remove
+              # clips until there are only three
+              if summary
+                pc = pc.sort_by { rand }
+                while pc.length > 3
+                  pc.delete_at(rand(pc.length))
+                end
+              end
+              
+              pc.each_with_index do |clip,i|
+              
+                #tags = clip.tags.collect { |t| t.name }
+                #div( :class => tags.include?("project") ? "project" : "clip" ) do
+                div.clip do
+                  _clip(clip)
+                end
+              end
+            end
+          end
+          
+          # css hack for ie < 7
+          div.clear_hack ""
         end
         
         def _clip(clip)
-          a(clip.nickname, :href => clip.url)
-          p clip.source
+          blockquote do
+            render_text clip.body
+          end
+          
+          div.source do
+            a(clip.nickname, :href => clip.url)
+            cite clip.source
+          end
           tags = clip.tags unless clip.tags.nil?
           unless tags.empty?
             div.tags do
@@ -519,11 +557,11 @@ module Kambi::Views
               end
             end
           end
-          p clip.body
-          unless @state.user_id.blank?
-            p do
-              a("Edit Resource", :href => R(Clips, clip.id, 'edit'))
-            end
+          
+          when_logged_in do
+            a( "Edit this Clip",
+               :class => "edit ed-clip",
+               :href  => R(Clips, clip.id, 'edit'))
           end
         end
         

@@ -2,6 +2,7 @@
   padding: 0;
   margin: 0;
   line-height: 1;
+  zoom: 1;
 }
 
 h1,h2,h3,h4,h5 {
@@ -34,6 +35,10 @@ a.edit {
   color: #fff;
   padding: 0.4em;
   background: #c00;
+  
+  /* make visible when hovering
+   * over the parent container */
+  display: none;
 }
 
 a.edit:hover {
@@ -41,6 +46,25 @@ a.edit:hover {
 }
 
 #header { }
+  
+  #logged_in_as {
+    font-size: 7pt;
+    text-align: center;
+    
+    position: fixed;
+    top: 0;
+    left: 50%;
+    width: 460px;
+    margin-left: -250px;
+    padding: 4px 20px;
+    
+    background: url("../png/logged-in-banner.png") no-repeat 0 100%;
+  }
+
+    #logged_in_as .username {
+      text-transform: uppercase;
+      color: #aa0;
+    }
   
   /* for adding and removing things from
      the site. only displayed when logged in */
