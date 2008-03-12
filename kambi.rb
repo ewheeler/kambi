@@ -17,8 +17,8 @@ require 'rubygems'
 gem 'camping', '~> 1.5'
 gem 'reststop', '~> 0.2'
 
-require 'camping'
-
+require "camping"
+require "htmlentities"
 
 begin
   # try to use local copy of library
@@ -43,9 +43,7 @@ module Kambi
     require 'kambi/models'
     require 'kambi/views'
     require 'kambi/controllers'
-    
     include Camping::Session
-
 end
 
 

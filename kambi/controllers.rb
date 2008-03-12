@@ -79,13 +79,12 @@ module Kambi::Controllers
         
         # GET /pages/new
         def new
-            unless @state.user_id.blank?
-                @user = User.find @state.user_id
-                @page = Page.new; 
-                @all_clips = Models::Clip.find :all;      @these_clips = nil
-                @all_tags = Models::Tag.find :all;  @these_tags = nil
-            end
+          require_login do
+            @page = Page.new 
+            @all_clips = Models::Clip.find :all
+            @all_tags  = Models::Tag.find  :all
             render :add_page
+          end
         end
 
         # GET /pages/1/edit
@@ -474,13 +473,12 @@ module Kambi::Controllers
       
       # GET /authors/new
       def new
-          unless @state.user_id.blank?
-              @user = User.find @state.user_id
-              @author = Models::Author.new; 
-              @all_posts = Models::Post.find :all;  @these_posts = nil
-              @all_tags = Models::Tag.find :all;    @these_tags = nil
-          end
+        require_login do
+          @author    = Models::Author.new; 
+          @all_posts = Models::Post.find(:all)
+          @all_tags  = Models::Tag.find(:all)
           render :add_author
+        end
       end
       
       # GET /authors/1/edit
@@ -525,20 +523,35 @@ module Kambi::Controllers
     class Sessions < REST 'sessions'
         # POST /sessions
         def create
-            @user = User.find :first, :conditions => ['username = ? AND password = ?', input.username, input.password]
+            @user = User.find :first, :conditions => ["username=? AND password=?", input.username, input.password]
             if @user
-                @login = 'login success !'
-                @state.user_id   = @user.id
-                @state.user_name = @user.username
+              
+              @redir = "/"
+              @h2    = "Login Successful"
+              @msg   = "You are now logged in to the website. See the admin "   +
+                       "toolbox in the top-right to add things, or hover over " +
+                       "existing things to edit them."
+              
+              # log the user in with a cookie
+              # (expires when browser is closed)
+              @state.user_id   = @user.id
+              @state.user_name = @user.username
+              
             else
-                @login = 'wrong user name or password'
+              # show an error and redirect back
+              # to the login form to try again
+              @redir = R(Sessions, :new)
+              @h2    = "Login Failed"
+              @msg   = "Your username and/or password were not correct. " +
+                       "Please check them and try again."
             end
-            render :login
+            
+            render :msg
         end   
         
         # GET /sessions/new
         def new
-            render :edit_post
+            render :login
         end
 
         # DELETE /sessions

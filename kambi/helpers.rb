@@ -9,6 +9,20 @@ class String
   end
 end
 
+# OMFG this is a horrid monkey-patch
+# TODO: how can this method be made
+# available to all controller methods?
+class Object
+  def require_login(&block)
+    if @state && @state.user_id
+      @user = Kambi::Models::User.find(@state.user_id)
+      yield
+    else
+      redirect "/sessions/new"
+    end
+  end
+end
+
 module Kambi::Helpers
   # include Kambi::Controllers
   # include Kambi::Models

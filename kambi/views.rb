@@ -20,15 +20,16 @@ module Kambi::Views
         # only execute the block if the current
         # user is logged in to the website
         def when_logged_in(&block)
-          unless @state.user_id.blank?
+          if @state.user_id
             yield
           end
         end
         
         def render_text(text)
+          enc = HTMLEntities.new
           unless text.nil? or text.empty?
             text.gsub("\r","").each("") do |chunk|
-              p chunk.trim
+              p enc.encode(chunk.trim, :named)
             end
           end
         end
@@ -38,6 +39,7 @@ module Kambi::Views
             head do
               title "Kambi"
               link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/base.css",    :media => "screen")
+              link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/forms.css",   :media => "screen")
               link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/anserai.css", :media => "screen")
             end
             
@@ -85,9 +87,10 @@ module Kambi::Views
                 div.footer! do
                   div do
                     p.links do
-                      a( "Disclaimer", :href=>"TODO" ); span { "&bull;" }
-                      a( "About",      :href=>"TODO" ); span { "&bull;" }
-                      a( "Legal",      :href=>"TODO" )
+                      a( "Disclaimer",  :href=>"TODO" ); span { "&bull;" }
+                      a( "About",       :href=>"TODO" ); span { "&bull;" }
+                      a( "Legal",       :href=>"TODO" ); span { "&bull;" }
+                      a( "Admin Login", :href=>R(Sessions, :new) )
                     end
                     p.rights "Copyright United Nations 2008. All Rights Reserved."
                   end
@@ -137,10 +140,43 @@ module Kambi::Views
             _cloud
           end
         end   
-    
+        
+        # show a generic message (this
+        # used to be the "logged in" page
+        def msg
+          h2(@h2) if @h2
+          p(@msg) if @msg
+          
+          # show a link to continue to
+          # the next page, if applicable
+          if @redir
+            p do
+              a("Continue", :href=>@redir)
+            end
+          end
+        end
+        
+        # display the login form
+        # (no longer a partial)
         def login
-          p { b @login }
-          p { a 'Continue', :href => R(Posts) }
+          
+          form(:action=>R(Sessions), :method=>"post") do
+            fieldset do
+              div do
+                label "Username", :for=>"fm-username"
+                input :id=>"fm-username", :name=>"username", :type=>"text"
+              end
+              
+              div do
+                label "Password", :for=>"fm-password"
+                input :id=>"fm-password", :name=>"password", :type=>"password"
+              end
+              
+              div do
+                button "Login"
+              end
+            end
+          end
         end
     
         def logout
@@ -149,74 +185,56 @@ module Kambi::Views
         end
         
         def add_author
-          if @user
+          when_logged_in do
             _author_form(@author, :action => R(Authors))
-          else
-            _login
           end
         end
         
         def add_page
-          if @user
+          when_logged_in do
             _page_form(@page, :action => R(Pages))
-          else
-            _login
           end
         end
     
         def add_post
-          if @user
+          when_logged_in do
             _post_form(@post, :action => R(Posts))
-          else
-            _login
           end
         end
         
         def add_clip
-          if @user
+          when_logged_in do
             _clip_form(@clip, :action => R(Clips))
-          else
-            _login
           end
         end
         
         def add_tag
-          if @user
+          when_logged_in do
             _tag_form(@tag, :action => R(Tags))
-          else
-            _login
           end
         end
         
         def edit_author
-          if @user
+          when_logged_in do
             _author_form(@author, :action => R(@author), :method => :put)
-          else
-            _login
           end
         end
         
         def edit_page
-          if @user
+          when_logged_in do
             _page_form(@page, :action => R(@page), :method => :put)
-          else
-            _login
           end
         end
     
         def edit_post
-          if @user
+          when_logged_in do
             _post_form(@post, :action => R(@post), :method => :put)
-          else
-            _login
           end
         end
         
         def edit_clip
-          if @user
+          when_logged_in do
             _clip_form(@clip, :action => R(@clip), :method => :put)
-          else
-            _login
           end
         end
         
@@ -405,16 +423,6 @@ module Kambi::Views
         end
     
         # partials 
-        
-        def _login
-          form :action => R(Sessions), :method => 'post' do
-            label 'Username', :for => 'username'; br
-            input :name => 'username', :type => 'text'; br
-            label 'Password', :for => 'password'; br
-            input :name => 'password', :type => 'password'; br
-            input :type => 'submit', :name => 'login', :value => 'Login'
-          end
-        end
         
         def _cloud
           h2 "Tags:"
