@@ -10,6 +10,10 @@ module Kambi::Models
       validates_uniqueness_of :nickname
       has_many :taggings, :as => :taggable
       has_many :tags, :through => :taggings
+      
+      def to_s
+      	title
+      end
     end
       
     class Post < Base
@@ -26,6 +30,10 @@ module Kambi::Models
       def pretty_time
         self.created_at.strftime("%A %B %d, %Y at %I %p")
       end
+      
+      def to_s
+      	title
+      end
     end
   
     class Clip < Base
@@ -36,6 +44,10 @@ module Kambi::Models
       validates_uniqueness_of :nickname
       has_many :taggings, :as => :taggable
       has_many :tags, :through => :taggings
+      
+      def to_s
+      	nickname
+      end
     end
     
     class Reference < Base
@@ -73,7 +85,11 @@ module Kambi::Models
       
       def taggables
         self.taggings.collect{|t| t.taggable}
-      end  
+      end
+      
+      def to_s
+      	name
+      end
     end
     
     class Author < Base
@@ -84,7 +100,12 @@ module Kambi::Models
       has_many :tags, :through => :taggings
       
       def name
-        name = self.first + " " + self.last
+      	# return nil for new authors, full name for existing
+      	(self.id.nil?) ? nil : self.first + " " + self.last
+      end
+      
+      def to_s
+      	name
       end
     end
     

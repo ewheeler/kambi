@@ -1,3 +1,5 @@
+/* vim:tabstop=2:expandtab */
+
 * {
   padding: 0;
   margin: 0;
@@ -24,6 +26,7 @@ body {
 h1 {
   font-size: 2em;
   margin: 0.5em 0;
+  font-weight: bold;
 }
 
 h2 {

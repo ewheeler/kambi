@@ -1,23 +1,83 @@
-fieldset {
-  border: none;
+/* vim:tabstop=2:expandtab */
+
+form h1 {
+  margin-top: 0;
+  float: left;
 }
 
-label {
+#content form a.del {
+  /* undo global stuff from
+   * base.css and anserai.css */
+  position: static;
+  display: block;
+  
+  line-height: 2em;
+  padding: 0 0.5em;
+  margin-left: 0.5em;
+  float: left;
+}
+
+fieldset {
+  clear: left;
+  border: none;
+  margin-bottom: 1em;
+}
+  
+  fieldset div {
+    clear: left;
+  }
+  
+label,
+h3.checks {
   color: #ff0090;
   display: block;
   font-weight: bold;
   margin-bottom: 0.5em;
 }
 
-fieldset div {
-  margin-top: 1em;
-}
+h3.checks {
+  color: #ff9bd3; }
+  
+  fieldset.checks {
+    margin-left: 1em; }
+  
+  fieldset.checks div {
+    margin-top: 0; }
+    
+      .checks div input,
+      .checks div label {
+        float: left;
+        width: auto;
+        margin-right: 0.6em;
+      }
+
+fieldset div       { margin-top: 1em; }
+fieldset div.first { margin-top: 0; }
+
+  fieldset div.hint {
+    float: left;
+    padding: 0.5em;
+    font-size: 90%;
+    background: #ffdaef;
+    margin-top: 0;
+    margin-bottom: 0.5em;
+  }
 
 input, textarea {
   color: #fff;
   padding: 2px;
   background: #4786a5;
   border: 1px solid #203d4b;
+}
+
+input {
+  width: 20em;
+}
+
+textarea {
+  width: 50em;
+  height: 10em;
+  line-height: 1.2em;
 }
 
 button {

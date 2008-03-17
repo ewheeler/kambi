@@ -1,3 +1,5 @@
+/* vim:tabstop=2:expandtab */
+
 body {
     
 }
@@ -32,9 +34,9 @@ a:hover { text-decoration: underline; }
       border-bottom: 6px solid #fff;
     }
     
-      #pages li.p2 {
-      	border-right: 6px solid #fff;
-      }
+    #pages li.p2 {
+      border-right: 6px solid #fff;
+    }
 
       #pages li a {
         color: #fff;
@@ -178,16 +180,14 @@ a:hover { text-decoration: underline; }
       #content .ed-post { margin-top: 14px; top: 5.5em; }
       #content .ed-page { margin-top: 2px;  top: 3em;   }
   
-  #content h1 {
-    font-weight: bold;
-    margin-top: 2em;
-  }
+  #content .post h1,
+  #content .page h1 {
+    margin-top: 2em; }
   
     #content .post.first h1,
     #content .page h1 {
-      margin-top: 0;
-    }
-  
+      margin-top: 0; }
+    
     #content h1 a {
       color: #000;
     }

@@ -1,12 +1,13 @@
-#!ruby
+#!/usr/bin/env ruby
+# vim:tabstop=2:expandtab
 
 module Kambi::Controllers
-    class Index < R "/"
-      def get
-          @posts = [Post.find(:first)]
-          render :index
-      end
+  class Index < R "/"
+    def get
+      @posts = [Post.find(:first)]
+      render :index
     end
+  end
     
     class Pages < REST 'pages'      
 
@@ -27,7 +28,6 @@ module Kambi::Controllers
         end
         
         # GET /pages/1
-        # GET /pages/1.xml
         def read(page_id) 
             @page = Page.find page_id
             @clips = @page.clips
@@ -71,7 +71,6 @@ module Kambi::Controllers
         end
         
         # GET /pages
-        # GET /pages.xml
         def list
             @pages = Page.find :all; @posts = Post.find :all
             render :index
@@ -122,7 +121,6 @@ module Kambi::Controllers
         end
 
         # GET /posts/1
-        # GET /posts/1.xml
         def read(post_id) 
             @post = Post.find post_id;  @comments = @post.comments
             @clips = @post.clips;       @authors = @post.authors
@@ -174,7 +172,6 @@ module Kambi::Controllers
         end
 
         # GET /posts
-        # GET /posts.xml
         def list
             @posts = Post.find :all; @pages = Page.find :all
             render :index
@@ -231,7 +228,6 @@ module Kambi::Controllers
         end
         
         # GET /clips/1
-        # GET /clips/1.xml
         def read(clip_id) 
             @clip = Clip.find clip_id;
             @posts = @clip.posts
@@ -240,7 +236,6 @@ module Kambi::Controllers
         end
         
         # GET /clips
-        # GET /clips.xml
         def list
             @clips = Clip.find :all
             render :view_clips
@@ -339,7 +334,6 @@ module Kambi::Controllers
         end
         
         # GET /tags
-        # GET /tags.xml
         def list
             @tags = Tag.find :all
             @taggables = @tags.collect{|t| t.taggables}.flatten
@@ -347,7 +341,6 @@ module Kambi::Controllers
         end
         
         # GET /tags/1
-        # GET /tags/1.xml
         def read(tag_id) 
             @tag = Tag.find tag_id
             @tags = Tag.find :all
@@ -443,14 +436,12 @@ module Kambi::Controllers
       end
       
       # GET /authors
-      # GET /authors.xml
       def list
           @authors = Author.find :all
           render :view_authors
       end
       
       # GET /authors/1
-      # GET /authors/1.xml
       def read(author_id) 
           @author = Author.find author_id
           @posts = @author.posts
@@ -520,79 +511,92 @@ module Kambi::Controllers
       
     end
     
-    class Sessions < REST 'sessions'
-        # POST /sessions
-        def create
-            @user = User.find :first, :conditions => ["username=? AND password=?", input.username, input.password]
-            if @user
-              
-              @redir = "/"
-              @h2    = "Login Successful"
-              @msg   = "You are now logged in to the website. See the admin "   +
-                       "toolbox in the top-right to add things, or hover over " +
-                       "existing things to edit them."
-              
-              # log the user in with a cookie
-              # (expires when browser is closed)
-              @state.user_id   = @user.id
-              @state.user_name = @user.username
-              
-            else
-              # show an error and redirect back
-              # to the login form to try again
-              @redir = R(Sessions, :new)
-              @h2    = "Login Failed"
-              @msg   = "Your username and/or password were not correct. " +
-                       "Please check them and try again."
-            end
-            
-            render :msg
-        end   
-        
-        # GET /sessions/new
-        def new
-            render :login
-        end
+  class Sessions < REST "sessions"
+    
+    # POST /sessions
+    def create
 
-        # DELETE /sessions
-        def delete
-            @state.user_id   = nil
-            @state.user_name = nil
-            render :logout
-        end
+      # attempt to fetch the user from the
+      # db; will fail if un OR pw are wrong
+      @user = User.find(
+        :first,
+        :conditions => [
+          "username=? and password=?",
+          input.username,
+          input.password
+      ])
+
+      if @user
+        @h1    = "Login Successful"
+        @msg   = "You are now logged in to the website. See the admin "   +
+                 "toolbox in the top-right to add things, or hover over " +
+                 "existing things to edit them."
+
+        # log the user in with a cookie
+        # (expires when browser is closed)
+        @state.user_id   = @user.id
+        @state.user_name = @user.username
+
+      else
+        # show an error and redirect back
+        # to the login form to try again
+        @redir = R(Sessions, :new)
+        @h1    = "Login Failed"
+        @msg   = "Your username and/or password were not correct. " +
+                  "Please check them and try again."
+      end
+
+      render :msg
+    end   
+
+    # GET /sessions/new
+    def new
+      render :login
     end
-    
-    
-    class Static < R '/static/(.+)'
-      PATH = File.expand_path(File.dirname(__FILE__) + "/..") + "/static"
-      MIME_TYPES = {
-        '.css' => 'text/css',
-        '.js'  => 'text/javascript', 
-        '.jpg' => 'image/jpeg',
-        '.png' => 'image/png'
-      }
 
-      def get(path)
-        # prevent ../ attacks
-        if path.include? ".."
-          @status = 403
-          return "Invalid Path"
-        end
-        
-        file = "#{PATH}/#{path}"
-        
-        # return the file contents (x-sendfile
-        # seems to be broken), or a 404 error
-        if File.exists?(file)
-          ext = path[/\.\w+$/, 0]
-          @headers['Content-Type'] = MIME_TYPES[ext] || "text/plain"
-          return File.read(file)
-          
-        else
-          @status = 404
-          return "Not Found"
-        end
+    # DELETE /sessions
+    def delete
+      @state.user_id   = nil
+      @state.user_name = nil
+      
+      # display a basic message
+      @h1  = "Logged Out"
+      @msg = "You have been logged out of the website. Please come again."
+      render :msg
+    end
+  end
+  
+  class Static < R "/static/(.+)"
+    PATH = File.expand_path(File.dirname(__FILE__) + "/..") + "/static"
+    MIME_TYPES = {
+      '.css' => "text/css",
+      '.js'  => "text/javascript",
+      '.jpg' => "image/jpeg",
+      '.png' => "image/png"
+    }
+
+    def get(path)
+      
+      # prevent ../ attacks
+      if path.include?("..")
+        @status = 403
+        return "Invalid Path"
+      end
+
+      file = "#{PATH}/#{path}"
+
+      # return the file contents (x-sendfile
+      # seems to be broken), or a 404 error
+      if File.exists?(file)
+        ext = path[/\.\w+$/, 0]
+        @headers['Content-Type'] = MIME_TYPES[ext] || "text/plain"
+        return File.read(file)
+
+      else
+        @status = 404
+        return "Not Found"
       end
     end
+  end
 end
 
