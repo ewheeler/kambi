@@ -76,7 +76,7 @@ module Kambi::Views
               ul.pages! do
                 # the nav bar is hard-coded for now
                 li(:class=>"n0 first") { a("Home",  :href=> "/"         )}
-                li(:class=>"n1 last")  { a("About", :href=> R(Pages, 1) )}
+                li(:class=>"n1 last")  { a("About", :href=> "/pages/about" )}
 
 #                Page.find(:all).each_with_css do |page,klass|
 #                  li(:class=>klass) { a(page.title, :href => R(Pages, page.id)) }
@@ -105,9 +105,9 @@ module Kambi::Views
             div.footer! do
               div do
                 p.links do
-                  a( "Disclaimer",  :href=> R(Pages, 2) ); span { "&bull;" }
-                  a( "About",       :href=> R(Pages, 1) ); span { "&bull;" }
-                  a( "Legal",       :href=> R(Pages, 3) ); span { "&bull;" }
+                  a( "Disclaimer",  :href=> "/pages/disclaimer" ); span { "&bull;" }
+                  a( "About",       :href=> "/pages/about" ); span { "&bull;" }
+                  a( "Legal",       :href=> "/pages/legal" ); span { "&bull;" }
                   a( "Login",       :href=>R(Sessions, :new) )
                 end
                 p.rights "Copyright United Nations 2008. All Rights Reserved."
