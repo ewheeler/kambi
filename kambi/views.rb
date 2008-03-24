@@ -499,7 +499,7 @@ module Kambi::Views
       div.body do
         # abridge the essay (first paragraph only)
 #        post.body.gsub!(%r|\n+.*|, "") if summary
-        render_text(post.body)
+        p render_text(post.body)
         if summary
           p do
             a.complete("View Complete Essay", :href=>full)
