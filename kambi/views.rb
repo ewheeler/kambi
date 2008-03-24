@@ -62,7 +62,7 @@ module Kambi::Views
               ul.pages! do
                 # the index page is hard-coded
                 li.p1 { a("Home", :href => "/" )}
-                li.p1 { a( "About",       :href=> R(Pages, 1) )}
+                li.p1 { a( "About unisay",       :href=> R(Pages, 1) )}
 
                 # but others can be added dynamically
 #                Page.find(:all).each_with_index do |page,i|
