@@ -60,6 +60,7 @@ a.edit:hover {
     width: 460px;
     margin-left: -250px;
     padding: 4px 20px;
+    z-index: 1;
     
     background: url("../png/logged-in-banner.png") no-repeat 0 100%;
   }

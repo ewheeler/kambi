@@ -19,7 +19,7 @@ a:hover { text-decoration: underline; }
 }
   
   #header h1 {
-    width: 340px;
+    width: 446px;
     height: 120px;
     text-indent: -9999px;
     background: url("../png/header.png") no-repeat;
@@ -34,7 +34,7 @@ a:hover { text-decoration: underline; }
       border-bottom: 6px solid #fff;
     }
     
-    #pages li.p2 {
+    #pages li.last {
       border-right: 6px solid #fff;
     }
 
@@ -44,12 +44,18 @@ a:hover { text-decoration: underline; }
         display: block;
         padding: 1em;
         width: 8em;
+        
+        /* default colour = ugly! */
+        background: yellow;
       }
       
       /* each page has its own color...
          make sure there's enough to expand! */
-      #pages li.p1 a { background: #ff0090; }
-      #pages li.p2 a { background: #8d466e; }
+      #pages li.n0 a { background: #ff0090; }
+      #pages li.n1 a { background: #8d466e; }
+      #pages li.n2 a { background: #1cbcff; }
+      #pages li.n3 a { background: #87ff1c; }
+      #pages li.n4 a { background: #ff8400; }
       
 
   #places {

@@ -9,6 +9,35 @@ class String
   end
 end
 
+# add a new enumerator, similar to each_with_index,
+# which yields with a handy css class for styling
+module Enumerable
+  def each_with_css(&block)
+    
+    # this requires "each" and "length"
+    # methods to do anything useful
+    raise IndexError\
+      unless self.respond_to?(:each)\
+             && self.respond_to?(:length)
+    
+    n   = 0
+    len = self.length
+    
+    # iterate items, and call the block for
+    # each with the super-versatile css class
+    self.each do |obj|
+      n += 1
+      
+      klass = "n#{n}"              # index
+      klass << " first" if(n==1)   # first item?
+      klass << " last"  if(n==len) # last item?
+      klass << " odd"   if(n.odd?) # odd item?
+      
+      yield obj, klass
+    end
+  end
+end
+
 # OMFG this is a horrid monkey-patch
 # TODO: how can this method be made
 # available to all controller methods?
