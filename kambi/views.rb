@@ -247,19 +247,6 @@ module Kambi::Views
       div( :class=>"post n1 first last" ) do
         _post(@post)
       end
-        for clip in @clips
-          tag_names = clip.tags.collect{|t| t.name}
-          tag_names.to_s
-          if tag_names.include?('project')
-              div.project do
-                _clip(clip)
-              end
-          else
-            div.clip do
-              _clip(clip)
-            end
-          end
-        end
         div.comments do
           p "Comments:"
           for c in @comments
@@ -332,16 +319,22 @@ module Kambi::Views
       div.page do
         _page(@page)
       end
-      for clip in @clips
-        tag_names = clip.tags.collect{|t| t.name}
-        tag_names.to_s
-        if tag_names.include?('project')
-            div.project do
-              _clip(clip)
+      pc = page.clips
+      unless pc.empty?
+        div.clips do
+          h3 "References"
+          pc.each_with_index do |clip,i|
+            tag_names = clip.tags.collect{|t| t.name}
+            tag_names.to_s
+            if tag_names.include?('project')
+                div.project do
+                  _clip(clip)
+                end
+            else
+              div.clip do
+                _clip(clip)
+              end
             end
-        else
-          div.clip do
-            _clip(clip)
           end
         end
       end
@@ -506,9 +499,10 @@ module Kambi::Views
         # abridge the essay (first paragraph only)
         post.body.gsub!(%r|\n+.*|, "") if summary
         render_text(post.body)
-
-        p do
-          a.complete("View Complete Essay", :href=>full)
+        if summary
+          p do
+            a.complete("View Complete Essay", :href=>full)
+          end
         end
       end
 
@@ -528,11 +522,18 @@ module Kambi::Views
           end
 
           pc.each_with_index do |clip,i|
-
             #tags = clip.tags.collect { |t| t.name }
             #div( :class => tags.include?("project") ? "project" : "clip" ) do
-            div.clip do
-              _clip(clip)
+            tag_names = clip.tags.collect{|t| t.name}
+            tag_names.to_s
+            if tag_names.include?('project')
+                div.project do
+                  _clip(clip)
+                end
+            else
+              div.clip do
+                _clip(clip)
+              end
             end
           end
         end
