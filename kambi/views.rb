@@ -26,20 +26,29 @@ module Kambi::Views
       end
     end
 
-#    def render_text(text)
-#      enc = HTMLEntities.new
-#      unless text.nil? or text.empty?
-#        text.gsub("\r","").each("") do |chunk|
-#          p enc.encode(chunk.trim, :named)
-#        end
-#      end
-#    end
-    
-    # we're just rendering the text as-is,
-    # for the time being. more formats later!
-    def render_text(text)
-      div do
-        text
+    def render_text(text, format=:lite)
+      # lite formatting escapes html entities
+      # and breaks the text into paragraphs
+      if format==:lite
+        enc = HTMLEntities.new
+        unless text.nil? or text.empty?
+          text.gsub("\r","").each("") do |chunk|
+            p enc.encode(chunk.trim, :named)
+          end
+        end
+      
+      # html formatting does NOTHING to the
+      # text. watch out for XSS vulnerabilities :O
+      elsif format==:html
+        div do
+          text
+        end
+      
+      # what
+      else
+        raise(
+          ArgumentError,
+          "Unsupported format: #{format}")
       end
     end
 
@@ -65,10 +74,9 @@ module Kambi::Views
               end
 
               ul.pages! do
-                
                 # the nav bar is hard-coded for now
-                li.n0 { a("Home",  :href=> "/"         )}
-                li.n1 { a("About", :href=> R(Pages, 1) )}
+                li(:class=>"n0 first") { a("Home",  :href=> "/"         )}
+                li(:class=>"n1 last")  { a("About", :href=> R(Pages, 1) )}
 
 #                Page.find(:all).each_with_css do |page,klass|
 #                  li(:class=>klass) { a(page.title, :href => R(Pages, page.id)) }
@@ -461,7 +469,7 @@ module Kambi::Views
       }
 
       _tagged_with(page.tags)
-      render_text(page.body)
+      render_text(page.body, :html)
     end
 
     def _post( post,summary=false )
@@ -508,12 +516,13 @@ module Kambi::Views
         # abridge the essay (first paragraph only)
 #        post.body.gsub!(%r|\n+.*|, "") if summary
         
-        render_text(post.body)
-        if summary
-          p do
+        # posts are supplied as raw html, for now
+        render_text(post.body, :html)
+#        if summary
+#          p do
 #            a.complete("View Complete Essay", :href=>full)
-          end
-        end
+#          end
+#        end
       end
 
       pc = post.clips
