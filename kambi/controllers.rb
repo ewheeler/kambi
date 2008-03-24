@@ -365,6 +365,20 @@ module Kambi::Controllers
             render :add_tag
         end
         
+        # DELETE /tags/1
+        def delete(tag_id)
+            unless @state.user_id.blank?
+                @tag = Tag.find tag_id
+                if @tag.destroy
+                  redirect R(Tags)
+                else
+                  _error("Unable to delete tag #{@tag.id}", 500)
+                end
+            else
+              _error("Unauthorized", 401)
+            end
+        end
+        
         # # GET /tag/1/edit
         # def edit(tag_id) 
         #     unless @state.user_id.blank?
