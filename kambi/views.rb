@@ -100,7 +100,7 @@ module Kambi::Views
                   a( "Disclaimer",  :href=> R(Pages, 2) ); span { "&bull;" }
                   a( "About",       :href=> R(Pages, 1) ); span { "&bull;" }
                   a( "Legal",       :href=> R(Pages, 3) ); span { "&bull;" }
-                  a( "Admin Login", :href=>R(Sessions, :new) )
+                  a( "Login",       :href=>R(Sessions, :new) )
                 end
                 p.rights "Copyright United Nations 2008. All Rights Reserved."
               end
