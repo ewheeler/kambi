@@ -38,7 +38,7 @@ module Kambi::Views
     def layout
       xhtml11 do
         head do
-          title "Kambi"
+          title "unisay"
           link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/base.css",    :media => "screen")
           link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/forms.css",   :media => "screen")
           link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/anserai.css", :media => "screen")
@@ -47,7 +47,7 @@ module Kambi::Views
         body do
           div.wrapper! do
             div.header! do
-              h1 { a 'Kambi', :href => R(Posts) }
+              h1 { a 'unisay', :href => R(Posts) }
 
               when_logged_in do
                 div.logged_in_as! do
