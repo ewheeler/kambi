@@ -33,7 +33,9 @@ module Kambi::Views
       #     p enc.encode(chunk.trim, :named)
       #   end
       # end
-      return text
+      div do 
+        text
+      end
     end
 
     def layout
@@ -499,8 +501,7 @@ module Kambi::Views
       div.body do
         # abridge the essay (first paragraph only)
 #        post.body.gsub!(%r|\n+.*|, "") if summary
-#        render_text(post.body)
-        post.body
+        render_text(post.body)
         if summary
           p do
             a.complete("View Complete Essay", :href=>full)
