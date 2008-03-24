@@ -33,7 +33,7 @@ module Kambi::Views
       #     p enc.encode(chunk.trim, :named)
       #   end
       # end
-      text
+      return text
     end
 
     def layout
