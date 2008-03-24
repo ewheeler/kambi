@@ -27,12 +27,13 @@ module Kambi::Views
     end
 
     def render_text(text)
-      enc = HTMLEntities.new
-      unless text.nil? or text.empty?
-        text.gsub("\r","").each("") do |chunk|
-          p enc.encode(chunk.trim, :named)
-        end
-      end
+      # enc = HTMLEntities.new
+      # unless text.nil? or text.empty?
+      #   text.gsub("\r","").each("") do |chunk|
+      #     p enc.encode(chunk.trim, :named)
+      #   end
+      # end
+      text
     end
 
     def layout
@@ -497,7 +498,7 @@ module Kambi::Views
 
       div.body do
         # abridge the essay (first paragraph only)
-        post.body.gsub!(%r|\n+.*|, "") if summary
+#        post.body.gsub!(%r|\n+.*|, "") if summary
         render_text(post.body)
         if summary
           p do
