@@ -501,7 +501,7 @@ module Kambi::Views
 
 #      div.body do
         # abridge the essay (first paragraph only)
-#        post.body.gsub!(%r|\n+.*|, "") if summary
+        post.body.gsub!(%r|\n+.*|, "") if summary
         render_text(post.body)
         if summary
           p do
