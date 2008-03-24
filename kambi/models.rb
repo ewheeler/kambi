@@ -8,6 +8,7 @@ module Kambi::Models
       has_many :clips, :through => :references
       validates_presence_of :title, :nickname
       validates_uniqueness_of :nickname
+      validates_length_of :nickname, :minimum =>4, :too_short=>"please enter at least %d character"
       has_many :taggings, :as => :taggable
       has_many :tags, :through => :taggings
       
@@ -22,6 +23,7 @@ module Kambi::Models
       has_many :clips, :through => :references#, :source => :clip
       validates_presence_of :title, :nickname
       validates_uniqueness_of :nickname
+      validates_length_of :nickname, :minimum =>4, :too_short=>"please enter at least %d character"
       has_many :taggings, :as => :taggable
       has_many :tags, :through => :taggings
       has_many :authorships, :foreign_key => "post_id"
@@ -42,6 +44,7 @@ module Kambi::Models
       has_many :pages, :through => :references
       validates_presence_of :url, :nickname
       validates_uniqueness_of :nickname
+      validates_length_of :nickname, :minimum =>4, :too_short=>"please enter at least %d character"
       has_many :taggings, :as => :taggable
       has_many :tags, :through => :taggings
       

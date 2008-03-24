@@ -9,13 +9,13 @@ module Kambi::Controllers
     end
   end
   
-  # class PagesNicks < R '/pages/([-\D]*)'
-  #   def get(nickname)
-  #       @page = Page.find(:first, :conditions => ["nickname = ?", nickname])
-  #       @clips = @page.clips
-  #       render :view_page
-  #   end
-  # end
+  class PagesNicks < R '/pages/([-\D]{4,})'
+    def get(nickname)
+        @page = Page.find(:first, :conditions => ["nickname = ?", nickname])
+        @clips = @page.clips
+        render :view_page
+    end
+  end
     
     class Pages < REST 'pages'      
 
@@ -107,15 +107,15 @@ module Kambi::Controllers
         
     end
     
-    # class PostsNicks < R '/posts/([-\D]*)'
-    #   def get(nickname)
-    #     @post = Post.find(:first, :conditions => ["nickname = ?", nickname])
-    #     @comments = @post.comments
-    #     @clips = @post.clips;       @authors = @post.authors
-    #     @captcha = turing_image
-    #     render :view
-    #   end
-    # end
+    class PostsNicks < R '/posts/([-\D]{4,})'
+      def get(nickname)
+        @post = Post.find(:first, :conditions => ["nickname = ?", nickname])
+        @comments = @post.comments
+        @clips = @post.clips;       @authors = @post.authors
+        @captcha = turing_image
+        render :view
+      end
+    end
     
     class Posts < REST 'posts'      
 
@@ -229,14 +229,14 @@ module Kambi::Controllers
         end
     end
     
-    # class ClipsNicks < R '/clips/([-\D]*)'
-    #   def get(nickname)
-    #     @clip = Clip.find(:first, :conditions => ["nickname = ?", nickname])
-    #     @posts = @clip.posts
-    #     @pages = @clip.pages
-    #     render :view_clip
-    #   end
-    # end
+    class ClipsNicks < R '/clips/([-\D]{4,})'
+      def get(nickname)
+        @clip = Clip.find(:first, :conditions => ["nickname = ?", nickname])
+        @posts = @clip.posts
+        @pages = @clip.pages
+        render :view_clip
+      end
+    end
     
     class Clips < REST 'clips'
         # POST /clips
