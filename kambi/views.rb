@@ -62,11 +62,12 @@ module Kambi::Views
               ul.pages! do
                 # the index page is hard-coded
                 li.p1 { a("Home", :href => "/" )}
+                li.p1 { a( "About",       :href=> R(Pages, 1) )}
 
                 # but others can be added dynamically
-                Page.find(:all).each_with_index do |page,i|
-                  li(:class=>"p#{i+2}") { a(page.title, :href => R(Pages, page.id)) }
-                end
+#                Page.find(:all).each_with_index do |page,i|
+#                  li(:class=>"p#{i+2}") { a(page.title, :href => R(Pages, page.id)) }
+#                end
               end
 
 
@@ -91,9 +92,9 @@ module Kambi::Views
             div.footer! do
               div do
                 p.links do
-                  a( "Disclaimer",  :href=>"TODO" ); span { "&bull;" }
-                  a( "About",       :href=>"TODO" ); span { "&bull;" }
-                  a( "Legal",       :href=>"TODO" ); span { "&bull;" }
+                  a( "Disclaimer",  :href=> R(Pages, 2) ); span { "&bull;" }
+                  a( "About",       :href=> R(Pages, 1) ); span { "&bull;" }
+                  a( "Legal",       :href=> R(Pages, 3) ); span { "&bull;" }
                   a( "Admin Login", :href=>R(Sessions, :new) )
                 end
                 p.rights "Copyright United Nations 2008. All Rights Reserved."
