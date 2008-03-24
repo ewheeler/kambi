@@ -498,7 +498,7 @@ module Kambi::Views
 
       _tagged_with(post.tags)
 
-      div.body do
+#      div.body do
         # abridge the essay (first paragraph only)
 #        post.body.gsub!(%r|\n+.*|, "") if summary
         render_text(post.body)
@@ -507,7 +507,7 @@ module Kambi::Views
             a.complete("View Complete Essay", :href=>full)
           end
         end
-      end
+#      end
 
       pc = post.clips
       unless pc.empty?
