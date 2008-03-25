@@ -54,9 +54,9 @@ module Kambi::Models
     end
     
     class Reference < Base
-      belongs_to :clip, :class_name => "Clip"
-      belongs_to :post, :class_name => "Post"
-      belongs_to :page, :class_name => "Page"
+      belongs_to :clip, :class_name => "Clip",    :foreign_key => "clip_id"
+      belongs_to :post, :class_name => "Post",    :foreign_key => "post_id"
+      belongs_to :page, :class_name => "Page",    :foreign_key => "page_id"
     end
   
     class Comment < Base
@@ -113,7 +113,7 @@ module Kambi::Models
     end
     
     class Authorship < Base
-      belongs_to :author, :class_name => "Author"
+      belongs_to :author, :class_name => "Author",    :foreign_key => "author_id"
       belongs_to :post, :foreign_key => "post_id"#:class_name => "Post",
     end
     
