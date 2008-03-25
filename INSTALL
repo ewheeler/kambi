@@ -13,6 +13,7 @@ Making kambi work is easy!
      * activerecord
      * turing
      * htmlentities
+	 * RedCloth
    (there are actually more dependancies, but you
    will be prompted by ruby gems to install those)
 

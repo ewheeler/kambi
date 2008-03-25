@@ -45,6 +45,12 @@ module Kambi::Views
         div do
           text
         end
+        
+      elsif format==:red
+        r = RedCloth.new text
+        div do
+          r.to_html
+        end
       
       # what
       else
@@ -496,7 +502,7 @@ module Kambi::Views
       end
 
       _tagged_with(page.tags)
-      div.body { render_text(page.body, :html) }
+      div.body { render_text(page.body, :red) }
       _clips(page.clips)
       
       # css hack for ie < 7
@@ -548,7 +554,7 @@ module Kambi::Views
         post.body.gsub!(%r|\n+.*|, "") if summary
         
         # posts are supplied as raw html, for now
-        render_text(post.body, :html)
+        render_text(post.body, :red)
         
         # link to the full essay, if this is not it
         p { a.complete("View Complete Essay", :href=>full) } if summary
@@ -562,7 +568,7 @@ module Kambi::Views
 
     def _clip(clip)
       blockquote do
-        render_text clip.body
+        render_text(clip.body, :red)
       end
 
       div.source do
