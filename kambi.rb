@@ -35,8 +35,8 @@ require 'camping/session'
 gem 'turing'
 require 'turing'
 
-gem 'RedCloth'
-require 'RedCloth'
+#gem 'RedCloth'
+require 'redcloth'
     
 Camping.goes :Kambi
 
