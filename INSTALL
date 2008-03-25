@@ -6,6 +6,22 @@ Making kambi work is easy!
    (this will also install libsqlite3-0 for you)
    TODO: What about OSX? :'(
 
+1b. To use mysql, you have to make the sessions table manually:
+    CREATE TABLE `sessions` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `hashid` varchar(32) DEFAULT NULL, `created_at` datetime DEFAULT NULL, `ivars` text DEFAULT NULL)
+   
+    Next make a .campingrc file in your home folder:
+
+    host : 127.0.0.1
+    port : 3301
+    server : mongrel
+    database :
+      :adapter: mysql
+      :database: kambi
+      :hostname: localhost
+      :username: yourusername
+      :password: yourpassword
+    log:
+      kambi.log
 
 2. Install the following ruby gems:
      * camping
@@ -29,3 +45,17 @@ Making kambi work is easy!
 4. Start Kambi by running (in this dir):
      $ camping kambi.rb
 
+5. The top and bottom navigation elements 
+   link to pages with nicknames called:
+     *about
+     *privacy
+     *legal
+   You will need to either create these pages or
+   edit the header and footer links that are 
+   hard-coded in the layout method in views.rb
+
+   The help_text method (also in views.rb) links to 
+   a page with the nickname:
+     *help
+   So you may want to make or change this to avoid 
+   nasty errors.
