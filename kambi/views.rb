@@ -45,7 +45,8 @@ module Kambi::Views
         div do
           text
         end
-        
+      
+      # textile + markdown via redcloth
       elsif format==:red
         r = RedCloth.new text
         div do
@@ -142,9 +143,11 @@ module Kambi::Views
           # logged in as banner at the bottom of
           # the html output (despite being at the
           # top of the rendered output) for IE6
-          div.logged_in_as! do
-            span { "You are logged in as&nbsp;" }
-            span.username(@state.user_name)
+          when_logged_in do
+            div.logged_in_as! do
+              span { "You are logged in as&nbsp;" }
+              span.username(@state.user_name)
+            end
           end
         end
       end
@@ -191,11 +194,11 @@ module Kambi::Views
         fieldset do
           div do
             label "Username", :for=>"fm-username"
-            input :id=>"fm-username", :name=>"username", :type=>"text"
+            input :id=>"fm-username", :name=>"username", :class=>"text", :type=>"text"
           end
           div do
             label "Password", :for=>"fm-password"
-            input :id=>"fm-password", :name=>"password", :type=>"password"
+            input :id=>"fm-password", :name=>"password", :class=>"text", :type=>"password"
           end
 
           div do
@@ -312,15 +315,15 @@ module Kambi::Views
             hush = @captcha[:hushhush]
             img :src => "/static/" + src; br
             label 'Please enter the above number', :for => 'captcha'; br
-            input :name => 'captcha', :type => 'text'; br
+            input :name => 'captcha',  :class=>"text", :type => 'text'; br
 
             label 'Name', :for => 'post_username'; br
-            input :name => 'post_username', :type => 'text'; br
+            input :name => 'post_username',  :class=>"text", :type => 'text'; br
             label 'Comment', :for => 'post_body'; br
             textarea :name => 'post_body' do; end; br
-            input :type => 'hidden', :name => 'post_id', :value => @post.id
-            input :type => 'hidden', :name => 'hushhush', :value => hush
-            input :type => 'submit', :value => 'Submit'
+            input :type => 'hidden', :class=>"hidden", :name => 'post_id', :value => @post.id
+            input :type => 'hidden', :class=>"hidden",:name => 'hushhush', :value => hush
+            input :type => 'submit', :class=>"submit button", :value => 'Submit'
         end
       end
     end
@@ -651,12 +654,12 @@ module Kambi::Views
         fieldset do
           div.first do
             label "Title", :for=>"page_title"
-            input :name=>"page_title", :value=>page.title
+            input :name=>"page_title", :class=>"text", :type=>"text", :value=>page.title
           end
 
           div do
             label "Nickname", :for=>"page_nickname"
-            input :name=>"page_nickname", :value=>page.nickname
+            input :name=>"page_nickname", :class=>"text", :type=>"text", :value=>page.nickname
           end
 
           div do
@@ -670,7 +673,7 @@ module Kambi::Views
         _checks(@all_tags,    @these_tags,    "Tags:")
         _checks(@all_clips,   @these_clips,   "References:")
         
-        input :type=>"hidden", :name=>"post_id", :value=>post.id
+        input :type=>"hidden", :class=>"hidden", :name=>"post_id", :value=>post.id
         button "Submit"
       end
     end
@@ -692,12 +695,12 @@ module Kambi::Views
         fieldset do
           div.first do
             label "Title", :for=>"post_title"
-            input :name=>"post_title", :value=>post.title
+            input :name=>"post_title", :class=>"text", :type=>"text", :value=>post.title
           end
 
           div do
             label "Nickname", :for=>"post_nickname"
-            input :name=>"post_nickname", :value=>post.nickname
+            input :name=>"post_nickname", :class=>"text", :type=>"text", :value=>post.nickname
           end
 
           div do
@@ -712,7 +715,7 @@ module Kambi::Views
         _checks(@all_tags,    @these_tags,    "Tags:")
         _checks(@all_clips,   @these_clips,   "References:")
         
-        input :type=>"hidden", :name=>"post_id", :value=>post.id
+        input :type=>"hidden", :class=>"hidden", :name=>"post_id", :value=>post.id
         button "Submit"
       end
     end
@@ -734,17 +737,17 @@ module Kambi::Views
         fieldset do
           div.first do
             label "Nickname", :for=>"fm-clip-nickname"
-            input :id=>"fm-clip-nickname", :name=>"clip_nickname", :value=>clip.nickname
+            input :id=>"fm-clip-nickname", :name=>"clip_nickname", :class=>"text", :type=>"text", :value=>clip.nickname
           end
           
           div do
             label "Url", :for=>"fm-clip-url"
-            input :id=>"fm-clip-url", :name=>"clip_url", :type=>"text", :value=>clip.url
+            input :id=>"fm-clip-url", :name=>"clip_url", :class=>"text", :type=>"text", :value=>clip.url
           end
           
           div do
             label "Source", :for=>"fm-clip-source"
-            input :id=>"fm-clip-source", :name=>"clip_source", :value=>clip.source
+            input :id=>"fm-clip-source", :name=>"clip_source", :class=>"text", :type=>"text", :value=>clip.source
           end
           
           div do
@@ -759,7 +762,7 @@ module Kambi::Views
         _checks(@all_posts, @these_posts, "Referenced by Posts:")
         _checks(@all_pages, @these_pages, "Referenced by Pages:")
         
-        input :type=>"hidden", :name=>"clip_id", :value=>clip.id
+        input :type=>"hidden", :class=>"hidden", :name=>"clip_id", :value=>clip.id
         button "Submit"
       end
     end
@@ -840,13 +843,13 @@ module Kambi::Views
         fieldset do
           div.first do
             label "Name", :for=>"tag_name"
-            input :name=>"tag_name", :value=>tag.name
+            input :name=>"tag_name", :class=>"text", :type=>"text", :value=>tag.name
           end
         end
         
         # no check boxes to link this tag to pages, essays, etc
         
-        input :type=>"hidden", :name=>"tag_id", :value=>tag.id
+        input :type=>"hidden", :class=>"hidden", :name=>"tag_id", :value=>tag.id
         button "Submit"
       end
     end
@@ -872,7 +875,7 @@ module Kambi::Views
               # the [x] label pair
               # (inlined via css)
               
-              input(chk_hash.merge({:type=>"checkbox", :id=>"fm-#{name}-#{thing.id}", :name=>"#{name}-#{thing.id}"}))
+              input(chk_hash.merge({:type=>"checkbox", :class=>"checkbox", :id=>"fm-#{name}-#{thing.id}", :name=>"#{name}-#{thing.id}"}))
               label thing.to_s, :for => "fm-#{name}-#{thing.id}"
             end
           end

@@ -19,6 +19,7 @@ gem 'reststop', '~> 0.2'
 
 require "camping"
 require "htmlentities"
+require "redcloth"
 
 begin
   # try to use local copy of library
@@ -34,9 +35,6 @@ require 'camping/session'
    
 gem 'turing'
 require 'turing'
-
-#gem 'RedCloth'
-require 'redcloth'
     
 Camping.goes :Kambi
 

@@ -1,7 +1,8 @@
 /* vim:tabstop=2:expandtab */
 
 * html body {
-    behavior: url("/static/csshover.htc");
+  /* to enable :hover on anything */
+  behavior: url("/static/csshover.htc");
 }
 
 #wrapper {
@@ -166,17 +167,11 @@ a:hover { text-decoration: underline; }
           /* the "tagged with" caption */
           #content .clip .tags p {
             display: none; }
-            
-      #content .post .clip a.edit,
-      #content .page .clip a.edit {
-        margin-top: 0;
-        top: 0;
-      }
       
       /* show "edit" link when hovering
        * over the clip to edit */
       #content .clip:hover a.edit {
-        display: block; }
+        right: 0; }
     
     #content .post p {
     }
@@ -184,19 +179,24 @@ a:hover { text-decoration: underline; }
     /* serves both posts and pages */
     #content .edit {
       position: absolute;
-      right: 0;
+      display: inline;
+      right: 9999px;
       top: 0;
     }
       
       /* show "edit" link when hovering
-       * over the clip to edit */
+       * over the post/page to edit */
       #content .post:hover a.ed-post,
       #content .page:hover a.ed-page {
-        display: block; }
+        right: 0; }
       
       #content .ed-post { margin-top: 13px; top: 5.3em; } /* h1[ f:2em, mb:1em ], author[ pt:6px, f:1.3em, mb:1em, pb:6px ] */
       #content .ed-page { margin-top: 2px;  top: 3em; }
-  
+      
+      /* hacked by eye for IE, which doesn't work (what's new?) */
+      * html #content .ed-post { margin-top: 21px; }
+      * html #content .ed-page { margin-top: 7px; }
+      
   #content .post h1,
   #content .page h1 {
     margin-top: 2em; }

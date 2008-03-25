@@ -42,10 +42,7 @@ a.edit {
   color: #fff;
   padding: 0.4em;
   background: #c00;
-  
-  /* make visible when hovering
-   * over the parent container */
-  display: none;
+  white-space: nowrap;
 }
 
 a.edit:hover {

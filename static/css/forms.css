@@ -63,14 +63,14 @@ fieldset div.first { margin-top: 0; }
     margin-bottom: 0.5em;
   }
 
-input, textarea {
+input.text, textarea {
   color: #fff;
   padding: 2px;
   background: #4786a5;
   border: 1px solid #203d4b;
 }
 
-input {
+input.text {
   width: 20em;
 }
 
@@ -80,8 +80,7 @@ textarea {
   line-height: 1.2em;
 }
 
-input.button {
+input {
   padding: 0.25em;
-  width: auto;
 }
 
