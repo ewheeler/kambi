@@ -436,8 +436,12 @@ module Kambi::Views
       maxtc = 0; mintc = 3
       tags_counts.each{|c| maxtc = c if c > maxtc; mintc = c if c < mintc}
       for c in all_tags
-        tag_index = all_tags.index(c)
-        a( c.name, :href => R(Tags, c.id), :style => font_size_for_tag_cloud( tags_counts.fetch(tag_index), mintc, maxtc) )
+        
+        # never show the magic "project" tag
+        unless c.name.downcase == "project"
+          tag_index = all_tags.index(c)
+          a( c.name, :href => R(Tags, c.id), :style => font_size_for_tag_cloud( tags_counts.fetch(tag_index), mintc, maxtc) )
+        end
       end
     end
 
@@ -446,13 +450,17 @@ module Kambi::Views
     end
 
     def _tagged_with(tags)
-
-      # ignore invalid arguments
-      unless(tags.nil? or tags.empty?)
+      
+      # ignore invalid arguments... or lists of tags that only contain "project" -- WTF
+      unless(tags.nil? or tags.empty? or (tags.length == 1 and tags[0].name.downcase == "project"))
         p.tags do
           span "Tags:"
           tags.each do |tag|
-            a(tag.name, :href => R(Tags, tag.id))
+            
+            # never show the magic "project" tag
+            unless tag.name.downcase == "project"
+              a(tag.name, :href => R(Tags, tag.id))
+            end
           end
         end
       end
@@ -548,8 +556,8 @@ module Kambi::Views
               
               # all clips of this type,
               # via the _clip partial
-              clips[type].each do |clip|
-                div.clip do
+              clips[type].each_with_css("clip") do |clip,klass|
+                div(:class=>klass) do
                   _clip clip
                 end
               end
@@ -571,15 +579,8 @@ module Kambi::Views
         a(clip.nickname, :href => clip.url)
         cite clip.source
       end
-      tags = clip.tags unless clip.tags.nil?
-      unless tags.empty?
-        div.tags do
-          p "tagged with:"
-          for tag in tags
-            a(tag.name, :href => R(Tags, tag.id))
-          end
-        end
-      end
+      
+      _tagged_with(clip.tags)
 
       when_logged_in do
         a( "Edit this Clip",

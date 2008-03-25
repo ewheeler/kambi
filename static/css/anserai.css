@@ -127,20 +127,26 @@ a:hover { text-decoration: underline; }
     
       #content .clips h3 {
         font-size: 150%;
+        padding-bottom: 0.33em; /* 0.5em at font-size=100% */
+        border-bottom: 1px dotted #ccc;
       }
       
       #content .clip {
         position: relative;
         padding-left: 21px;
-        margin-top: 1em;
+        margin: 1.5em 0;
         background: url("../png/ref-arrow.png") no-repeat;
+      }
+      
+      #content .clip.project blockquote,
+      #content .clip.project div {
+        background: #f88;
       }
       
         #content .clip blockquote,
         #content .clip .tags {
           font-size: 90%;
           line-height: 1.6em;
-          margin: 1em 0;
         }
         
         #content .clip .source a {
@@ -150,6 +156,8 @@ a:hover { text-decoration: underline; }
         
         #content .clip .tags {
           border-top: 0;
+          margin: 1em 0 0 0;
+          padding: 0;
         }
           
           /* the "tagged with" caption */
@@ -204,14 +212,14 @@ a:hover { text-decoration: underline; }
     color: #ccc;
     right: 0;
     
-    /* 3.5em = 2em(h1) + 1.5em (p.authors),
+    /* 3.3em = 2em(h1) + 1.3em (p.authors),
      * 12px  = 6px (authors padding) * 2 (top+bottom) */
     top: 12px;
-    margin-top: 3.5em;
+    margin-top: 3.3em;
   }
   
   #content .authors {
-    font-size: 150%;
+    font-size: 130%;
     float: left;
     background: #feffc8;
     padding: 6px;
