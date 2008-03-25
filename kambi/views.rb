@@ -33,7 +33,9 @@ module Kambi::Views
         enc = HTMLEntities.new
         unless text.nil? or text.empty?
           text.gsub("\r","").each("") do |chunk|
-            p enc.encode(chunk.trim, :named)
+            p do
+              enc.encode(chunk.trim, :named)
+            end
           end
         end
       
@@ -59,6 +61,7 @@ module Kambi::Views
           link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/base.css",    :media => "screen")
           link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/forms.css",   :media => "screen")
           link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/anserai.css", :media => "screen")
+          link( :rel => "shortcut icon", :href => "/static/favicon.ico" )
         end
 
         body do
@@ -138,22 +141,17 @@ module Kambi::Views
 
     def index
       unless @posts.empty?
-        @posts.each_with_index do |post,i|
-
-          # attach nice css hooks to each post,
-          # to make styling the page waaay easier
-          c = ["post", "p#{i+1}"]
-          c.push("first") if (i==0)
-          c.push("last")  if (i==(@posts.length-1))
-
-          div(:class=>c.join(" ")) do
-            _post(post,:summary)
+        @posts.each_with_css("post") do |post,klass|
+          div(:class=>klass) do
+            _post(post)
           end
         end
 
       else
         p "No posts found."
       end
+      
+      # tag cloud
       div.cloud do
         _cloud
       end
@@ -514,44 +512,46 @@ module Kambi::Views
 
       div.body do
         # abridge the essay (first paragraph only)
-#        post.body.gsub!(%r|\n+.*|, "") if summary
+        post.body.gsub!(%r|\n+.*|, "") if summary
         
         # posts are supplied as raw html, for now
         render_text(post.body, :html)
-#        if summary
-#          p do
-#            a.complete("View Complete Essay", :href=>full)
-#          end
-#        end
+        
+        # link to the full essay, if this is not it
+        p { a.complete("View Complete Essay", :href=>full) } if summary
       end
-
-      pc = post.clips
-      unless pc.empty?
-        div.clips do
-          h3 "References"
-
-          # if we are only displaying a summary
-          # of this post, then randomly remove
-          # clips until there are only three
-          if summary
-            pc = pc.sort_by { rand }
-            while pc.length > 3
-              pc.delete_at(rand(pc.length))
-            end
-          end
-
-          pc.each_with_index do |clip,i|
-            #tags = clip.tags.collect { |t| t.name }
-            #div( :class => tags.include?("project") ? "project" : "clip" ) do
-            tag_names = clip.tags.collect{|t| t.name}
-            tag_names.to_s
-            if tag_names.include?('project')
-                div.project do
-                  _clip(clip)
+      
+      unless summary
+        clips = {
+          :projects   => [],
+          :references => [] }
+        
+        # section headers
+        titles = {
+          :projects   => "Related Projects",
+          :references => "References" }
+        
+        # iterate all of this post's clips,
+        # sort them into "project" and "not
+        # project" (reference) arrays
+        post.clips.each do |clip|
+          type = clip.has_tag?("project") ? (:projects) : (:references)
+          clips[type].push clip
+        end
+        
+        # iterate each 'type' of clip, and create
+        # div + h3 + (all clips of type)
+        clips.each_key do |type|
+          unless clips[type].empty?
+            div.clips do
+              h3 titles[type]
+              
+              # all clips of this type,
+              # via the _clip partial
+              clips[type].each do |clip|
+                div.clip do
+                  _clip clip
                 end
-            else
-              div.clip do
-                _clip(clip)
               end
             end
           end

@@ -614,7 +614,8 @@ module Kambi::Controllers
       '.css' => "text/css",
       '.js'  => "text/javascript",
       '.jpg' => "image/jpeg",
-      '.png' => "image/png"
+      '.png' => "image/png",
+      '.ico' => "image/vnd.microsoft.icon"
     }
 
     def get(path)

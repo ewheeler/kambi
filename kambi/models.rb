@@ -1,4 +1,28 @@
 #!ruby
+
+module Tagged
+  def self.included(klass)
+    klass.has_many :taggings, :as => :taggable
+    klass.has_many :tags, :through => :taggings
+  end
+  
+  def has_tag?(name,case_sensitive=false)
+    name.downcase!\
+      unless case_sensitive
+    
+    # iterate all tags, returning true
+    # if any of them match name
+    self.tags.each do |tag|
+      if name == (case_sensitive ? tag.name : tag.name.downcase)
+        return true
+      end
+    end
+    
+    # tag not found
+    return false
+  end
+end
+
 module Kambi::Models
   # include Kambi::Helpers
   # include Kambi::Controllers
@@ -9,8 +33,7 @@ module Kambi::Models
       validates_presence_of :title, :nickname
       validates_uniqueness_of :nickname
       validates_length_of :nickname, :minimum =>4, :too_short=>"please enter at least %d character"
-      has_many :taggings, :as => :taggable
-      has_many :tags, :through => :taggings
+      include Tagged
       
       def to_s
       	title
@@ -24,10 +47,9 @@ module Kambi::Models
       validates_presence_of :title, :nickname
       validates_uniqueness_of :nickname
       validates_length_of :nickname, :minimum =>4, :too_short=>"please enter at least %d character"
-      has_many :taggings, :as => :taggable
-      has_many :tags, :through => :taggings
       has_many :authorships, :foreign_key => "post_id"
       has_many :authors, :through => :authorships
+      include Tagged
       
       def pretty_time
         self.created_at.strftime("%A %B %d, %Y at %I %p")
@@ -45,8 +67,7 @@ module Kambi::Models
       validates_presence_of :url, :nickname
       validates_uniqueness_of :nickname
       validates_length_of :nickname, :minimum =>4, :too_short=>"please enter at least %d character"
-      has_many :taggings, :as => :taggable
-      has_many :tags, :through => :taggings
+      include Tagged
       
       def to_s
       	nickname

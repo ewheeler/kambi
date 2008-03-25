@@ -12,7 +12,7 @@ end
 # add a new enumerator, similar to each_with_index,
 # which yields with a handy css class for styling
 module Enumerable
-  def each_with_css(&block)
+  def each_with_css(singular="n",&block)
     
     # this requires "each" and "length"
     # methods to do anything useful
@@ -28,7 +28,8 @@ module Enumerable
     self.each do |obj|
       n += 1
       
-      klass = "n#{n}"              # index
+      # always start with "post post-N"
+      klass = singular + " " + singular + "-" + n.to_s
       klass << " first" if(n==1)   # first item?
       klass << " last"  if(n==len) # last item?
       klass << " odd"   if(n.odd?) # odd item?
