@@ -28,7 +28,7 @@ module Kambi::Controllers
           @pages = @clip.pages
           render :view_clip
         else
-          #@posts = [Post.find(:first)]
+          @posts = [Post.find(:first)]
           render :index
       end
     end  
