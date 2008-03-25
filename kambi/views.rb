@@ -75,13 +75,6 @@ module Kambi::Views
             div.header! do
               h1 { a 'unisay', :href => R(Posts) }
 
-              when_logged_in do
-                div.logged_in_as! do
-                    span "You are logged in as "
-                    span.username(@state.user_name)
-                end
-              end
-
               ul.pages! do
                 # the nav bar is hard-coded for now
                 li(:class=>"n0 first") { a("Home",  :href=> "/"         )}
@@ -113,9 +106,9 @@ module Kambi::Views
               div do
                 p.links do
                   a( "Privacy",  :href=> "/pages/privacy" ); span { "&bull;" }
-                  a( "About",       :href=> "/pages/about" ); span { "&bull;" }
-                  a( "Legal",       :href=> "/pages/legal" ); span { "&bull;" }
-                  a( "Login",       :href=>R(Sessions, :new) )
+                  a( "About",    :href=> "/pages/about"   ); span { "&bull;" }
+                  a( "Legal",    :href=> "/pages/legal"   ); span { "&bull;" }
+                  a( "Login",    :href=>R(Sessions, :new) )
                 end
                 p.rights "Copyright United Nations 2008. All Rights Reserved."
               end
@@ -138,6 +131,14 @@ module Kambi::Views
                 end
               end
             end
+          end
+          
+          # logged in as banner at the bottom of
+          # the html output (despite being at the
+          # top of the rendered output) for IE6
+          div.logged_in_as! do
+            span { "You are logged in as&nbsp;" }
+            span.username(@state.user_name)
           end
         end
       end
@@ -192,7 +193,7 @@ module Kambi::Views
           end
 
           div do
-            button "Login"
+            input :type=>"submit", :class=>"submit button", :value=> "Login"
           end
         end
       end
@@ -281,6 +282,25 @@ module Kambi::Views
               end
             end
           end
+          
+
+#          form(:action=>R(Comments), :method=>"post") do
+#            fieldset do
+#              div do
+#                label "Username", :for=>"fm-username"
+#                input :id=>"fm-username", :name=>"username", :type=>"text"
+#              end
+#              div do
+#                label "Password", :for=>"fm-password"
+#                input :id=>"fm-password", :name=>"password", :type=>"password"
+#              end
+
+#              div do
+#                button "Login"
+#              end
+#            end
+#          end
+      
           form :action => R(Comments), :method => 'post' do
             src = @captcha[:filename]
             hush = @captcha[:hushhush]

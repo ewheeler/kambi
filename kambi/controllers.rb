@@ -613,7 +613,8 @@ module Kambi::Controllers
       '.js'  => "text/javascript",
       '.jpg' => "image/jpeg",
       '.png' => "image/png",
-      '.ico' => "image/vnd.microsoft.icon"
+      '.ico' => "image/vnd.microsoft.icon",
+      '.htc' => "text/x-component"
     }
 
     def get(path)

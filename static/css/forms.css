@@ -80,7 +80,8 @@ textarea {
   line-height: 1.2em;
 }
 
-button {
+input.button {
   padding: 0.25em;
+  width: auto;
 }
 

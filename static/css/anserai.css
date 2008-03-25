@@ -1,7 +1,7 @@
 /* vim:tabstop=2:expandtab */
 
-body {
-    
+* html body {
+    behavior: url("/static/csshover.htc");
 }
 
 #wrapper {
@@ -62,6 +62,7 @@ a:hover { text-decoration: underline; }
     position: absolute;
     bottom: 16px;
     right: 0;
+    width: 8em;
   }
   
     #places li {
