@@ -108,7 +108,7 @@ module Kambi::Views
             div.footer! do
               div do
                 p.links do
-                  a( "Disclaimer",  :href=> "/pages/disclaimer" ); span { "&bull;" }
+                  a( "Privacy",  :href=> "/pages/privacy" ); span { "&bull;" }
                   a( "About",       :href=> "/pages/about" ); span { "&bull;" }
                   a( "Legal",       :href=> "/pages/legal" ); span { "&bull;" }
                   a( "Login",       :href=>R(Sessions, :new) )
