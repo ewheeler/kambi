@@ -59,6 +59,12 @@ module Kambi::Views
           "Unsupported format: #{format}")
       end
     end
+    
+    def help_text
+      div.hint do
+        "You may format your text using HTML, Textile, or Markdown." + a( "Help",    :href=> "/pages/help"   )
+      end
+    end
 
     def layout
       xhtml11 do
@@ -655,6 +661,7 @@ module Kambi::Views
 
           div do
             label "Body", :for=>"page_body"
+            help_text
             textarea page.body, :name=>"page_body"
           end
         end
@@ -695,6 +702,7 @@ module Kambi::Views
 
           div do
             label "Body", :for=>"post_body"
+            help_text
             textarea post.body, :name=>"post_body"
           end
         end
@@ -741,7 +749,7 @@ module Kambi::Views
           
           div do
             label "Body", :for=>"fm-clip-body"
-            div.hint "It's probably a better idea to edit this part in an external text editor and paste it in here."
+            help_text
             textarea clip.body, :id=>"fm-clip-body", :name=>"clip_body"
           end
         end
