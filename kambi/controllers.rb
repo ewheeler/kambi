@@ -14,7 +14,6 @@ module Kambi::Controllers
       case thing
         when "pages"
           @page = Page.find(:first, :conditions => ["nickname = ?", nickname])
-          @clips = @page.clips
           render :view_page
         when "posts"
           @post = Post.find(:first, :conditions => ["nickname = ?", nickname])
@@ -56,7 +55,6 @@ module Kambi::Controllers
         # GET /pages/1
         def read(page_id) 
             @page = Page.find page_id
-            @clips = @page.clips
             render :view_page
         end
         
@@ -637,7 +635,7 @@ module Kambi::Controllers
 
       else
         @status = 404
-        return "Not Found"
+        return "Not Found: #{file}"
       end
     end
   end

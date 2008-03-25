@@ -102,9 +102,10 @@ a:hover { text-decoration: underline; }
       float: left;
       width: 70%;
     }
-    
+      
+      /* gap between text and sidebar */
       #content .body p {
-        padding-right: 1em; }
+        padding-right: 2em; }
       
       /* all links in post body */
       #content .body a {
@@ -120,7 +121,8 @@ a:hover { text-decoration: underline; }
       
     /* the additional stuff on
      * the right hand side */
-    #content .post .clips {
+    #content .post .clips,
+    #content .page .clips {
       float: left;
       width: 30%;
     }
@@ -191,8 +193,8 @@ a:hover { text-decoration: underline; }
       #content .page:hover a.ed-page {
         display: block; }
       
-      #content .ed-post { margin-top: 14px; top: 5.5em; }
-      #content .ed-page { margin-top: 2px;  top: 3em;   }
+      #content .ed-post { margin-top: 13px; top: 5.3em; } /* h1[ f:2em, mb:1em ], author[ pt:6px, f:1.3em, mb:1em, pb:6px ] */
+      #content .ed-page { margin-top: 2px;  top: 3em; }
   
   #content .post h1,
   #content .page h1 {
@@ -225,7 +227,9 @@ a:hover { text-decoration: underline; }
     padding: 6px;
     line-height: 1;
     color: #feafbf;
-    margin-bottom: 0.66em;
+    
+    /* 1em @ 100% font size */
+    margin-bottom: 0.769em;
   }
   
     #content .authors a { color: #ff38b2; }

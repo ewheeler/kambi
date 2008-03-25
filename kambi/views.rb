@@ -86,13 +86,11 @@ module Kambi::Views
 #                end
               end
 
-
               ul.places! do
                 # the top-right "places" nav
                 li.p1 { a("All Essays",    :href => R(Posts)   )}
                 li.p2 { a("All Resources", :href => R(Clips)   )}
                 li.p3 { a("All Tags",      :href => R(Tags)    )}
-                #li.p4 { a("All Authors",   :href => R(Authors) )}
               end
 
               div.clear_hack ""
@@ -262,6 +260,7 @@ module Kambi::Views
       div( :class=>"post n1 first last" ) do
         _post(@post)
       end
+      
         div.comments do
           p "Comments:"
           for c in @comments
@@ -331,27 +330,8 @@ module Kambi::Views
     end
 
     def view_page
-      div.page do
+      div(:class=>"page page-1 first last") do
         _page(@page)
-      end
-      pc = page.clips
-      unless pc.empty?
-        div.clips do
-          h3 "References"
-          pc.each_with_index do |clip,i|
-            tag_names = clip.tags.collect{|t| t.name}
-            tag_names.to_s
-            if tag_names.include?('project')
-                div.project do
-                  _clip(clip)
-                end
-            else
-              div.clip do
-                _clip(clip)
-              end
-            end
-          end
-        end
       end
     end
 
@@ -465,22 +445,73 @@ module Kambi::Views
         end
       end
     end
+    
+    # render the right-hand-side bar, containing
+    # the clips (projects and non) related to
+    # a page or a post
+    def _clips(clips)
+      sorted = {
+        :projects   => [],
+        :references => [] }
+      
+      # section headers
+      titles = {
+        :projects   => "Related Projects",
+        :references => "References" }
+      
+      # iterate all of this post/pages's clips,
+      # sort them into "project" and "not
+      # project" (reference) arrays
+      clips.each do |clip|
+        type = clip.has_tag?("project") ? (:projects) : (:references)
+        sorted[type].push clip
+      end
+      
+      # iterate each 'type' of clip, and create
+      # div + h3 + (all clips of type)
+      sorted.each_key do |type|
+        unless sorted[type].empty?
+          div.clips do
+            h3 titles[type]
+            
+            # all clips of this type,
+            # via the _clip partial
+            sorted[type].each_with_css("clip") do |clip,klass|
+              div(:class=>klass) do
+                _clip clip
+              end
+            end
+          end
+        end
+      end
+    end
 
     def _page(page)
       h1 { a(page.title, :href => R(Pages, page.id)) }
-      when_logged_in {
+      
+      when_logged_in do
         a( "Edit this Page",
            :class => "edit ed-page",
            :href  => R(Pages, page.id, 'edit'))
-      }
+      end
 
       _tagged_with(page.tags)
-      render_text(page.body, :html)
+      div.body { render_text(page.body, :html) }
+      _clips(page.clips)
+      
+      # css hack for ie < 7
+      div.clear_hack ""
     end
 
     def _post( post,summary=false )
       full = R(Posts, post.id)
       h1 { a(post.title, :href => full) }
+
+      when_logged_in do
+        a( "Edit this Essay",
+           :class => "edit ed-post",
+           :href  => R(Posts, post.id, 'edit'))
+      end
 
       # the date in human readable
       # format: March 11th 2008
@@ -510,12 +541,6 @@ module Kambi::Views
         end
       end
 
-      when_logged_in do
-        a( "Edit this Essay",
-           :class => "edit ed-post",
-           :href  => R(Posts, post.id, 'edit'))
-      end
-
       _tagged_with(post.tags)
 
       div.body do
@@ -529,42 +554,7 @@ module Kambi::Views
         p { a.complete("View Complete Essay", :href=>full) } if summary
       end
       
-      unless summary
-        clips = {
-          :projects   => [],
-          :references => [] }
-        
-        # section headers
-        titles = {
-          :projects   => "Related Projects",
-          :references => "References" }
-        
-        # iterate all of this post's clips,
-        # sort them into "project" and "not
-        # project" (reference) arrays
-        post.clips.each do |clip|
-          type = clip.has_tag?("project") ? (:projects) : (:references)
-          clips[type].push clip
-        end
-        
-        # iterate each 'type' of clip, and create
-        # div + h3 + (all clips of type)
-        clips.each_key do |type|
-          unless clips[type].empty?
-            div.clips do
-              h3 titles[type]
-              
-              # all clips of this type,
-              # via the _clip partial
-              clips[type].each_with_css("clip") do |clip,klass|
-                div(:class=>klass) do
-                  _clip clip
-                end
-              end
-            end
-          end
-        end
-      end
+      _clips(post.clips) unless summary
 
       # css hack for ie < 7
       div.clear_hack ""
