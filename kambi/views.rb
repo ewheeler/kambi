@@ -18,10 +18,17 @@ module Kambi::Views
       self
     end
 
+    
+    # a clearer way of checking if the current
+    # user is logged in to the website as admin
+    def logged_in?
+      return @state.user_id ? true : false
+    end
+    
     # only execute the block if the current
     # user is logged in to the website
     def when_logged_in(&block)
-      if @state.user_id
+      if logged_in?
         yield
       end
     end
@@ -63,28 +70,37 @@ module Kambi::Views
     
     def help_text
       div.hint do
-        "You may format your text using HTML, Textile, or Markdown." + a( "Help",    :href=> "/pages/help"   )
+        "You may format your text using HTML, Textile, or Markdown." + a("Help", :href=> "/pages/help")
       end
+    end
+    
+    def disaster(msg)
+      p.disaster msg
     end
 
     def layout
       xhtml11 do
         head do
           title "unisay"
-          link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/base.css",    :media => "screen")
-          link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/forms.css",   :media => "screen")
-          link( :rel => "stylesheet", :type => "text/css", :href => "/static/css/anserai.css", :media => "screen")
-          link( :rel => "shortcut icon", :href => "/static/favicon.ico" )
+          script(:type=>"text/javascript",:src=>"/static/admin.js") if logged_in?
+          link :rel => "stylesheet", :type => "text/css", :href => "/static/css/base.css",    :media => "screen"
+          link :rel => "stylesheet", :type => "text/css", :href => "/static/css/forms.css",   :media => "screen"
+          link :rel => "stylesheet", :type => "text/css", :href => "/static/css/anserai.css", :media => "screen"
+          link :rel => "shortcut icon", :href => "/static/favicon.ico"
         end
 
         body do
           div.wrapper! do
             div.header! do
-              h1 { a 'unisay', :href => R(Posts) }
+              h1 do
+                a(:href => R(Posts)) do
+                  span "unisay"
+                end
+              end
 
               ul.pages! do
                 # the nav bar is hard-coded for now
-                li(:class=>"n0 first") { a("Home",  :href=> "/"         )}
+                li(:class=>"n0 first") { a("Home",  :href=> "/"            )}
                 li(:class=>"n1 last")  { a("About", :href=> "/pages/about" )}
 
 #                Page.find(:all).each_with_css do |page,klass|
@@ -94,19 +110,27 @@ module Kambi::Views
 
               ul.places! do
                 # the top-right "places" nav
-                li.p1 { a("All Essays",    :href => R(Posts)   )}
-                li.p2 { a("All Resources", :href => R(Clips)   )}
-                li.p3 { a("All Tags",      :href => R(Tags)    )}
+                li.p1 { a("All Essays",    :href => R(Posts))}
+                li.p2 { a("All Resources", :href => R(Clips))}
+                li.p3 { a("All Tags",      :href => R(Tags) )}
               end
 
               div.clear_hack ""
             end
 
-            # wrapped for css hackery
-            div.content_wrap! do
-              div.content! do
-                self << yield
+            # wrapped multiple times
+            # for css hackery
+            div.content_wrap1! do
+              div.content_wrap2! do
+                div.content! do
+                  self << yield
+                end
               end
+            end
+      
+            # tag cloud
+            div.cloud do
+              _cloud
             end
 
             div.footer! do
@@ -125,7 +149,8 @@ module Kambi::Views
             # only appears when logged in
             when_logged_in do
               div.admin_toolbox! do
-                h3 "Admin Toolbox"
+                h3("Admin Toolbox", :onclick=>"window.toggle_toolbox()")
+                
                 ul do
                   li { a("New Page",     :href => R(Pages,   "new")) }
                   li { a("New Essay",    :href => R(Posts,   "new")) }
@@ -145,7 +170,7 @@ module Kambi::Views
           # top of the rendered output) for IE6
           when_logged_in do
             div.logged_in_as! do
-              span { "You are logged in as&nbsp;" }
+              span { "You are logged in as" }
               span.username(@state.user_name)
             end
           end
@@ -153,21 +178,19 @@ module Kambi::Views
       end
     end
 
-    def index
-      unless @posts.empty?
-        @posts.each_with_css("post") do |post,klass|
+    def view_posts
+      p = @posts.to_a.compact
+      unless p.empty?
+        
+        # render all posts passed to us (might
+        # only be one, if this is the index page)
+        p.each_with_css("post") do |post,klass|
           div(:class=>klass) do
             _post(post)
           end
         end
-
       else
-        p "No posts found."
-      end
-      
-      # tag cloud
-      div.cloud do
-        _cloud
+        disaster "No posts found"
       end
     end
 
@@ -363,9 +386,13 @@ module Kambi::Views
       end
     end
 
-    def view_page
-      div(:class=>"page page-1 first last") do
-        _page(@page)
+    def view_page(page=nil)
+      unless page.nil?
+        div(:class=>"page page-1 first last") do
+          _page(page)
+        end
+      else
+        disaster "Page not found"
       end
     end
 
@@ -456,11 +483,11 @@ module Kambi::Views
     end
 
     def _tagged_with(tags)
-      
-      # ignore invalid arguments... or lists of tags that only contain "project" -- WTF
-      unless(tags.nil? or tags.empty? or (tags.length == 1 and tags[0].name.downcase == "project"))
-        p.tags do
-          span "Tags:"
+      p.tags do
+        span "Tags:"
+        
+        # ignore invalid arguments... or lists of tags that only contain "project" -- WTF
+        unless(tags.nil? or tags.empty? or (tags.length == 1 and tags[0].name.downcase == "project"))
           tags.each do |tag|
             
             # never show the magic "project" tag
@@ -468,7 +495,10 @@ module Kambi::Views
               a(tag.name, :href => R(Tags, tag.id))
             end
           end
-        end
+        
+        # oops: the dodgy layout
+        # breaks the tag paragraph
+        else; a "None"; end
       end
     end
     
@@ -495,16 +525,18 @@ module Kambi::Views
       
       # iterate each 'type' of clip, and create
       # div + h3 + (all clips of type)
-      sorted.each_key do |type|
-        unless sorted[type].empty?
-          div.clips do
-            h3 titles[type]
-            
-            # all clips of this type,
-            # via the _clip partial
-            sorted[type].each_with_css("clip") do |clip,klass|
-              div(:class=>klass) do
-                _clip clip
+      div.clips_box do
+        [:projects, :references].each do |type|
+          unless sorted[type].empty?
+            div.clips do
+              h3 titles[type]
+              
+              # all clips of this type,
+              # via the _clip partial
+              sorted[type].each_with_css("clip") do |clip,klass|
+                div(:class=>klass) do
+                  _clip clip
+                end
               end
             end
           end
@@ -554,9 +586,9 @@ module Kambi::Views
       # the authors that produced this
       # post: Tom, Dick and Harry
       pa = post.authors
-      unless pa.empty?
-        p.authors do
-          span "By"
+      p.authors do
+        span "By"
+        unless pa.empty?
           pa.each_with_index do |author,i|
 
             # capture the link as text, and add a join (COMMA or AND)
@@ -564,6 +596,11 @@ module Kambi::Views
             join = (i < (pa.length-1)) ? (i < (pa.length-2) ? "," : " and ") : ""
             text link.trim + join + "\n"
           end
+          
+        else
+          # no authors! (don't omit the paragraph
+          # though, which breaks the layout)
+          text "<a>???</a>"
         end
       end
 
@@ -718,7 +755,7 @@ module Kambi::Views
         # this partial serves new
         # clips and existing clips
         if clip.nickname.nil?
-          h1 "Creating a New Resource"
+          h1 "Creating a New Clip"
         else
           h1 "Editing: " + clip.nickname.to_s
           a("Delete", :class=>"edit del", :href=>R(Clips, clip.id, "delete"))
@@ -732,7 +769,7 @@ module Kambi::Views
           end
           
           div do
-            label "Url", :for=>"fm-clip-url"
+            label "URL", :for=>"fm-clip-url"
             input :id=>"fm-clip-url", :name=>"clip_url", :class=>"text", :type=>"text", :value=>clip.url
           end
           
@@ -764,42 +801,43 @@ module Kambi::Views
         # this partial serves new
         # authors and existing authors
         if author.name.nil?
-          h1 "Creating a New Resource"
+          h1 "Creating a New Author"
         else
           h1 "Editing: " + author.name.to_s
           a("Delete", :class=>"edit del", :href=>R(Authors, author.id, "delete"))
         end
 
-        # form fields
+        # form fields (this should be made
+        # into a generic form builder)
         fieldset do
           div.first do
             label "First Name", :for=>"fm-author-first"
-            input :id=>"fm-author-first", :name=>"author_first", :value=>author.first
+            input :id=>"fm-author-first", :type=>"text", :class=>"text", :name=>"author_first", :value=>author.first
           end
           
           div do
             label "Last Name", :for=>"fm-author-last"
-            input :id=>"fm-author-last", :name=>"author_last", :value=>author.last
+            input :id=>"fm-author-last", :type=>"text", :class=>"text", :name=>"author_last", :value=>author.last
           end
           
           div do
             label "URL", :for=>"fm-author-url"
-            input :id=>"fm-author-url", :name=>"author_url", :value=>author.url
+            input :id=>"fm-author-url", :type=>"text", :class=>"text", :name=>"author_url", :value=>author.url
           end
           
           div do
-            label "Photo Url", :for=>"fm-author-photo"
-            input :id=>"fm-author-photo", :name=>"author_photo_url", :value=>author.photo_url
+            label "Photo URL", :for=>"fm-author-photo"
+            input :id=>"fm-author-photo", :type=>"text", :class=>"text", :name=>"author_photo_url", :value=>author.photo_url
           end
           
           div do
             label "Organization", :for=>"fm-author-org"
-            input :id=>"fm-author-org", :name=>"author_org", :value=>author.org
+            input :id=>"fm-author-org", :type=>"text", :class=>"text", :name=>"author_org", :value=>author.org
           end
           
           div do
             label "Organization URL", :for=>"fm-author-org-url"
-            input :id=>"fm-author-org-url", :name=>"author_org_url", :value=>author.org_url
+            input :id=>"fm-author-org-url", :type=>"text", :class=>"text", :name=>"author_org_url", :value=>author.org_url
           end
           
           div do

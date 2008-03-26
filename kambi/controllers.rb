@@ -4,8 +4,9 @@
 module Kambi::Controllers
   class Index < R "/"
     def get
-      @posts = [Post.find(:first)]
-      render :index
+      # render only the latest post
+      @posts = Post.find(:first)
+      render :view_posts
     end
   end
   
@@ -13,8 +14,8 @@ module Kambi::Controllers
     def get(thing, nickname)
       case thing
         when "pages"
-          @page = Page.find(:first, :conditions => ["nickname = ?", nickname])
-          render :view_page
+          render :view_page, Page.find(:first, :conditions => ["nickname = ?", nickname])
+          
         when "posts"
           @post = Post.find(:first, :conditions => ["nickname = ?", nickname])
           @comments = @post.comments
@@ -27,8 +28,8 @@ module Kambi::Controllers
           @pages = @clip.pages
           render :view_clip
         else
-          @posts = [Post.find(:first)]
-          render :index
+          
+          render :view_posts, Post.find(:first)
       end
     end  
   end
@@ -54,8 +55,7 @@ module Kambi::Controllers
         
         # GET /pages/1
         def read(page_id) 
-            @page = Page.find page_id
-            render :view_page
+            render :view_page, Page.find(page_id)
         end
         
         # PUT /pages/1
@@ -198,8 +198,8 @@ module Kambi::Controllers
 
         # GET /posts
         def list
-            @posts = Post.find :all; @pages = Page.find :all
-            render :index
+            @posts = Post.find :all
+            render :view_posts
         end
               
         # GET /posts/new

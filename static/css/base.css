@@ -31,11 +31,24 @@ h1 {
   font-size: 2em;
   margin: 0.5em 0;
   font-weight: bold;
+  font-family: arial, sans-serif;
 }
 
 h2 {
   font-size: 1.6em;
   margin: 0.625em 0;
+}
+
+#content p.disaster {
+  text-align: center;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #f00;
+  background: #e00;
+  
+  /* 1em @ 500% */
+  font-size: 500%;
+  margin-bottom: 0.2em;
 }
 
 a.edit {
@@ -97,17 +110,25 @@ a.edit:hover {
   
     #admin_toolbox h3 {
       color: #fff;
+      cursor: pointer;
       background: #000;
       text-align: center;
-      padding: 0.5em;
+      padding: 0.5em 1em;
     }
+    
+      #admin_toolbox.open h3 {
+        border-bottom: 1px solid #000; }
     
     #admin_toolbox ul {
     }
   
       #admin_toolbox li {
         list-style: none;
+        display: none;
       }
+      
+      #admin_toolbox.open li {
+        display: block; }
       
         #admin_toolbox a {
           display: block;

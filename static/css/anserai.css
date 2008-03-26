@@ -20,11 +20,20 @@ a:hover { text-decoration: underline; }
 }
   
   #header h1 {
-    width: 446px;
-    height: 120px;
-    text-indent: -9999px;
-    background: url("../png/header.png") no-repeat;
   }
+  
+    #header h1 a {
+      display: block;
+      width: 446px;
+      height: 120px;
+      background: url("../png/header.png") no-repeat;
+    }
+    
+      #header h1 a:hover {
+        text-decoration: none; }
+    
+      #header h1 a span {
+        visibility: hidden; }
   
   #pages {
   }
@@ -32,6 +41,8 @@ a:hover { text-decoration: underline; }
     #pages li {
       float: left;
       list-style: none;
+      font-size: 125%;
+      text-transform: lowercase;
       border-bottom: 6px solid #fff;
     }
     
@@ -43,8 +54,8 @@ a:hover { text-decoration: underline; }
         color: #fff;
         font-weight: bold;
         display: block;
-        padding: 1em;
-        width: 8em;
+        padding: 0.8em;
+        width: 8.4em; /* 8.4w + p[0.8 x 2] = 10em */
         
         /* default colour = ugly! */
         background: yellow;
@@ -61,6 +72,7 @@ a:hover { text-decoration: underline; }
 
   #places {
     position: absolute;
+    font-size: 125%;
     bottom: 16px;
     right: 0;
     width: 10em; /* w[8em] + p[1em+1em] */
@@ -69,29 +81,32 @@ a:hover { text-decoration: underline; }
     #places li {
       list-style: none;
       background: #f00;
+      text-transform: lowercase;
     }
     
       #places li a {
         color: #fff;
         font-weight: bold;
         display: block;
-        padding: 1em;
-        width: 8em;
+        padding: 0.8em;
+        width: 8.4em;
       }
       
-      #places li.p1 a { background: #b6ffe8; color: #008a88; } /* essays    */
-      #places li.p2 a { background: #d5ff7a; color: #00a49a; } /* resources */
-      #places li.p3 a { background: #fff667; color: #ff7200; } /* tags      */
+      #places li.p1 a { background: #86ffe2; color: #007a76; } /* essays    */
+      #places li.p2 a { background: #b6ff51; color: #00988a; } /* resources */
+      #places li.p3 a { background: #fefb35; color: #ff5400; } /* tags      */
 
 
-#content_wrap {
-    background: url("../png/blue-stripe.png") repeat-x;
+#content_wrap1 {
+  background: url("../png/blue-stripe.png") repeat-x; }
+
+#content_wrap2 {
+  background: url("../png/swoosh.png") no-repeat;
+  padding-top: 60px;
 }
 
 #content {
-    background: url("../png/swoosh.png") no-repeat;
-    padding: 90px 30px 0 30px;
-}
+  padding-top: 2em; }
   
   #content .post,
   #content .page {
@@ -101,9 +116,7 @@ a:hover { text-decoration: underline; }
     /* the main (left) contents of
      * the post / page */
     #content .body {
-      float: left;
-      width: 70%;
-    }
+      width: 65%; }
       
       /* gap between text and sidebar */
       #content .body p {
@@ -120,37 +133,39 @@ a:hover { text-decoration: underline; }
         background: #feffc8;
         padding: 0.25em;
       }
-      
+    
     /* the additional stuff on
      * the right hand side */
-    #content .post .clips,
-    #content .page .clips {
-      float: left;
-      width: 30%;
+    #content .clips_box {
+      position: absolute;
+      width: 35%; 
+      right: 0;
+      top: 0;
     }
     
       #content .clips h3 {
         font-size: 150%;
+        margin-left: 2em;
         padding-bottom: 0.33em; /* 0.5em at font-size=100% */
         border-bottom: 1px dotted #ccc;
       }
       
       #content .clip {
         position: relative;
-        padding-left: 21px;
+        padding-left: 26px;
         margin: 1.5em 0;
+        margin-left: 3em;
         background: url("../png/ref-arrow.png") no-repeat;
       }
       
       #content .clip.project blockquote,
       #content .clip.project div {
-        background: #f88;
-      }
+        background: #f88; }
       
         #content .clip blockquote,
         #content .clip .tags {
-          font-size: 90%;
           line-height: 1.6em;
+          font-size: 90%;
         }
         
         #content .clip .source a {
@@ -186,12 +201,8 @@ a:hover { text-decoration: underline; }
       
       /* show "edit" link when hovering
        * over the post/page to edit */
-      #content .post:hover a.ed-post,
-      #content .page:hover a.ed-page {
-        right: 0; }
-      
-      #content .ed-post { margin-top: 13px; top: 5.3em; } /* h1[ f:2em, mb:1em ], author[ pt:6px, f:1.3em, mb:1em, pb:6px ] */
-      #content .ed-page { margin-top: 2px;  top: 3em; }
+      #content .post:hover .ed-post { right: 35%; margin-top: 13px; top: 5.3em; } /* h1[ f:2em, mb:1em ], author[ pt:6px, f:1.3em, mb:1em, pb:6px ] */
+      #content .page:hover .ed-page { right: 0;   margin-top: 2px;  top: 3em; }
       
       /* hacked by eye for IE, which doesn't work (what's new?) */
       * html #content .ed-post { margin-top: 21px; }
@@ -200,7 +211,9 @@ a:hover { text-decoration: underline; }
   #content .post h1,
   #content .page h1,
   #content .tagged h1 {
-    margin-top: 2em; }
+    margin-top: 2em;
+    width: 65%;
+  }
   
     #content .post.first h1,
     #content .page,first h1,
@@ -224,7 +237,7 @@ a:hover { text-decoration: underline; }
     position: absolute;
     line-height: 1;
     color: #ccc;
-    right: 0;
+    right: 35%;
     
     /* 3.3em = 2em(h1) + 1.3em (p.authors),
      * 12px  = 6px (authors padding) * 2 (top+bottom) */
@@ -234,6 +247,7 @@ a:hover { text-decoration: underline; }
   
   #content .authors {
     font-size: 130%;
+    font-weight: bold;
     float: left;
     background: #feffc8;
     padding: 6px;
@@ -249,6 +263,7 @@ a:hover { text-decoration: underline; }
   #content .tags {
     color: #aaa;
     clear: left;
+    width: 65%;
     padding-top: 0.5em;
     margin-bottom: 2em;
     border-top: 1px dotted #ccc;
@@ -264,8 +279,6 @@ a:hover { text-decoration: underline; }
   .cloud {
     border: 0.5em solid #aff3ff;
     background: #eff;
-    margin-left: -30px;
-    margin-right: -30px;
     margin-top: 2em;
     padding: 1em;
   }
