@@ -63,7 +63,7 @@ a:hover { text-decoration: underline; }
     position: absolute;
     bottom: 16px;
     right: 0;
-    width: 8em;
+    width: 10em; /* w[8em] + p[1em+1em] */
   }
   
     #places li {
@@ -198,16 +198,27 @@ a:hover { text-decoration: underline; }
       * html #content .ed-page { margin-top: 7px; }
       
   #content .post h1,
-  #content .page h1 {
+  #content .page h1,
+  #content .tagged h1 {
     margin-top: 2em; }
   
     #content .post.first h1,
-    #content .page h1 {
+    #content .page,first h1,
+    #content .tagged.first h1 {
       margin-top: 0; }
     
-    #content h1 a {
-      color: #000;
+    #content .tagged h1 {
+      border-bottom: 1px dotted #ccc;
+      padding-bottom: 0.5em;
     }
+    
+      #content li {
+        display: block;
+        margin-bottom: 0.5em;
+      }
+    
+    #content h1 a {
+      color: #000; }
   
   #content .date {
     position: absolute;

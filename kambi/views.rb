@@ -189,7 +189,6 @@ module Kambi::Views
     # display the login form
     # (no longer a partial)
     def login
-
       form(:action=>R(Sessions), :method=>"post") do
         fieldset do
           div do
@@ -371,46 +370,38 @@ module Kambi::Views
     end
 
     def view_tags
+      if @tag
+        thing_map = {
+          "Essays"    => @posts,
+          "Resources" => @clips,
+          "Pages"     => @pages,
+          "Authors"   => @authors
+        }
+        
+        # do the same thing for all three taggables
+        thing_map.keys.each_with_css("tagged") do |type,klass|
+          things = thing_map[type]
+          
+          unless things.nil? or things.empty?
+            div(:class=>klass) do
+              h1 do
+                text "#{type} tagged with "
+                span @tag.name
+              end
+              ul do
+                things.each do |thing|
+                  li do
+                    a thing.to_s, :href=>R(thing.restful_root, thing.id)
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+      
       div.cloud do
         _cloud
-      end
-      if @tag
-        h3 @tag.name
-        unless @posts.nil? or @posts.empty?
-          div.tags do
-            p "Essays tagged with " + @tag.name + ":"
-            for post in @posts
-              a(post.title, :href => R(Posts, post.id))
-            end
-          end
-        end
-        unless @clips.nil? or @clips.empty?
-          div.tags do
-            p "Resources tagged with " + @tag.name + ":"
-            for clip in @clips
-              a(clip.nickname, :href => R(Clips, clip.id))
-            end
-          end
-        end
-        unless @pages.nil? or @pages.empty?
-          div.tags do
-            p "Pages tagged with " + @tag.name + ":"
-            for page in @pages
-              a(page.nickname, :href => R(Pages, page.id))
-            end
-          end
-        end
-        unless @authors.nil? or @authors.empty?
-          div.tags do
-            p "Authors tagged with " + @tag.name + ":"
-            for author in @authors
-              a(author.name, :href => R(Authors, author.id))
-            end
-          end
-        end
-        unless @state.user_id.blank?
-          _tag(@tag)
-        end
       end
     end
 

@@ -38,6 +38,10 @@ module Kambi::Models
       def to_s
       	title
       end
+      
+      def restful_root
+        Kambi::Controllers::Pages
+      end
     end
       
     class Post < Base
@@ -58,6 +62,10 @@ module Kambi::Models
       def to_s
       	title
       end
+      
+      def restful_root
+        Kambi::Controllers::Posts
+      end
     end
   
     class Clip < Base
@@ -71,6 +79,10 @@ module Kambi::Models
       
       def to_s
       	nickname
+      end
+      
+      def restful_root
+        Kambi::Controllers::Clips
       end
     end
     
@@ -130,6 +142,10 @@ module Kambi::Models
       
       def to_s
       	name
+      end
+      
+      def restful_root
+        Kambi::Controllers::Authors
       end
     end
     
