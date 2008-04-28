@@ -657,7 +657,9 @@ module Kambi::Views
       p "Organization:"
       a(author.org, :href => author.org_url)
       p "Bio:"
-      p author.bio
+      p do 
+	render_text(author.bio, :red)
+      end
       unless @state.user_id.blank?
         p do
           a("Edit Author", :href => R(Authors, author.id, 'edit'))
@@ -842,6 +844,7 @@ module Kambi::Views
           
           div do
             label "Bio", :for=>"fm-author-bio"
+            help_text
             textarea author.bio, :id=>"fm-author-bio", :name=>"author_bio"
           end
         end
