@@ -14,8 +14,11 @@ module Kambi::Controllers
     def get(thing, nickname)
       case thing
         when "pages"
-          render :view_page, Page.find(:first, :conditions => ["nickname = ?", nickname])
-          
+          #this wasnt working, so reverted for now
+          #render :view_page, Page.find(:first, :conditions => ["nickname = ?", nickname])
+          @page = Page.find(:first, :conditions => ["nickname = ?", nickname])
+          render :view_page
+
         when "posts"
           @post = Post.find(:first, :conditions => ["nickname = ?", nickname])
           @comments = @post.comments
@@ -55,7 +58,9 @@ module Kambi::Controllers
         
         # GET /pages/1
         def read(page_id) 
-            render :view_page, Page.find(page_id)
+            #render :view_page, Page.find(page_id)
+            @page = Page.find page_id
+            render :view_page
         end
         
         # PUT /pages/1

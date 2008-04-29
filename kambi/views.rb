@@ -179,6 +179,8 @@ module Kambi::Views
     end
 
     def view_posts
+      # need to refactor
+      # warning: default `to_a' will be obsolete
       p = @posts.to_a.compact
       unless p.empty?
         
@@ -385,8 +387,8 @@ module Kambi::Views
         end
       end
     end
-
-    def view_page(page=nil)
+                 #this was causing all of them to be nil
+    def view_page#(page=nil)
       unless page.nil?
         div(:class=>"page page-1 first last") do
           _page(page)
