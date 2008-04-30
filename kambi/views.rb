@@ -656,9 +656,9 @@ module Kambi::Views
         end
       end
       a(author.photo_url, :href => author.photo_url)
-      p "Organization:"
+      #p "Organization:"
       a(author.org, :href => author.org_url)
-      p "Bio:"
+      #p "Bio:"
       p do 
 	render_text(author.bio, :red)
       end
