@@ -438,7 +438,8 @@ module Kambi::Views
       h2 "Resources:"
       for clip in @clips
         div.clip do
-          a(clip.nickname, :href => R(Clips, clip.id, 'edit'))
+          #a(clip.nickname, :href => R(Clips, clip.id, 'edit'))
+          a(clip.nickname, :href => clip.url)
           tags = clip.tags unless clip.tags.nil?
           unless tags.empty?
             div.tags do
@@ -655,7 +656,7 @@ module Kambi::Views
           end
         end
       end
-      a(author.photo_url, :href => author.photo_url)
+      img(:alt => author.name, :src => author.photo_url)
       #p "Organization:"
       a(author.org, :href => author.org_url)
       #p "Bio:"
