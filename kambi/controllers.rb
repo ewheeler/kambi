@@ -611,7 +611,7 @@ module Kambi::Controllers
     end
   end
   
-  class Static < R "/(static|images)/(.+)"
+  class Assets < R "/(static|images)/(.+)"
     PATH = File.expand_path(File.dirname(__FILE__) + "/..")
     MIME_TYPES = {
       '.css' => "text/css",
