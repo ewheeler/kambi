@@ -611,8 +611,8 @@ module Kambi::Controllers
     end
   end
   
-  class Static < R "/static/(.+)"
-    PATH = File.expand_path(File.dirname(__FILE__) + "/..") + "/static"
+  class Static < R "/(static|images)/(.+)"
+    PATH = File.expand_path(File.dirname(__FILE__) + "/..")
     MIME_TYPES = {
       '.css' => "text/css",
       '.js'  => "text/javascript",
@@ -622,7 +622,7 @@ module Kambi::Controllers
       '.htc' => "text/x-component"
     }
 
-    def get(path)
+    def get(folder, path)
       
       # prevent ../ attacks
       if path.include?("..")
@@ -630,7 +630,7 @@ module Kambi::Controllers
         return "Invalid Path"
       end
 
-      file = "#{PATH}/#{path}"
+      file = "#{PATH}/#{folder}/#{path}"
 
       # return the file contents (x-sendfile
       # seems to be broken), or a 404 error
