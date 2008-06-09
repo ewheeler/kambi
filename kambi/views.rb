@@ -182,12 +182,7 @@ module Kambi::Views
     def view_posts
       # need to refactor
       # warning: default `to_a' will be obsolete
-      # p = @posts.to_a.compact
-			# i changed to .to_ary which i think is the
-			# specific intention -- if @posts is only
-			# a single post rather than an array
-			# of several we will always get an array
-			p = @posts.to_ary.compact
+			p = @posts.to_a.compact
       unless p.empty?
         
         # render all posts passed to us (might
@@ -452,6 +447,7 @@ module Kambi::Views
           end
         end
       end
+
     end
 
     def view_clips
