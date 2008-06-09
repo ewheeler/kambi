@@ -481,6 +481,8 @@ module Kambi::Views
     
     def _bundles
       @bundles.each do |bundle|
+				# this should be a nice red hovering edit link if logged in
+				# and just a title otherwise
         h1 { a bundle.name, :href => R(Bundles, bundle.id, 'edit') }
          bundle.bundlings.each do |b|
            a b.tag.name, :href => R(Tags, b.tag.id)
@@ -682,11 +684,9 @@ module Kambi::Views
         end
       end
       img(:alt => author.name, :src => author.photo_url)
-      #p "Organization:"
       a(author.org, :href => author.org_url)
-      #p "Bio:"
       p do 
-	render_text(author.bio, :red)
+				render_text(author.bio, :red)
       end
       unless @state.user_id.blank?
         p do
