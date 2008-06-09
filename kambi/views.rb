@@ -452,10 +452,6 @@ module Kambi::Views
           end
         end
       end
-      
-      div.cloud do
-        _cloud
-      end
     end
 
     def view_clips
