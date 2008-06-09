@@ -274,6 +274,12 @@ module Kambi::Views
       end
     end
 
+		def edit_bundle
+			when_logged_in do
+				_bundle_form(@bundle, :action => R(@bundle), :method => :put)
+			end
+		end
+
     def edit_author
       when_logged_in do
         _author_form(@author, :action => R(@author), :method => :put)
@@ -483,10 +489,10 @@ module Kambi::Views
     
     def _bundles
       @bundles.each do |bundle|
-        h2 bundle.name
+        h1 { a bundle.name, :href => R(Bundles, bundle.id, 'edit') }
          bundle.bundlings.each do |b|
-           a b.tag.name, :href=>R(Tags, b.tag.id)
-        end
+           a b.tag.name, :href => R(Tags, b.tag.id)
+     		end
       end
     end
 
@@ -916,8 +922,16 @@ module Kambi::Views
       end
     end
     
-    def _bundle_form(tag,opts)
+    def _bundle_form(bundle,opts)
       form({:method => 'post'}.merge(opts))do
+
+				if bundle.name.nil?
+          h1 "Creating a New Bundle"
+        else
+          h1 "Editing: " + bundle.name.to_s
+          a("Delete", :class=>"edit del", :href=>R(Bundles, bundle.id, "delete"))
+        end
+
         # form fields
         fieldset do
           div.first do

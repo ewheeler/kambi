@@ -458,8 +458,48 @@ module Kambi::Controllers
           render :add_bundle
       end
      
-      
+			# GET /bundles/1/edit
+      def edit(bundle_id) 
+          unless @state.user_id.blank?
+              @user = User.find @state.user_id
+          end
+          @bundle = Models::Bundle.find bundle_id
+          @all_tags = Models::Tag.find :all;  @these_tags = @bundle.bundlings.collect{|b| b.tag}
+          render :edit_bundle
+      end
      
+ 			# PUT /bundles/1
+      def update(bundle_id)
+          unless @state.user_id.blank?
+              bundle = Bundle.find bundle_id
+              all_tags = Models::Tag.find :all
+              bundle.update_attributes :name => input.bundle_name
+
+              these_bundlings = Array.new(bundle.bundlings)
+              these_bundlings.each{|d| bundle.bundlings.delete(d) }
+              
+              all_tags.each{|a| if input.include?('tag-' + a.id.to_s); 
+                  bundle.bundlings<<(Bundling.create(:bundle_id => bundle.id, :tag_id => a.id)); end; }
+							redirect R(Tags)
+					end
+     	end
+
+			# DELETE /bundles/1
+      def delete(bundle_id)
+          unless @state.user_id.blank?
+              @bundle = Bundle.find bundle_id
+              if @bundle.destroy
+                redirect R(Tags)
+              else
+                _error("Unable to delete bundle #{@bundle.id}", 500)
+              end
+          else
+            _error("Unauthorized", 401)
+          end
+      end
+
+
+
     end
      
     class Comments < REST 'comments'
