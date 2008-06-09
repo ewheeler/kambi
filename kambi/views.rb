@@ -261,6 +261,12 @@ module Kambi::Views
         _tag_form(@tag, :action => R(Tags))
       end
     end
+    
+    def add_bundle
+      when_logged_in do
+        _bundle_form(@bundle, :action => R(Bundles))
+      end
+    end
 
     def edit_author
       when_logged_in do
@@ -399,6 +405,12 @@ module Kambi::Views
     end
 
     def view_tags
+      if @bundles
+        div.bundles do
+          _bundles
+        end
+      end
+      
       if @tag
         thing_map = {
           "Essays"    => @posts,
@@ -462,6 +474,15 @@ module Kambi::Views
     end
 
     # partials
+    
+    def _bundles
+      @bundles.each do |bundle|
+        h2 bundle.name
+         bundle.bundlings.each do |b|
+           a b.tag.name, :href=>R(Tags, b.tag.id)
+        end
+      end
+    end
 
     def _cloud
       h2 "Tags:"
@@ -886,6 +907,21 @@ module Kambi::Views
         
         input :type=>"hidden", :class=>"hidden", :name=>"tag_id", :value=>tag.id
         button "Submit"
+      end
+    end
+    
+    def _bundle_form(tag,opts)
+      form({:method => 'post'}.merge(opts))do
+        # form fields
+        fieldset do
+          div.first do
+            label "Name", :for=>"bundle_name"
+            input :name=>"bundle_name", :class=>"text", :type=>"text", :value=>bundle.name
+          end
+          _checks(@all_tags,  @these_tags,  "Include:")
+          input :type=>"hidden", :class=>"hidden", :name=>"bundle_id", :value=>bundle.id
+          button "Submit"
+        end
       end
     end
 

@@ -368,6 +368,7 @@ module Kambi::Controllers
         def list
             @tags = Tag.find :all
             @taggables = @tags.collect{|t| t.taggables}.flatten
+            @bundles = Bundle.find :all
             render :view_tags
         end
         
@@ -436,6 +437,30 @@ module Kambi::Controllers
         #     end
         # end
     end 
+    
+    class Bundles < REST 'bundles'
+      # POST /bundles
+      def create
+          bundle = Bundle.create(:name => input.bundle_name)
+          all_tags = Models::Tag.find :all
+          all_tags.each{|a| if input.include?('tag-' + a.id.to_s); 
+               bundle.bundlings<<(Bundling.create(:bundle_id => bundle.id, :tag_id => a.id)); end; }
+          redirect R(Tags)
+      end
+      
+      # GET /bundles/new
+      def new
+          unless @state.user_id.blank?
+              @user = User.find @state.user_id
+              @all_tags = Models::Tag.find :all;  @these_tags = nil
+              @bundle = Bundle.new
+          end
+          render :add_bundle
+      end
+     
+      
+     
+    end
      
     class Comments < REST 'comments'
         # POST /comments

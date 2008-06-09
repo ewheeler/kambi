@@ -118,6 +118,8 @@ module Kambi::Models
       has_many :posts,    :through => :taggings, :source => :post,    :conditions => "kambi_taggings.taggable_type = 'Post'"
       has_many :pages,    :through => :taggings, :source => :page,    :conditions => "kambi_taggings.taggable_type = 'Page'"
       has_many :authors,  :through => :taggings, :source => :author,  :conditions => "kambi_taggings.taggable_type = 'Author'"
+      has_many :bundlings
+      has_many :bundles,  :through => :bundlings
       
       def taggables
         self.taggings.collect{|t| t.taggable}
@@ -126,6 +128,17 @@ module Kambi::Models
       def to_s
       	name
       end
+    end
+    
+    class Bundling < Base
+      belongs_to :bundle
+      belongs_to :tag
+    end
+    
+    class Bundle < Base
+      validates_presence_of :name
+      has_many :bundlings
+      has_many :tags, :through => :bundlings
     end
     
     class Author < Base
@@ -212,6 +225,15 @@ module Kambi::Models
           table.integer :tag_id
           table.integer :taggable_id
           table.string :taggable_type
+        end
+        
+        create_table :kambi_bundles, :force => true do |table|
+          table.string :name
+        end
+        
+        create_table :kambi_bundlings, :force => true do |table|
+          table.integer :tag_id
+          table.integer :bundle_id
         end
         
       end
