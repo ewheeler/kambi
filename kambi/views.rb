@@ -156,6 +156,7 @@ module Kambi::Views
                   li { a("New Essay",    :href => R(Posts,   "new")) }
                   li { a("New Resource", :href => R(Clips,   "new")) }
                   li { a("New Tag",      :href => R(Tags,    "new")) }
+									li { a("New Bundle",   :href => R(Bundles, "new")) }
                   li { a("New Author",   :href => R(Authors, "new")) }
 
                   # requires class for css hackery (ie<7 compat)
