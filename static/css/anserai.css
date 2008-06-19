@@ -163,6 +163,7 @@ a:hover { text-decoration: underline; }
         #content .clip .source a {
           margin-bottom: 0.5em;
           display: block;
+          color: red;
         }
         
         #content .clip .tags {
