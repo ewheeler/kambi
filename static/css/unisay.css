@@ -56,6 +56,10 @@
     
     #content .tags a { color: #00a4e1; }
     
+    #content .clip {
+      background: url("../png/ref-arrow.png") no-repeat;
+    }
+    
     .cloud {
       border: 0.5em solid #aff3ff;
       background: #eff;
