@@ -22,7 +22,7 @@ module Kambi::Views
     # a clearer way of checking if the current
     # user is logged in to the website as admin
     def logged_in?
-      return @state.user_id.blank? ? false : true
+      return @state.user_id# ? true : false
     end
     
     # only execute the block if the current
