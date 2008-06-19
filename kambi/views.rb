@@ -28,9 +28,11 @@ module Kambi::Views
     # only execute the block if the current
     # user is logged in to the website
     def when_logged_in(&block)
-      #if logged_in?
+      if logged_in?
         yield
-      #end
+      else
+				disaster("Please log in")
+			end
     end
 
     def render_text(text, format=:lite)
