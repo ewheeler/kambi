@@ -22,15 +22,15 @@ module Kambi::Views
     # a clearer way of checking if the current
     # user is logged in to the website as admin
     def logged_in?
-      return @state.user_id# ? true : false
+      return @state.user_id ? true : false
     end
     
     # only execute the block if the current
     # user is logged in to the website
     def when_logged_in(&block)
-      if logged_in?
+      #if logged_in?
         yield
-      end
+      #end
     end
 
     def render_text(text, format=:lite)
