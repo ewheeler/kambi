@@ -261,7 +261,7 @@ a:hover { text-decoration: underline; }
     border-top: 1px dotted #ccc;
   }
   
-    #content .tags a { color: #00a4e1; }
+    #content .tags a { color: #777; }
   
   #content p {
     line-height: 1.6em;
