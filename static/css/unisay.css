@@ -1,6 +1,15 @@
 /* vim:tabstop=2:expandtab */
 
-
+#header {
+  background: url("../png/blue-stripe.png") repeat-x 0 100%;
+}
+  
+  #header h1 {
+  }
+  
+    #header h1 a {
+      background: url("../png/header.png") no-repeat;
+    }
         
         
 #content_wrap1 {
@@ -8,16 +17,13 @@
 
 #content_wrap2 {
   background: url("../png/swoosh.png") no-repeat;
-  padding-top: 60px;
 }
 
 #footer {
-  margin-top: 2em;
   background: url("../png/uniwiki-unicef.png") no-repeat 100% 0;
 }
 
   #footer div {
-    padding-left: 35px;
     background: url("../png/footer-logo.png") no-repeat 0 50%;
   }
 

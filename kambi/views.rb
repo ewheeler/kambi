@@ -86,7 +86,7 @@ module Kambi::Views
           link :rel => "stylesheet", :type => "text/css", :href => "/static/css/base.css",    :media => "screen"
           link :rel => "stylesheet", :type => "text/css", :href => "/static/css/forms.css",   :media => "screen"
           link :rel => "stylesheet", :type => "text/css", :href => "/static/css/anserai.css", :media => "screen"
-          link :rel => "stylesheet", :type => "text/css", :href => "/static/css/unisay.css", :media => "screen"
+#          link :rel => "stylesheet", :type => "text/css", :href => "/static/css/unisay.css", :media => "screen"
           link :rel => "shortcut icon", :href => "/static/favicon.ico"
         end
 

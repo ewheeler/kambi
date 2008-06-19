@@ -15,7 +15,6 @@ a:hover { text-decoration: underline; }
 
 #header {
   position: relative;
-  background: url("../png/blue-stripe.png") repeat-x 0 100%;
 }
   
   #header h1 {
@@ -25,7 +24,6 @@ a:hover { text-decoration: underline; }
       display: block;
       width: 446px;
       height: 120px;
-      background: url("../png/header.png") no-repeat;
     }
     
       #header h1 a:hover {
@@ -269,6 +267,14 @@ a:hover { text-decoration: underline; }
     line-height: 1.6em;
     margin-bottom: 1em;
   }
+
+  #content_wrap1 {
+    }
+
+  #content_wrap2 {
+    padding-top: 60px;
+  }
+    
     
   .cloud {
     border: 0.5em solid #aff3ff;
@@ -285,5 +291,19 @@ a:hover { text-decoration: underline; }
       /* color and size are inline */
     }
 
+    #footer {
+      margin-top: 2em;
+    }
 
+      #footer div {
+        padding-left: 35px;
+      }
+
+        #footer .links   { color: #0ff;    }
+        #footer .links a { color: #00a4e1; }
+
+        #footer .rights {
+          margin-top: 0.25em;
+          color: #aaa;
+        }
 
