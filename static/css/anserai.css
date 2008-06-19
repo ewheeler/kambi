@@ -277,8 +277,8 @@ a:hover { text-decoration: underline; }
     
     
   .cloud {
-    border: 0.5em solid #aff3ff;
-    background: #eff;
+    border: 0.5em solid #444;
+    background: #999;
     margin-top: 2em;
     padding: 1em;
   }
