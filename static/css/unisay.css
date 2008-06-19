@@ -34,3 +34,15 @@
       margin-top: 0.25em;
       color: #aaa;
     }
+    
+    #places li.p1 a { background: #86ffe2; color: #007a76; } /* essays    */
+    #places li.p2 a { background: #b6ff51; color: #00988a; } /* resources */
+    #places li.p3 a { background: #fefb35; color: #ff5400; } /* tags      */
+    
+    /* each page has its own color...
+       make sure there's enough to expand! */
+    #pages li.n0 a { background: #ff0090; }
+    #pages li.n1 a { background: #8d466e; }
+    #pages li.n2 a { background: #1cbcff; }
+    #pages li.n3 a { background: #87ff1c; }
+    #pages li.n4 a { background: #ff8400; }

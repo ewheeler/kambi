@@ -61,11 +61,11 @@ a:hover { text-decoration: underline; }
       
       /* each page has its own color...
          make sure there's enough to expand! */
-      #pages li.n0 a { background: #ff0090; }
-      #pages li.n1 a { background: #8d466e; }
-      #pages li.n2 a { background: #1cbcff; }
-      #pages li.n3 a { background: #87ff1c; }
-      #pages li.n4 a { background: #ff8400; }
+      #pages li.n0 a { background: #666; }
+      #pages li.n1 a { background: #444; }
+      #pages li.n2 a { background: #888; }
+      #pages li.n3 a { background: #777; }
+      #pages li.n4 a { background: #555; }
       
 
   #places {
@@ -90,9 +90,9 @@ a:hover { text-decoration: underline; }
         width: 8.4em;
       }
       
-      #places li.p1 a { background: #86ffe2; color: #007a76; } /* essays    */
-      #places li.p2 a { background: #b6ff51; color: #00988a; } /* resources */
-      #places li.p3 a { background: #fefb35; color: #ff5400; } /* tags      */
+      #places li.p1 a { background: #888; color: black; } /* essays    */
+      #places li.p2 a { background: #666; color: black; } /* resources */
+      #places li.p3 a { background: #444; color: black; } /* tags      */
 
 
 
