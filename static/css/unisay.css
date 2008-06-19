@@ -46,3 +46,10 @@
     #pages li.n2 a { background: #1cbcff; }
     #pages li.n3 a { background: #87ff1c; }
     #pages li.n4 a { background: #ff8400; }
+    
+    
+    
+    #content .authors {
+      background: #feffc8;
+      color: #feafbf;
+    }

@@ -241,16 +241,16 @@ a:hover { text-decoration: underline; }
     font-size: 130%;
     font-weight: bold;
     float: left;
-    background: #feffc8;
+    background: #999;
     padding: 6px;
     line-height: 1;
-    color: #feafbf;
+    color: white;
     
     /* 1em @ 100% font size */
     margin-bottom: 0.769em;
   }
   
-    #content .authors a { color: #ff38b2; }
+    #content .authors a { color: white; }
   
   #content .tags {
     color: #aaa;
