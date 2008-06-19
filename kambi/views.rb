@@ -81,7 +81,8 @@ module Kambi::Views
     def layout
       xhtml11 do
         head do
-          title "unisay"
+          #title "unisay"
+					title "kambi"
           script(:type=>"text/javascript",:src=>"/static/admin.js") if logged_in?
           link :rel => "stylesheet", :type => "text/css", :href => "/static/css/base.css",    :media => "screen"
           link :rel => "stylesheet", :type => "text/css", :href => "/static/css/forms.css",   :media => "screen"
