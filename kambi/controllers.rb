@@ -453,7 +453,7 @@ module Kambi::Controllers
           unless @state.user_id.blank?
               @user = User.find @state.user_id
               @all_tags = Models::Tag.find :all;  @these_tags = nil
-              @bundle = Bundle.new
+              @bundle = Models::Bundle.new
           end
           render :add_bundle
       end
