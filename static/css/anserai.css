@@ -116,7 +116,7 @@ a:hover { text-decoration: underline; }
       
       /* all links in post body */
       #content .body a {
-        color: #00a4e1; }
+        color: red; }
       
       #content .body a.complete {
         font-size: 150%;
@@ -223,7 +223,7 @@ a:hover { text-decoration: underline; }
       }
     
     #content h1 a {
-      color: #000; }
+      color: red; }
   
   #content .date {
     position: absolute;
@@ -299,8 +299,8 @@ a:hover { text-decoration: underline; }
         padding-left: 35px;
       }
 
-        #footer .links   { color: #0ff;    }
-        #footer .links a { color: #00a4e1; }
+        #footer .links   { color: red;    }
+        #footer .links a { color: red; }
 
         #footer .rights {
           margin-top: 0.25em;
