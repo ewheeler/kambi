@@ -14,26 +14,7 @@ a       { text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 
-#header {
-  position: relative;
-  background: url("../png/blue-stripe.png") repeat-x 0 100%;
-}
-  
-  #header h1 {
-  }
-  
-    #header h1 a {
-      display: block;
-      width: 446px;
-      height: 120px;
-      background: url("../png/header.png") no-repeat;
-    }
-    
-      #header h1 a:hover {
-        text-decoration: none; }
-    
-      #header h1 a span {
-        visibility: hidden; }
+
   
   #pages {
   }
@@ -97,13 +78,7 @@ a:hover { text-decoration: underline; }
       #places li.p3 a { background: #fefb35; color: #ff5400; } /* tags      */
 
 
-#content_wrap1 {
-  background: url("../png/blue-stripe.png") repeat-x; }
 
-#content_wrap2 {
-  background: url("../png/swoosh.png") no-repeat;
-  padding-top: 60px;
-}
 
 #content {
   padding-top: 2em; }
@@ -291,21 +266,5 @@ a:hover { text-decoration: underline; }
       /* color and size are inline */
     }
 
-#footer {
-  margin-top: 2em;
-  background: url("../png/uniwiki-unicef.png") no-repeat 100% 0;
-}
 
-  #footer div {
-    padding-left: 35px;
-    background: url("../png/footer-logo.png") no-repeat 0 50%;
-  }
-
-    #footer .links   { color: #0ff;    }
-    #footer .links a { color: #00a4e1; }
-
-    #footer .rights {
-      margin-top: 0.25em;
-      color: #aaa;
-    }
 
