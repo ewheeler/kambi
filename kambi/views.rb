@@ -919,7 +919,7 @@ module Kambi::Views
     def _bundle_form(bundle,opts)
       form({:method => 'post'}.merge(opts))do
 
-				if @these_tags.nil?
+				if @bundle.name.nil?
           h1 "Creating a New Bundle"
         else
           h1 "Editing: " + bundle.name.to_s
