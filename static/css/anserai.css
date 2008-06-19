@@ -90,9 +90,9 @@ a:hover { text-decoration: underline; }
         width: 8.4em;
       }
       
-      #places li.p1 a { background: #888; color: black; } /* essays    */
-      #places li.p2 a { background: #666; color: black; } /* resources */
-      #places li.p3 a { background: #444; color: black; } /* tags      */
+      #places li.p1 a { background: #888; color: white; } /* essays    */
+      #places li.p2 a { background: #666; color: white; } /* resources */
+      #places li.p3 a { background: #444; color: white; } /* tags      */
 
 
 
