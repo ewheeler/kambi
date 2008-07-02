@@ -44,6 +44,7 @@ module Kambi
     require 'kambi/views'
     require 'kambi/controllers'
     require 'kambi/recaptcha'
+    include Ambethia::ReCaptcha
     include Camping::Session
 end
 
