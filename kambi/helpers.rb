@@ -169,7 +169,6 @@ module Kambi::Helpers
       raise ReCaptchaError, e
     end    
   end # verify_recaptcha
-end # ControllerHelpers
 
 
 end
