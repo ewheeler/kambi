@@ -6,6 +6,8 @@ module Kambi::Views
     include Kambi::Helpers
     include Kambi::Models
     include Kambi::Controllers
+    include Ambethia::ReCaptcha::Helper
+    include Ambethia::ReCaptcha::Controller
 
     # the markaby gem doesn't seem to provide
     # a way of switching to xhtml 1.1 strict,
