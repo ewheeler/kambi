@@ -119,7 +119,7 @@ module Kambi::Helpers
   def recaptcha_tags(options = {})
     # Default options
     key   = options[:public_key] ||= RECAPTCHA_PUBLIC_KEY
-    error = options[:error] ||= session[:recaptcha_error]
+    error = options[:error] #||= session[:recaptcha_error]
     uri   = options[:ssl] ? RECAPTCHA_API_SECURE_SERVER : RECAPTCHA_API_SERVER
     xhtml = Builder::XmlMarkup.new :target => out=(''), :indent => 2 # Because I can.
     if options[:display] 
