@@ -30,8 +30,6 @@ module Kambi::Views
     def when_logged_in(&block)
       if logged_in?
         yield
-      else
-				disaster("Please log in")
 			end
     end
 
@@ -357,12 +355,14 @@ module Kambi::Views
             # img :src => "/static/" + src; br
             # label 'Please enter the above number', :for => 'captcha'; br
             # input :name => 'captcha',  :class=>"text", :type => 'text'; br
-            recaptcha_tags(:ajax => true)
             label 'Name', :for => 'post_username'; br
             input :name => 'post_username',  :class=>"text", :type => 'text'; br
             label 'Comment', :for => 'post_body'; br
             textarea :name => 'post_body' do; end; br
             input :type => 'hidden', :class=>"hidden", :name => 'post_id', :value => @post.id
+            div do
+              recaptcha_tags(:ajax => true)
+            end
             # input :type => 'hidden', :class=>"hidden",:name => 'hushhush', :value => hush
             input :type => 'submit', :class=>"submit button", :value => 'Submit'
         end
