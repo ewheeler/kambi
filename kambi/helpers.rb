@@ -57,6 +57,11 @@ module Kambi::Helpers
   # include Kambi::Controllers
   # include Kambi::Models
   # include Kambi::Views
+  RECAPTCHA_API_SERVER        = 'http://api.recaptcha.net';
+  RECAPTCHA_API_SECURE_SERVER = 'https://api-secure.recaptcha.net';
+  RECAPTCHA_VERIFY_SERVER     = 'api-verify.recaptcha.net';
+  RECAPTCHA_PUBLIC_KEY        = '6Lc6WgIAAAAAAA827S8BoVWFCxqtIpmeve--AU4v' #nothin.gs
+  RECAPTCHA_PRIVATE_KEY       = '6Lc6WgIAAAAAANYJJt0gGb_J_JXXtPC1fI06ru7P' #nothin.gs
   
   def font_size_for_tag_cloud( total, lowest, highest, options={} )
    return nil if total.nil? or highest.nil? or lowest.nil?
