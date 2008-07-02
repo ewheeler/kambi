@@ -171,7 +171,6 @@ module Kambi::Helpers
   end # verify_recaptcha
 end # ControllerHelpers
 
-class ReCaptchaError < StandardError; end
 
 end
 
