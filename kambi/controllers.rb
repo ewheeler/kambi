@@ -506,7 +506,7 @@ module Kambi::Controllers
         # POST /comments
         def create
 
-          if input.captcha == input.hushhush
+          if verify_recaptcha
               Models::Comment.create(:username => input.post_username,
                          :body => input.post_body, :post_id => input.post_id)
           

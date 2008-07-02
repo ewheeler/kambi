@@ -357,7 +357,7 @@ module Kambi::Views
             # img :src => "/static/" + src; br
             # label 'Please enter the above number', :for => 'captcha'; br
             # input :name => 'captcha',  :class=>"text", :type => 'text'; br
-
+            recaptcha_tags
             label 'Name', :for => 'post_username'; br
             input :name => 'post_username',  :class=>"text", :type => 'text'; br
             label 'Comment', :for => 'post_body'; br
