@@ -33,8 +33,8 @@ end
 require 'camping/db'
 require 'camping/session'
    
-gem 'turing'
-require 'turing'
+# gem 'turing'
+# require 'turing'
     
 Camping.goes :Kambi
 

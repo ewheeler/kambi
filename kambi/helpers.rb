@@ -100,14 +100,14 @@ module Kambi::Helpers
 
 
   def turing_image
-     ti = Turing::Image.new(:width => 150, :height => 75)
-     pat = "tmpf-%s-%s-%s"
-     name =  pat % [Process::pid, Time.now.to_f.to_s.tr(".",""), rand(1e8)]
-     dir = Dir.getwd + "/static/"
-     fn = File.join(dir, name<<'.jpg')
-     captcha = rand(1e8).to_s
-     ti.generate(fn, captcha) 
-     src = {:filename => File.basename(fn), :hushhush => captcha, :type => "image/jpeg", :disposition => "inline"}
+     # ti = Turing::Image.new(:width => 150, :height => 75)
+     # pat = "tmpf-%s-%s-%s"
+     # name =  pat % [Process::pid, Time.now.to_f.to_s.tr(".",""), rand(1e8)]
+     # dir = Dir.getwd + "/static/"
+     # fn = File.join(dir, name<<'.jpg')
+     # captcha = rand(1e8).to_s
+     # ti.generate(fn, captcha) 
+     # src = {:filename => File.basename(fn), :hushhush => captcha, :type => "image/jpeg", :disposition => "inline"}
   end
 end
 
