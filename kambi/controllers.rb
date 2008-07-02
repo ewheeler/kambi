@@ -505,13 +505,14 @@ module Kambi::Controllers
     class Comments < REST 'comments'
         # POST /comments
         def create
-
+          
           if verify_recaptcha
               Models::Comment.create(:username => input.post_username,
                          :body => input.post_body, :post_id => input.post_id)
-          
-          end
             redirect R(Posts, input.post_id)
+          else
+            msg
+          end
         end
         
         # DELETE /comments/1
@@ -628,7 +629,7 @@ module Kambi::Controllers
 
       # attempt to fetch the user from the
       # db; will fail if un OR pw are wrong
-      @user = User.find(
+      @user = Kambi::Models::User.find(
         :first,
         :conditions => [
           "username=? and password=?",
